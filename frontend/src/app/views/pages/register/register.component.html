@@ -1,0 +1,137 @@
+<link href="https://fonts.googleapis.com/css?family=Josefin+Sans" rel="stylesheet">
+
+<!-- Background & animion & navbar & title -->
+<div class="container-fluid">
+<!-- Background animtion-->
+    <div class="background">
+       <div class="cube"></div>
+       <div class="cube"></div>
+       <div class="cube"></div>
+       <div class="cube"></div>
+      <div class="cube"></div>
+      <div class="cube"></div>
+       <div class="cube"></div>
+       <div class="cube"></div>
+       <div class="cube"></div>
+      <div class="cube"></div>
+    </div>
+<!-- header -->
+   <header>
+<!-- navbar -->
+     
+<!-- logo -->
+      <div class="logo"><span>      <img class="img" src="./assets/minseg.png" alt="">
+      </span></div>
+<!-- title & content -->
+      <section class="header-content ">
+       
+  <c-container>
+    <c-row class="justify-content-center">
+      <c-col lg="7" md="9" xl="6">
+        <c-card class="mx-4">
+          <c-card-body class="p-4">
+            <form *ngIf="userType === 'administrador'" cForm>
+              <div class="card text-white custom-card">
+                <div class="card-body text-center p-2">
+                  <h6 class="card-title font-weight-bold mb-0">Registro</h6>
+                </div>
+              </div>
+              <div *ngIf="message" class="alert alert-{{type}}" role="alert">
+                {{ message }}
+              </div>
+              <p class="text-body-secondary">Completar formulario</p>
+
+              <c-input-group class="mb-3">
+                <span cInputGroupText>&#64;</span>
+                <input cFormControl placeholder="Nombre y Apellido" name="nombre" [(ngModel)]='nombre' />
+              </c-input-group>
+              <c-input-group class="mb-3">
+                <span cInputGroupText>&#64;</span>
+                <input cFormControl placeholder="Legajo" name="legajo" [(ngModel)]='legajo' />
+              </c-input-group>
+
+              <c-input-group class="mb-3">
+                <span cInputGroupText>&#64;</span>
+                <input autoComplete="email" cFormControl placeholder="Email" name="email" [(ngModel)]='email' />
+              </c-input-group>
+
+              <c-input-group class="mb-3">
+                <span cInputGroupText>
+                  <svg cIcon name="cilLockLocked"></svg>
+                </span>
+                <input autoComplete="new-password" cFormControl placeholder="Password" type="password" name="password" [(ngModel)]='password'/>
+              </c-input-group>
+
+              <c-input-group class="mb-4">
+                <span cInputGroupText>
+                  <svg cIcon name="cilLockLocked"></svg>
+                </span>
+                <input autoComplete="new-password" cFormControl placeholder="Repeat password" type="password" name="repeatpassword" [(ngModel)]='repeatpassword'/>
+              </c-input-group>
+
+              <!-- Campo desplegable para seleccionar el perfil -->
+              <c-input-group class="mb-4">
+                <span cInputGroupText>Perfil</span>
+                <select cFormControl [(ngModel)]="perfil" name="perfil">
+                  <option value="usuario">Usuario Común</option>
+                  <option value="administrador">Administrador</option>
+                </select>
+              </c-input-group>
+
+              <div class="d-flex justify-content-center">
+                <button cButton color="success" (click)="register()">
+                  <ng-container *ngIf="loadingregister; else registerButton">
+                    <c-spinner aria-hidden="false" size="sm"></c-spinner>Cargando...
+                  </ng-container>
+                  <ng-template #registerButton>
+                    Crear Cuenta
+                  </ng-template>
+                </button>
+              </div>
+              <br>
+
+            </form>
+          
+            <div class="card text-white custom-card">
+              <div class="card-body text-center p-2">
+                <h6 class="card-title font-weight-bold mb-0">MI PERFIL</h6>
+              </div>
+             
+            </div> 
+            <br>
+
+             <div *ngIf="userType !== 'administrador'" class="alert alert-danger" role="alert">
+              No tienes permisos para registrar nuevos usuarios.
+            </div>
+            <form *ngIf="userData" cForm>
+              <c-input-group class="mb-3">
+                <span cInputGroupText>Nombre</span>
+                <input cFormControl placeholder="Nombre" name="nombre" [(ngModel)]='userData.nombre' disabled />
+              </c-input-group>
+              <c-input-group class="mb-3">
+                <span cInputGroupText>Legajo</span>
+                <input cFormControl placeholder="Legajo" name="legajo" [(ngModel)]='userData.legajo' disabled />
+              </c-input-group>
+              <c-input-group class="mb-3">
+                <span cInputGroupText>Email</span>
+                <input cFormControl placeholder="Email" name="email" [(ngModel)]='userData.email' disabled />
+              </c-input-group>
+              <c-input-group class="mb-3">
+                <span cInputGroupText>Perfil</span>
+                <input cFormControl placeholder="Perfil" name="perfil" [(ngModel)]='userData.perfil' disabled />
+              </c-input-group>
+            </form>
+            <div class="d-flex justify-content-center">
+              <button cButton color="secondary" routerLink="/dashboard">
+                Volver al Inicio
+              </button>
+            </div>
+          </c-card-body>
+        </c-card>
+      </c-col>
+    </c-row>
+  </c-container>
+
+</section>
+</header>
+</div>

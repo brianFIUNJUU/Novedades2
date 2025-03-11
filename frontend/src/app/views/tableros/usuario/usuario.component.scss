@@ -1,0 +1,35 @@
+/* styles.scss o usuario.component.scss */
+.select-ancho-reducido {
+  width: auto; /* Ajusta el ancho según tus necesidades */
+}
+.titulo {
+  color: #112d4d;
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.custom-card {
+  background-color: #081a2e; /* Color azul */
+  color: white; /* Color del texto */
+}
+
+.custom-card2 {
+  background-color: #0f2f53; /* Color azul */
+  color: white; /* Color del texto */
+}
+
+.table td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-modal-header {
+  background-color: #0f2f53; /* Color azul */
+  color: white; /* Color del texto */
+}
+.custom-modal-header2 {
+  background-color: #124b8d; /* Color azul */
+  color: white; /* Color del texto */
+}

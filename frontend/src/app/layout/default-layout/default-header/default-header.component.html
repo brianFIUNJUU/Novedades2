@@ -1,0 +1,121 @@
+<ng-container>
+  <c-container [fluid]="true" class="px-4 full-width-container">
+    <button
+      [cSidebarToggle]="sidebarId"
+      cHeaderToggler
+      class="btn"
+      toggle="visible"
+      style="margin-inline-start: -14px;"
+      aria-label="Toggle sidebar navigation "
+    >
+      <svg cIcon name="cilMenu" size="lg"></svg>
+    </button>
+    <c-header-nav class=" d-md-flex  ">
+      <h5 class="tu text-center text-white">
+        <a routerLink="/dashboard" class="custom-link">CGSC</a>
+      </h5>
+    </c-header-nav>
+
+    <c-header-nav class="ms-auto ">
+      <div class="nav-item py-1">
+        <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
+      </div>
+      <ng-container *ngTemplateOutlet="themeDropdown" />
+      <div class="nav-item py-1">
+        <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
+      </div>
+    </c-header-nav>
+    <c-header-nav class="d-none d-md-flex">
+      <span class="navbar-text">Bienvenido, {{ userName }} !</span>
+    </c-header-nav>
+    <c-header-nav class="mx-0">
+      <ng-container *ngTemplateOutlet="userDropdown" />
+    </c-header-nav>
+  </c-container>
+</ng-container>
+
+  <!--</c-header>-->
+  
+  <ng-template #userDropdown>
+    <c-dropdown [popperOptions]="{ placement: 'bottom-start' }" variant="nav-item">
+      <button [caret]="false" cDropdownToggle class="py-0 pe-0" aria-label="Open user menu">
+        <c-avatar
+          shape="rounded-1"
+          [size]="'md'"
+          src="./assets/policia.png"
+          status="success"
+          textColor="primary"
+          alt="User avatar"
+        />
+      </button>
+      <ul cDropdownMenu class="pt-0 w-auto">
+        <!-- <li>
+          <h6 cDropdownHeader class="bg-body-secondary text-body-secondary fw-semibold py-2 rounded-top">
+            Novedades
+          </h6>
+        </li>
+        <li>
+          <a cDropdownItem routerLink="">
+            <svg cIcon class="me-2" name="cilBell"></svg>
+           Notificaciones
+            <c-badge class="ms-2 float-end" color="info"> 2</c-badge>
+          </a>
+        </li>
+        <li>
+          <a cDropdownItem routerLink="/apps/email/inbox">
+            <svg cIcon class="me-2" name="cilEnvelopeOpen"></svg>
+            Mensajes
+            <c-badge class="ms-2 float-end" color="success">
+              2
+            </c-badge>
+          </a>
+        </li> -->
+        
+        <li>
+          <h6 cDropdownHeader class="bg-body-secondary text-body-secondary fw-semibold py-2">
+            Configuraciones
+          </h6>
+        </li>
+        <li></li>
+        <li>
+          <a cDropdownItem routerLink="" (click)="perfil()">
+            <svg cIcon class="me-2" name="cilUser"></svg>
+            Perfil
+          </a>
+        </li>
+        
+       
+        <li>
+          <hr cDropdownDivider />
+        </li>
+        <li>
+          <a cDropdownItem routerLink="" (click)="logout()">
+            <svg cIcon class="me-2" name="cilAccountLogout"></svg>
+            Logout
+          </a>
+        </li>
+      </ul>
+    </c-dropdown>
+  </ng-template>
+  
+  <ng-template #themeDropdown>
+    <c-dropdown alignment="end" variant="nav-item">
+      <button [caret]="false" cDropdownToggle aria-label="Open theme picker">
+        <svg cIcon [name]="icons()" size="lg"></svg>
+      </button>
+      <div cDropdownMenu>
+        @for (mode of colorModes; track mode.name) {
+          <button
+            (click)="colorMode.set(mode.name)"
+            [active]="colorMode()===mode.name"
+            [routerLink]="[]"
+            cDropdownItem
+            class="d-flex align-items-center"
+          >
+            <svg cIcon class="me-2" [name]="mode.icon" size="lg"></svg>
+            {{ mode.text }}
+          </button>
+        }
+      </div>
+    </c-dropdown>
+  </ng-template>

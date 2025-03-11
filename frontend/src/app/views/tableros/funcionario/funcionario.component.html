@@ -1,0 +1,156 @@
+<div class="container">
+  <h2>Gestión de Funcionarios</h2>
+
+  <!-- Formulario para crear/editar funcionario -->
+  <form (ngSubmit)="guardarFuncionario()">
+    <div class="container">
+      <div class="row">
+        <!-- Columna 1 -->
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="dniPersona">DNI de la Persona:</label>
+            <input
+              id="dniPersona"
+              [(ngModel)]="dniPersona"
+              name="dniPersona"
+              type="text"
+              class="form-control"
+              placeholder="Ingrese DNI"
+              (blur)="buscarPersonaPorDni()"
+            />
+          </div>
+  
+          <div *ngIf="personaExistente" class="form-group">
+            <p><strong>Persona Encontrada:</strong> {{ personaExistente.nombre }} {{ personaExistente.apellido }}</p>
+          </div>
+          <div *ngIf="!personaExistente && dniPersona" class="form-group">
+            <p class="text-danger">La persona con el DNI proporcionado no existe.</p>
+          </div>
+  
+          <div class="form-group">
+            <label for="legajo">Legajo:</label>
+            <input
+              id="legajo"
+              [(ngModel)]="funcionario.legajo"
+              name="legajo"
+              type="text"
+              class="form-control"
+              placeholder="Ingrese el legajo"
+            />
+          </div>
+  
+          <div class="form-group">
+            <label for="cargo">Cargo:</label>
+            <input
+              id="cargo"
+              [(ngModel)]="funcionario.cargo"
+              name="cargo"
+              type="text"
+              class="form-control"
+              placeholder="Ingrese el cargo"
+            />
+          </div>
+        </div>
+  
+        <!-- Columna 2 -->
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="fechaInicio">Fecha de Inicio:</label>
+            <input
+              id="fechaInicio"
+              [(ngModel)]="funcionario.fecha_inicio"
+              name="fechaInicio"
+              type="date"
+              class="form-control"
+            />
+          </div>
+  
+          <div class="form-group">
+            <label for="fechaFin">Fecha de Fin (opcional):</label>
+            <input
+              id="fechaFin"
+              [(ngModel)]="funcionario.fecha_fin"
+              name="fechaFin"
+              type="date"
+              class="form-control"
+            />
+          </div>
+  
+          <div class="form-group">
+            <label for="activo">Activo:</label>
+            <input
+              id="activo"
+              [(ngModel)]="funcionario.activo"
+              name="activo"
+              type="checkbox"
+            />
+          </div>
+  
+          
+        </div>
+      </div>
+     
+    </div>
+  </form> 
+  <button type="submit" class="btn btn-primary">Guardar</button>
+          <button type="button" class="btn btn-secondary" (click)="resetForm()">Resetear</button>
+  
+
+  <!-- Mensaje de error -->
+  <div *ngIf="mensajeError" class="alert alert-danger mt-2">
+    {{ mensajeError }}
+  </div>
+  <hr>
+  <div class="form-group">
+    <label for="legajoBusqueda">Buscar Funcionario por Legajo:</label>
+    <input
+      id="legajoBusqueda"
+      [(ngModel)]="legajoBusqueda"
+      name="legajoBusqueda"
+      type="text"
+      class="form-control"
+      placeholder="Ingrese el legajo"
+    />
+    <button class="btn btn-success mt-2" (click)="buscarFuncionarioPorLegajo()">Buscar</button>
+  </div>
+
+  <!-- Lista de funcionarios en una tabla -->
+  <h3 class="mt-4">Lista de Funcionarios</h3>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Legajo</th>
+        <th>Nombre</th>
+        <th>Apellido</th>
+        <th>DNI</th>
+        <th>Cargo</th>
+        <th>Fecha de Inicio</th>
+        <th>Fecha de Fin (Si tiene)</th>
+        <th>Activo</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let func of funcionarios; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ func.legajo }}</td>
+        <td>{{ func.persona.nombre }}</td>
+        <td>{{ func.persona.apellido }}</td>
+        <td>{{ func.persona.dni }}</td>
+        <td>{{ func.cargo }}</td>
+        <td>{{ func.fecha_inicio | date:'dd/MM/yyyy' }} </td>
+        <td >
+          {{ func.fecha_fin | date:'dd/MM/yyyy' }}
+        </td>
+        <td>
+          <input type="checkbox" [checked]="func.activo" disabled />
+        </td>
+        <td>
+          <button class="btn btn-warning btn-sm" (click)="editarFuncionario(func)">Editar</button>
+          <button class="btn btn-danger btn-sm ml-2" (click)="eliminarFuncionario(func._id)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,166 @@
+<div class="container mt-4">
+  <!-- Tabla para mostrar la lista de Personales -->
+  <div class="mt-4">
+    <div class="card text-white custom-card">
+      <div class="card-body text-center p-2">
+        <h6 class="card-title font-weight-bold mb-0">PLANTA DE PERSONAL</h6>
+      </div>
+    </div>
+    <br/>
+    <div>
+      <div class="col-md-12">
+        <div class="row">
+          <div class="col-md-4 d-flex align-items-center">
+            <!-- Botón para abrir el modal de Personal -->
+            <div class="form-group d-flex align-items-center mb-2">
+              <label for="personal" class="mr-2 mb-0">Agregar Personal:</label>
+              <button type="button" class="btn btn-primary btn-sm ml-2" (click)="showModal()">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <!-- Formulario para buscar por legajo  -->
+            <div class="form-group mb-2">
+              <div class="input-group input-group-sm">
+                <input type="text" id="legajoBuscar" [(ngModel)]="legajo" name="legajoBuscar" placeholder="Buscar Legajo" class="form-control form-control-sm" [readonly]="userInfo.perfil === 'usuario'" />
+                <div class="input-group-append">
+                  <button type="button" class="btn btn-primary btn-sm" (click)="buscarPersonalPorLegajo()">
+                    <i class="bi bi-search"></i>
+                  </button>
+                </div>
+              </div>
+              <small class="text-danger" *ngIf="mensajeError">{{ mensajeError }}</small>
+            </div>
+          </div>
+          <div class="col-md-3 d-flex align-items-center">
+            <button (click)="getPersonales()" class="btn btn-primary btn-sm">Cargar Planta</button>
+          </div>
+          <div class="col-md-3 d-flex align-items-center">
+            <button (click)="exportToExcel()" class="btn btn-success btn-sm">Exportar a Excel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br/>
+    <div class="table-responsive">
+      <table class="table table-bordered border-primary table-sm">
+        <thead>
+          <tr>
+            <th class="text-small">Legajo</th>
+            <th class="text-small">Jerarquía</th>
+            <th class="text-small">Dependencia</th>
+            <!-- <th class="text-small">Unidad Regional</th> -->
+            <th class="text-small">Nombre</th>
+            <th class="text-small">Apellido</th>
+            <th class="text-small">DNI</th>
+            <th class="text-small">Email</th>
+            <th class="text-small">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let personal of personales">
+            <td class="text-small">{{ personal.legajo }}</td>
+            <td class="text-small">{{ personal.jerarquia }}</td>
+            <td class="text-small">{{ personal.dependencia_nombre }}</td>
+            <!-- <td class="text-small">{{ personal.unidad_regional_nombre }}</td> -->
+            <td class="text-small">{{ personal.nombre }}</td>
+            <td class="text-small">{{ personal.apellido }}</td>
+            <td class="text-small">{{ personal.dni }}</td>
+            <td class="text-small">{{ personal.email }}</td>
+            <td>
+              <button class="btn btn-warning btn-sm" (click)="editarPersonal(personal)">Editar</button>
+              <button class="btn btn-danger btn-sm" (click)="eliminarPersonal(personal.id.toString())">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- Modal para Personal -->
+<div class="modal fade" id="modalPersonal" tabindex="-1" aria-labelledby="modalPersonalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header custom-modal-header p-2">
+        <h5 class="modal-title mb-0" id="modalPersonalLabel">Datos del Personal:</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="guardarPersonal()">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="legajo">Legajo</label>
+                <input type="text" id="legajo" [(ngModel)]="personal.legajo" name="legajo" class="form-control" required [readonly]="userInfo.perfil === 'usuario'" />
+              </div>
+              <!-- aqui si el userInfo:usuario entonces me tiene que cargar en este campo el userInfo.legajo como valor de manera bloqueada -->
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="jerarquia">Jerarquía</label>
+                <input type="text" id="jerarquia" [(ngModel)]="personal.jerarquia" name="jerarquia" class="form-control" required />
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="unidad_regional">Unidad Regional</label>
+                <select id="unidad_regional" [(ngModel)]="personal.unidad_regional_id" name="unidad_regional" class="form-control form-select" (change)="cargarDependencias(personal.unidad_regional_id)" required>
+                  <option value="" disabled selected>Selecciona una Unidad Regional</option>
+                  <option *ngFor="let unidad of unidadRegionales" [value]="unidad.id">
+                    {{ unidad.unidad_regional }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="dependencia">Dependencia</label>
+                <select id="dependencia" [(ngModel)]="personal.DependenciaId" name="dependencia" class="form-control form-select" required>
+                  <option value="" disabled selected>Selecciona una Dependencia</option>
+                  <option *ngFor="let dependencia of dependencias" [value]="dependencia.id">
+                    {{ dependencia.juridiccion }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="nombre">Nombre</label>
+                <input type="text" id="nombre" [(ngModel)]="personal.nombre" name="nombre" class="form-control" required />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="apellido">Apellido</label>
+                <input type="text" id="apellido" [(ngModel)]="personal.apellido" name="apellido" class="form-control" required />
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="dni">DNI</label>
+                <input type="text" id="dni" [(ngModel)]="personal.dni" name="dni" class="form-control" required />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" [(ngModel)]="personal.email" name="email" class="form-control" required />
+              </div>
+            </div>
+          </div>
+          <div class="form-group text-center mt-4">
+            <button type="submit" class="btn btn-primary">{{ isUpdating ? 'Actualizar' : 'Guardar' }}</button>
+            <button type="button" class="btn btn-secondary mx-2" data-bs-dismiss="modal" (click)="resetForm()">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

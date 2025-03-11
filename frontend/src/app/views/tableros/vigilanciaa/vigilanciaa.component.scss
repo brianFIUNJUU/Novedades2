@@ -1,0 +1,45 @@
+/* Contenedor para cada archivo */
+.archivo-container {
+  margin-bottom: 0.5rem; /* Reduce espacio entre las tarjetas */
+}
+
+/* Tarjeta del archivo con menos padding */
+.file-card {
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  padding: 0.5rem; /* Reduce el padding interno */
+  margin-bottom: 0.5rem; /* Ajusta el espacio entre tarjetas */
+}
+
+/* Vista previa de imagen con tamaño más pequeño */
+.preview-container img {
+  max-width: 100px; /* Reduce el tamaño de la imagen */
+  max-height: 100px; /* Limita la altura de la imagen */
+}
+
+/* Ajuste del botón */
+/* Ajuste del botón */
+.btn-warning, .btn-danger {
+  padding: 0.15rem 0.5rem; /* Reduce aún más el padding en el botón */
+  font-size: 0.75rem; /* Reduce el tamaño de la fuente */
+}
+
+
+/* Reducción de márgenes internos */
+.mt-2 {
+  margin-top: 0.5rem !important; /* Reduce espacio superior */
+}
+/* styles.scss o vigilanciaa.component.scss */
+.wide-column {
+  width: 300px; /* Ajusta el ancho según tus necesidades */
+  white-space: nowrap; /* Evita que el texto se envuelva */
+  overflow: hidden; /* Oculta el desbordamiento */
+  text-overflow: ellipsis; /* Agrega puntos suspensivos si el texto es demasiado largo */
+}
+#map {
+  cursor: grab; /* Cambia el cursor a una mano abierta */
+}
+
+#map:active {
+  cursor: grabbing; /* Cambia el cursor a una mano cerrada cuando se arrastra */
+}

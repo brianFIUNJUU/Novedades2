@@ -1,0 +1,48 @@
+.text-small {
+  font-size: 0.875rem; /* Tamaño de texto más pequeño */
+}
+.custom-card {
+  background-color: #081a2e; /* Color azul */
+  color: white; /* Color del texto */
+}
+.custom-card2 {
+  background-color: #0f2f53; /* Color azul */
+  color: white; /* Color del texto */
+}
+
+.table td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.custom-modal-header {
+  background-color: #0f2f53; /* Color azul */
+  color: white; /* Color del texto */
+}
+
+/* Aumentar la especificidad de las clases CSS personalizadas */
+.table-custom tr.rojo td {
+  background-color: rgba(236, 7, 7, 0.407) !important;
+}
+
+.table-custom tr.amarillo td {
+  background-color: rgba(255, 255, 0, 0.434) !important;
+}
+
+.table-custom tr.verde td {
+  background-color: rgba(0, 128, 0, 0.355) !important;
+}
+.btn-close-red {
+  background-color: red;
+  border: none;
+  opacity: 1;
+}
+
+.btn-close-red:hover {
+  background-color: darkred;
+}
+
+.custom-modal-header2 {
+  background-color: #0f2f53; /* Color azul */
+  color: white; /* Color del texto */
+}

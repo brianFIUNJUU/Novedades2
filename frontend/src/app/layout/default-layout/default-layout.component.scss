@@ -1,0 +1,66 @@
+:host {
+  .ng-scrollbar {
+    --scrollbar-padding: 1px;
+    --scrollbar-size: 5px;
+    --scrollbar-thumb-color: var(--cui-gray-500, #999);
+    --scrollbar-thumb-hover-color: var(--cui-gray-400, #999);
+    --scrollbar-hover-size: calc(var(--scrollbar-size) * 1.5);
+  }
+}
+
+/* default-layout.component.scss o styles.scss */
+.img {
+  width: 100%;
+  height: auto;
+  max-width: 50px; /* Tamaño máximo de la imagen */
+}
+
+@media (max-width: 768px) {
+  .img {
+    max-width: 150px; /* Tamaño máximo de la imagen para pantallas pequeñas */
+  }
+}
+
+@media (max-width: 576px) {
+  .img {
+    max-width: 100px; /* Tamaño máximo de la imagen para pantallas muy pequeñas */
+  }
+}
+/* Estilos por defecto */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.body {
+  flex-grow: 1;
+  padding: 1rem; /* Padding por defecto */
+}
+
+/* Estilos para pantallas pequeñas */
+@media (max-width: 576px) {
+  .body {
+    padding: 0; /* Eliminar padding en pantallas pequeñas */
+  }
+
+  .c-container {
+    padding: 0 !important; /* Eliminar padding del contenedor en pantallas pequeñas */
+    margin: 0 !important; /* Eliminar márgenes del contenedor en pantallas pequeñas */
+    width: 100% !important; /* Asegurar que el contenedor ocupe todo el ancho */
+  }
+}
+// ng-scrollbar css variables
+//.cui-scrollbar {
+//  --scrollbar-border-radius: 7px;
+//  --scrollbar-padding: 1px;
+//  --scrollbar-viewport-margin: 0;
+//  --scrollbar-track-color: transparent;
+//  --scrollbar-wrapper-color: transparent;
+//  --scrollbar-thumb-color: rgba(0, 0, 0, 0.2);
+//  --scrollbar-thumb-hover-color: var(--scrollbar-thumb-color);
+//  --scrollbar-size: 5px;
+//  --scrollbar-hover-size: var(--scrollbar-size);
+//  --scrollbar-thumb-transition: height ease-out 150ms, width ease-out 150ms;
+//  --scrollbar-track-transition: height ease-out 150ms, width ease-out 150ms;
+//}

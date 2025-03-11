@@ -1,0 +1,93 @@
+
+// .gov-footer {
+//   background-color: #f1f1f1;
+//   padding: 20px 0;
+// //   color: #666;
+// }
+
+// .gov-footer h3 {
+//   color: #333;
+// }
+
+// .gov-footer ul {
+//   list-style: none;
+//   padding: 0;
+// }
+
+// .gov-footer ul li {
+//   margin-bottom: 90px;
+// }
+
+// .gov-footer ul li a {
+//   color: #666;
+//   text-decoration: none;
+// }
+
+// .gov-footer ul li a:hover {
+//   color: #333;
+// }
+
+// .container {
+//   width: 90%;
+//   margin: 0 auto;
+// }
+
+// .row {
+//   display: flex;
+//   flex-wrap: wrap;
+//   margin-bottom: 20px;
+// }
+
+// .col-md-6 {
+//   width: 50%;
+// }
+
+
+
+.custom-card {
+  background-color: #081a2e !important; /* Color azul */
+  color: white; /* Color del texto */
+}
+
+
+
+/* Asegura que el footer ocupe todo el ancho */
+::ng-deep app-default-footer {
+  background-color: #081a2e !important; /* Color azul */
+  border: none !important;
+  box-shadow: none !important;
+  width: 100% !important; /* Asegura que el footer ocupe todo el ancho */
+  padding: 20px 0 !important; /* Ajusta el padding */
+  position: relative;
+  left: 0;
+  right: 0;
+  display: flex; /* Usamos flexbox para centrar el contenido */
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center; /* Centra verticalmente */
+  height: 80px; /* Ajusta la altura del footer */
+  text-align: center; /* Centra el texto dentro del footer */
+}
+
+::ng-deep app-default-footer .custom-card {
+  background-color: #081a2e !important; 
+  border: none !important;
+  box-shadow: none !important;
+  width: 100% !important; /* Asegura que la tarjeta ocupe todo el ancho */
+  display: flex;
+  justify-content: center; /* Asegura que el contenido de la tarjeta esté centrado */
+  align-items: center; /* Centra verticalmente */
+}
+
+::ng-deep app-default-footer .card-body {
+  background-color: #081a2e !important; 
+  border: none !important;
+  box-shadow: none !important;
+  width: 100% !important;
+  text-align: center; /* Centra el texto dentro del card-body */
+}
+
+::ng-deep app-default-footer p {
+  color: white !important;
+  font-size: 1rem;
+  margin: 0;
+}

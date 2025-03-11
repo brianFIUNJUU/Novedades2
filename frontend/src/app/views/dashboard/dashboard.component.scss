@@ -1,0 +1,172 @@
+:host {
+  .legend {
+    small {
+      font-size: x-small;
+    }
+  }
+}
+
+.titulo {
+  color: #112d4d;
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.custom-card {
+  background-color: #081a2e; /* Color azul */
+  color: white; /* Color del texto */
+}
+
+.custom-card2 {
+  background-color: #0f2f53; /* Color azul */
+  color: white; /* Color del texto */
+}
+
+.table td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-modal-header {
+  background-color: #0f2f53; /* Color azul */
+  color: white; /* Color del texto */
+}
+.custom-modal-header2 {
+  background-color: #124b8d; /* Color azul */
+  color: white; /* Color del texto */
+}
+
+.camera-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.camera-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+video {
+  max-width: 100%;
+  max-height: 80vh;
+  margin-bottom: 10px;
+}
+
+#camera-modal .modal-dialog {
+  max-width: 600px; /* Ajusta este valor según el tamaño deseado */
+  width: auto !important;
+}
+
+#camera-modal .modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#camera-modal .modal-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+#camera-modal video {
+  width: 100%;
+  height: auto;
+}
+.btn-close-red {
+  background-color: red;
+  border: none;
+  opacity: 1;
+}
+
+.btn-close-red:hover {
+  background-color: darkred;
+}
+
+
+/* Título dentro de la card */
+.custom-card {
+  position: relative; /* Permite que el título esté encima de la imagen */
+  z-index: 10; /* Asegura que el título esté encima de la imagen */
+}
+
+/* Para asegurarnos de que el contenido no se sobreponga con la imagen */
+.card-body {
+  z-index: 20;
+  position: relative;
+  padding-top: 10px; /* Da espacio para el título encima de la imagen */
+}
+
+/* Ajustar el título para que esté más visible sobre la imagen */
+.card-title {
+  font-size: 1.5em;
+  color: white;
+  font-weight: bold;
+}
+/* Estilo para asegurar que la imagen se quede fija en la parte inferior y ocupe todo el ancho */
+/* Estilo original para la imagen en pantallas grandes */
+/* Estilo por defecto para la imagen de fondo */
+/* Estilo para la imagen de fondo que cubre todo el fondo */
+/* Contenedor de la imagen de fondo */
+.logo {
+  position: fixed; /* Fija el fondo en la pantalla */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh; /* Ocupa toda la altura de la pantalla */
+  z-index: -1; /* Se mantiene detrás del contenido */
+  background-image: url("/assets/fondopolicia.jpg");
+  background-size: cover; /* La imagen cubre toda la pantalla, recortando los bordes */
+  background-position: center center; /* Centra la imagen en el centro */
+  background-repeat: no-repeat; /* No se repite la imagen */
+}
+
+
+
+@media (max-width: 500px) {
+  h6.card-title {
+    font-size: 15px !important; /* Reduce el tamaño del texto */
+  }
+}
+
+
+//   /* Ajusta la imagen de fondo para que esté centrada */
+//   .logo {
+    
+//     background-image: url("/assets/fondopolicia.jpg");
+//     background-position: center center; /* Centra la imagen horizontal y verticalmente */
+//     background-repeat: no-repeat;
+//     background-size: cover; /* La imagen cubre toda la pantalla, recortando los bordes */
+//     top: 130px;
+//     left: 50%;
+//     transform: translateX(-50%); /* Ajusta la posición para centrarla */
+
+//     z-index: -1; /* Se mantiene detrás del contenido */
+//     height: 500px; /* Ajusta la altura según el diseño */
+//     width: 730px; /* Ajusta el ancho según la altura */
+//     margin: 0 auto; /* Centra la imagen */
+//     display: flex;
+//     bottom: auto;
+//     justify-content: center;
+//     align-items: center;
+//     box-shadow: 0 -40px 40px rgba(17, 30, 68, 0.741), 
+//     0 40px 40px rgba(17, 4, 68, 0.741);
+
+//   }
+
+  
+  
+// }

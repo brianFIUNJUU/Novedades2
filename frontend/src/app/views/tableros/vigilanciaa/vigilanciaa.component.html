@@ -1,0 +1,406 @@
+<div class="container">
+  <h2>Gestión de Vigilancia</h2>
+
+  <!-- Formulario para crear/editar vigilancia -->
+  <form [formGroup]="vigilanciaForm" (ngSubmit)="guardarVigilancia()">
+    <div class="container">
+      <div class="row">
+        <!-- Columna 1 -->
+        <div class="col-md-6">
+          <!-- UNIDAD SOLICITANTE -->
+          <div class="form-group">
+            <label for="unidad_solicitante">Unidad Solicitante:</label>
+            <select
+              id="unidad_solicitante"
+              formControlName="unidad_solicitante"
+              class="form-select"
+            >
+              <option value="" disabled selected class="option-placeholder">Seleccione la unidad Solicitante</option>
+              <option value="Autoridad-Poder Ejecutivo">Autoridad-Poder Ejecutivo</option>
+              <option value="Ministerio Publico de la acusacion">Ministerio Publico de la acusacion</option>
+              <option value="Poder Judicial">Poder Judicial</option>
+              <option value="Policia">Policia</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="detalle_unidad_solicitante">Detalle de la unidad solicitante:</label>
+            <input
+              id="detalle_unidad_solicitante"
+              formControlName="detalle_unidad_solicitante"
+              type="text"
+              class="form-control"
+              placeholder="Ingrese el detalle de la unidad solicitante"
+            />
+          </div>
+          <div class="form-group">
+            <label for="cargo_solicitante">Cargo o juez:</label>
+            <input
+              id="cargo_solicitante"
+              formControlName="cargo_solicitante"
+              type="text"
+              class="form-control"
+              placeholder="Cargo o juez"
+            />
+          </div>
+          <div class="form-group">
+            <label for="nro_oficio">N° de Oficio:</label>
+            <input
+              id="nro_oficio"
+              formControlName="nro_oficio"
+              type="text"
+              class="form-control"
+              placeholder="N° de Oficio"
+            />
+          </div>
+          
+
+          <div class="form-group">
+            <label for="oficio">Oficio</label>
+            <input type="file" id="oficio" (change)="onFileSelectedOficio($event)" class="form-control">
+            <small *ngIf="archivoOficioActual" class="form-text text-muted">
+              Archivo actual: {{ archivoOficioActual }}
+            </small>
+            <div *ngIf="archivoOficioActual">
+              <a [href]="'http://localhost:3000/uploads/' + archivoOficioActual" >Ver Oficio</a>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="foto_persona">Foto Persona</label>
+            <input type="file" id="foto_persona" (change)="onFileSelectedFotoPersona($event)" class="form-control">
+            <small *ngIf="archivoFotoPersonaActual" class="form-text text-muted">
+              Archivo actual: {{ archivoFotoPersonaActual }}
+            </small>
+            <div *ngIf="archivoFotoPersonaActual">
+              <a [href]="'http://localhost:3000/uploads/' + archivoFotoPersonaActual" >Ver Foto</a>
+            </div>
+          </div>
+          
+          <!-- ... que bueno porque ya me estaban empezando... -->
+          
+          <div class="form-group">
+            <label for="expediente">Expediente:</label>
+            <input
+              id="expediente"
+              formControlName="expediente"
+              type="text"
+              class="form-control"
+              placeholder="Expediente"
+            />
+          </div>
+          <div class="form-group">
+            <label for="caratula">Caratula:</label>
+            <input
+              id="caratula"
+              formControlName="caratula"
+              type="text"
+              class="form-control"
+              placeholder="Caratula"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="unidad_regional">Unidad Regional</label>
+            <select
+              formControlName="unidad_regional_id"
+              id="unidad_regional"
+              class="form-control"
+              (change)="cargarDependencias(vigilanciaForm.get('unidad_regional_id')?.value)"
+              required
+            >
+            
+              <option value="" disabled selected>Selecciona una unidad regional</option>
+              <option *ngFor="let unidad_regional of unidadRegionales" [value]="unidad_regional.id">{{ unidad_regional.unidad_regional }}</option>
+            </select>
+            <div *ngIf="!vigilanciaForm.get('unidad_regional_id')?.value" class="invalid-feedback">
+              La unidad regional es requerida.
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="dependencia" class="form-label">Dependencia:</label>
+            <div class="input-group">
+              <select
+                id="dependencia"
+                formControlName="juridiccion_id"
+                class="form-select"
+                placeholder="Seleccione una Juridiccion"
+              >
+                <option *ngFor="let dep of dependencias" [ngValue]="dep.id">{{ dep.juridiccion }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="motivo_custodia">Motivo de custodia:</label>
+            <select
+              id="motivo_custodia"
+              formControlName="motivo_custodia"
+              class="form-select"
+            >
+              <option value="" disabled selected class="option-placeholder">Seleccione el motivo de la custodia</option>
+              <option value="Menor de edad">Menor de edad</option>
+              <option value="Violencia de género">Violencia de género</option>
+              <option value="Persona detenida">Persona detenida</option>
+              <option value="Posible usurpación">Posible usurpación</option>
+              <option value="Protección de persona">Protección de persona</option>
+              <option value="Usurpación">Usurpación</option>
+              <option value="Vigilancia domicilio">Vigilancia domicilio</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="modalidad_custodia">Modalidad de custodia:</label>
+            <select
+              id="modalidad_custodia"
+              formControlName="modalidad_custodia"
+              class="form-select"
+            >
+              <option value="" disabled selected>Seleccione la modalidad de custodia</option>
+              <option value="custodia a la persona(domicilio)">Custodia a la persona (domicilio)</option>
+              <option value="custodia ambulatorio">Custodia ambulatorio</option>
+              <option value="custodia de detenido(hospitalizado)">Custodia de detenido (hospitalizado)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="observaciones">Observaciones:</label>
+            <textarea
+              id="observaciones"
+              formControlName="observaciones"
+              class="form-control"
+              placeholder="Ingrese observaciones"
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="fecha_inicio">Fecha de Inicio:</label>
+            <input
+              id="fecha_inicio"
+              formControlName="fecha_inicio"
+              type="date"
+              class="form-control"
+            />
+          </div>
+          <div class="form-group">
+            <label for="vigencia">Vigencia:</label>
+            <select
+              id="vigencia"
+              formControlName="vigencia"
+              class="form-select"
+            >
+              <option value="" disabled selected>Seleccione la vigencia</option>
+              <option value="fecha determinada">Fecha determinada</option>
+              <option value="hasta nueva disposicion">Hasta nueva disposición</option>
+              <option value="hasta que instale dispositivo DIME">Hasta que instale dispositivo DIME</option>
+              <option value="hasta que se notifique la medida cautelar">Hasta que se notifique la medida cautelar</option>
+              <option value="hasta que sea capturado">Hasta que sea capturado</option>
+              <option value="hasta que sea dado de alta">Hasta que sea dado de alta</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="fecha_limite">Fecha de Limite:</label>
+            <input
+              id="fecha_limite"
+              formControlName="fecha_limite"
+              type="date"
+              class="form-control"
+            />
+          </div>
+          <div class="form-group">
+            <label for="direccion_vigilancia">Dirección de la vigilancia:</label>
+            <input
+              id="direccion_vigilancia"
+              formControlName="direccion_vigilancia"
+              type="text"
+              class="form-control"
+              placeholder="Dirección de la vigilancia"
+            />
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="departamento">Departamento</label>
+              <select formControlName="departamento_id" id="departamento" class="form-select" (change)="cargarLocalidades(vigilanciaForm.get('departamento_id')?.value)" required>
+                <option value="" disabled selected>Selecciona un departamento</option>
+                <option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</option>
+              </select>
+              <div *ngIf="!vigilanciaForm.get('departamento_id')?.value" class="invalid-feedback">
+                El departamento es requerido.
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="localidad">Localidad</label>
+              <select formControlName="localidad_id" id="localidad" class="form-select" required>
+                <option value="" disabled selected>Selecciona una localidad</option>
+                <option *ngFor="let localidad of localidades" [value]="localidad.id">{{ localidad.nombre }}</option>
+              </select>
+              <div *ngIf="!vigilanciaForm.get('localidad_id')?.value" class="invalid-feedback">
+                La localidad es requerida.
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="latitud_vigilancia">Latitud:</label>
+            <input
+              id="latitud_vigilancia"
+              formControlName="latitud_vigilancia"
+              type="text"
+              class="form-control"
+              placeholder="Ingrese latitud"
+              (change)="actualizarMapaDesdeFormulario()" 
+            />
+          </div>
+          <div class="form-group">
+            <label for="longitud_vigilancia">Longitud:</label>
+            <input
+              id="longitud_vigilancia"
+              formControlName="longitud_vigilancia"
+              type="text"
+              class="form-control"
+              placeholder="Ingrese longitud"
+              (change)="actualizarMapaDesdeFormulario()" 
+            />
+          </div>
+          <button class="btn btn-warning btn-sm" (click)="actualizarMapaDesdeFormulario()">Actualizar ubicación</button>
+
+          <!-- Añadimos el div para el mapa -->
+          <div id="map" style="height: 400px; width: 100%;"></div>
+        </div>
+
+        <!-- Columna 2 -->
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="activo">Activo:</label>
+            <input
+              id="activo"
+              formControlName="activo"
+              type="checkbox"
+            />
+          </div>
+          <div class="form-group">
+            <label for="fecha_fin">Fecha de Fin:</label>
+            <input
+              id="fecha_fin"
+              formControlName="fecha_limite"
+              type="date"
+              class="form-control"
+            />
+          </div>
+          <div class="form-group">
+            <label for="recorrido_inicio">Recorrido Inicio:</label>
+            <input
+              id="recorrido_inicio"
+              formControlName="recorrido_inicio"
+              type="text"
+              class="form-control"
+              placeholder="Ingrese recorrido inicio"
+            />
+          </div>
+          <div class="form-group">
+            <label for="recorrido_final">Recorrido Final:</label>
+            <input
+              id="recorrido_final"
+              formControlName="recorrido_final"
+              type="text"
+              class="form-control"
+              placeholder="Ingrese recorrido final"
+            />
+          </div>
+          <div class="form-group">
+            <label for="unidad_operativa_mañana">Unidad Operativa Mañana:</label>
+            <input
+              id="unidad_operativa_mañana"
+              formControlName="unidad_operativa_manana"
+              type="text"
+              class="form-control"
+              placeholder="Ingrese unidad operativa mañana"
+            />
+          </div>
+          <div class="form-group">
+            <label for="unidad_operativa_tarde">Unidad Operativa Tarde:</label>
+            <input
+              id="unidad_operativa_tarde"
+              formControlName="unidad_operativa_tarde"
+              type="text"
+              class="form-control"
+              placeholder="Ingrese unidad operativa tarde"
+            />
+          </div>
+          <div class="form-group">
+            <label for="unidad_operativa_noche">Unidad Operativa Noche:</label>
+            <input
+              id="unidad_operativa_noche"
+              formControlName="unidad_operativa_noche"
+              type="text"
+              class="form-control"
+              placeholder="Ingrese unidad operativa noche"
+            />
+          </div>
+          <!-- Aquí agregamos el campo situacion_objetivo como un select -->
+          <div class="form-group">
+            <label for="situacion_objetivo">Situación Objetivo:</label>
+            <select
+              id="situacion_objetivo"
+              formControlName="situacion_objetivo"
+              class="form-select"
+            >
+              <option value="" disabled selected>Seleccione la situación objetivo</option>
+              <option value="activo">Activo</option>
+              <option value="objetivo finalizado">Objetivo finalizado</option>
+              <option value="ronda">Ronda</option>
+            </select>
+          </div>
+          
+
+          <div *ngIf="mensajeError" class="form-group">
+            <p class="text-danger">{{ mensajeError }}</p>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">
+            {{ vigilanciaForm.get('id')?.value ? 'Actualizar' : 'Agregar' }} Vigilancia
+          </button>
+          <button type="button" class="btn btn-secondary btn-block" (click)="cancelarActualizacion()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </form>
+
+       <h2>Lista de Vigilancias</h2>
+    <div class="table-responsive">
+      <table class="table table-bordered border-primary">
+        <thead>
+          <tr>
+            <th>Persona</th>
+            <th>Funcionario</th>
+            <th>Juridiccion</th>
+            <th>Activo</th>
+            <th>Oficio</th>
+            <th>Foto Persona</th>
+            <th>Motivo de la custodia</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let vigilancia of vigilancias">
+            <td>{{ vigilancia.nombre_persona }}</td>
+            <td>{{ vigilancia.cargo_solicitante }}</td>
+            <td>{{ vigilancia.juridiccion_nombre }}</td>
+            <td>{{ vigilancia.activo ? 'Si' : 'No' }}</td>
+            <td class="wide-column">
+              <div *ngIf="vigilancia.oficio">
+                <a [href]="'http://localhost:3000/uploads/' + vigilancia.oficio" target="_blank">Ver Oficio</a>
+              </div>
+            </td>
+             
+            <td>
+              <div *ngIf="vigilancia.foto_persona">
+                <a [href]="'http://localhost:3000/uploads/' + vigilancia.foto_persona" target="_blank">Ver Oficio</a>
+              </div> 
+        <!--  -->
+            <td>{{ vigilancia.motivo_custodia }}</td>
+            <td>
+              <button (click)="editarVigilancia(vigilancia)" class="btn btn-warning btn-sm">Editar</button>
+              <button (click)="eliminarVigilancia(vigilancia.id)" class="btn btn-danger btn-sm">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
