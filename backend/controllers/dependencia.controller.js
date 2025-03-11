@@ -23,10 +23,10 @@ dependenciaCtrl.getDependencias = async (req, res) => {
 
 // Crear una nueva dependencia
 dependenciaCtrl.createDependencia = async (req, res) => {
-    const { juridiccion, departamento_id, localidad_id, domicilio, unidad_regional_id } = req.body; // Destructuración de campos
+    const { juridiccion, unidad_regional_id } = req.body; // Destructuración de campos
 
     // Validar datos
-    if (!juridiccion ||!unidad_regional_id) {
+    if (!juridiccion || !unidad_regional_id) {
         return res.status(400).json({
             'status': '0',
             'msg': 'Todos los campos son obligatorios.'
@@ -35,7 +35,10 @@ dependenciaCtrl.createDependencia = async (req, res) => {
 
     try {
         // Crear la nueva dependencia
-        const dependencia = await Dependencia.create(req.body);
+        const dependencia = await Dependencia.create({
+            juridiccion,
+            unidad_regional_id
+        });
         res.json({
             'status': '1',
             'msg': 'Dependencia guardada.',
@@ -72,6 +75,7 @@ dependenciaCtrl.getDependencia = async (req, res) => {
         });
     }
 };
+
 // Obtener dependencias por unidad regional
 dependenciaCtrl.getDependenciasByUnidadRegional = async (req, res) => {
     try {
@@ -90,13 +94,12 @@ dependenciaCtrl.getDependenciasByUnidadRegional = async (req, res) => {
             'msg': 'Error al obtener las dependencias por unidad regional.'
         });
     }
-}
+};
 
-// Editar una dependencia
 // Editar una dependencia
 dependenciaCtrl.editDependencia = async (req, res) => {
     // Asegúrate de que el ID esté en el cuerpo de la solicitud
-    const { id, juridiccion, departamento_id, localidad_id, domicilio, unidad_regional_id } = req.body;
+    const { id, juridiccion, unidad_regional_id } = req.body;
 
     // Validar datos
     if (!id || !juridiccion || !unidad_regional_id) {
@@ -133,7 +136,6 @@ dependenciaCtrl.editDependencia = async (req, res) => {
         });
     }
 };
-
 
 // Eliminar una dependencia
 dependenciaCtrl.deleteDependencia = async (req, res) => {

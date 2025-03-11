@@ -1,6 +1,6 @@
 const Personal = require('../models/personal'); // Asegúrate de que la ruta sea correcta
 const Dependencia = require('../models/dependencia'); // Importa el modelo Dependencia
-const Persona = require('../models/persona'); // Importa el modelo Persona
+const UnidadRegional = require('../models/unidad_regional'); // Importa el modelo UnidadRegional
 const personalCtrl = {};
 
 // Obtener todos los personales
@@ -11,19 +11,16 @@ personalCtrl.getPersonales = async (req, res) => {
                 {
                     model: Dependencia,
                     as: 'dependencia',
-                    // include: [
-                    //     {
-                    //         model: UnidadRegional,
-                    //         as: 'unidadRegional',
-                    //     },
-                    // ],
-                },
-                {
-                    model: Persona,
-                    as: 'persona',
+                    include: [
+                        {
+                            model: UnidadRegional,
+                            as: 'unidadRegional',
+                        },
+                    ],
                 },
             ],
         });
+        console.log('Dependencias y Unidades Regionales:', personales.map(p => p.dependencia)); // Imprimir en consola
         res.json(personales);
     } catch (error) {
         console.error('Error al obtener personales:', error); // Imprimir el error para depuración
@@ -34,50 +31,34 @@ personalCtrl.getPersonales = async (req, res) => {
     }
 };
 
-
-// Crear un nuevo personal
-// Crear un nuevo personal
-// Crear un nuevo personal
-// Crear un nuevo personal
 personalCtrl.createPersonal = async (req, res) => {
-    const { legajo, escalafon, jerarquia, dependenciaId, fechaIngreso, funcionario, cargo, jefe, personaId } = req.body;
+    const { legajo, jerarquia, nombre, apellido, dni, email, DependenciaId, unidad_regional_id } = req.body;
 
-    if (!dependenciaId || !personaId) {
+    if (!DependenciaId || !unidad_regional_id) {
         return res.status(400).json({
             'status': '0',
-            'msg': 'Los campos dependenciaId y personaId son obligatorios.'
+            'msg': 'Los campos DependenciaId y unidad_regional_id son obligatorios.'
         });
     }
 
     try {
-        // Obtener el siguiente ID disponible
-        const maxId = await Personal.max('id');
-        const newId = maxId !== null ? maxId + 1 : 1; // Obtener el siguiente ID
-
-        // Verificar si el nuevo ID ya está en uso
-        const existingPersonal = await Personal.findOne({ where: { id: newId } });
-        if (existingPersonal) {
-            // Aquí puedes implementar lógica para manejar el ID en uso
-            // Por ejemplo, podrías buscar el ID más bajo disponible o lanzar un error
-            return res.status(400).json({
-                'status': '0',
-                'msg': 'ID en uso, error al crear personal.'
-            });
-        }
-
-        // Crear el nuevo registro de Personal con el ID generado
+        // Crear el nuevo registro de Personal
         const personal = await Personal.create({
-            id: newId, // Asignar el nuevo ID
             legajo,
-            escalafon,
             jerarquia,
-            dependenciaId,
-            fechaIngreso,
-            funcionario,
-            cargo,
-            jefe,
-            personaId
+            nombre,
+            apellido,
+            dni,
+            email,
+            DependenciaId,
+            unidad_regional_id
         });
+
+        // Obtener y mostrar Dependencia y UnidadRegional
+        const dependencia = await Dependencia.findByPk(DependenciaId);
+        const unidadRegional = await UnidadRegional.findByPk(unidad_regional_id);
+        console.log('Dependencia:', dependencia);
+        console.log('Unidad Regional:', unidadRegional);
 
         res.json({
             'status': '1',
@@ -93,9 +74,6 @@ personalCtrl.createPersonal = async (req, res) => {
     }
 };
 
-
-
-
 // Obtener un personal por ID
 personalCtrl.getPersonal = async (req, res) => {
     try {
@@ -104,10 +82,12 @@ personalCtrl.getPersonal = async (req, res) => {
                 {
                     model: Dependencia,
                     as: 'dependencia',
-                },
-                {
-                    model: Persona,
-                    as: 'persona',
+                    include: [
+                        {
+                            model: UnidadRegional,
+                            as: 'unidadRegional',
+                        },
+                    ],
                 },
             ],
         });
@@ -117,6 +97,8 @@ personalCtrl.getPersonal = async (req, res) => {
                 msg: 'Personal no encontrado.',
             });
         }
+        console.log('Dependencia:', personal.dependencia);
+        console.log('Unidad Regional:', personal.dependencia.unidadRegional);
         res.json(personal);
     } catch (error) {
         res.status(400).json({
@@ -139,10 +121,15 @@ personalCtrl.editPersonal = async (req, res) => {
                 msg: 'Personal no encontrado.',
             });
         }
+        const personal = updatedPersonal[1][0];
+        const dependencia = await Dependencia.findByPk(personal.DependenciaId);
+        const unidadRegional = await UnidadRegional.findByPk(personal.unidad_regional_id);
+        console.log('Dependencia:', dependencia);
+        console.log('Unidad Regional:', unidadRegional);
         res.json({
             status: '1',
             msg: 'Personal actualizado.',
-            data: updatedPersonal[1][0], // El registro actualizado
+            data: personal, // El registro actualizado
         });
     } catch (error) {
         res.status(400).json({
@@ -155,15 +142,20 @@ personalCtrl.editPersonal = async (req, res) => {
 // Eliminar un personal
 personalCtrl.deletePersonal = async (req, res) => {
     try {
-        const deletedPersonal = await Personal.destroy({
-            where: { id: req.params.id },
-        });
-        if (deletedPersonal === 0) {
+        const personal = await Personal.findByPk(req.params.id);
+        if (!personal) {
             return res.status(404).json({
                 status: '0',
                 msg: 'Personal no encontrado.',
             });
         }
+        const dependencia = await Dependencia.findByPk(personal.DependenciaId);
+        const unidadRegional = await UnidadRegional.findByPk(personal.unidad_regional_id);
+        console.log('Dependencia:', dependencia);
+        console.log('Unidad Regional:', unidadRegional);
+        await Personal.destroy({
+            where: { id: req.params.id },
+        });
         res.json({
             status: '1',
             msg: 'Personal eliminado.',
@@ -185,10 +177,12 @@ personalCtrl.getPersonalByLegajo = async (req, res) => {
                 {
                     model: Dependencia,
                     as: 'dependencia',
-                },
-                {
-                    model: Persona,
-                    as: 'persona',
+                    include: [
+                        {
+                            model: UnidadRegional,
+                            as: 'unidadRegional',
+                        },
+                    ],
                 },
             ],
         });
@@ -198,6 +192,8 @@ personalCtrl.getPersonalByLegajo = async (req, res) => {
                 msg: 'Personal no encontrado.',
             });
         }
+        console.log('Dependencia:', personal.dependencia);
+        console.log('Unidad Regional:', personal.dependencia.unidadRegional);
         res.json(personal);
     } catch (error) {
         res.status(400).json({

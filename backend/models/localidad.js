@@ -15,11 +15,11 @@ const Localidad = sequelize.define('Localidad', {
     },
     latitud: {
         type: DataTypes.STRING,
-        allowNull: true // Si la latitud no es obligatoria
+     
     },
     longitud: {
         type: DataTypes.STRING,
-        allowNull: true // Si la longitud no es obligatoria
+
     },
     departamento_id: {
         type: DataTypes.INTEGER,

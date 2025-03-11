@@ -3,8 +3,23 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const sequelize = require('./database'); // Importamos la conexión a PostgreSQL usando Sequelize
 const path = require('path');
-const app = express();
 const admin = require('firebase-admin');
+const fs = require('fs');
+const https = require('https');
+const app = express();
+const Novedades = require('./models/novedades'); // Importa el modelo Novedades desde el directorio models
+const Persona = require('./models/persona');
+const NovedadPersona = require('./models/novedad_persona');
+const NovedadPersonal = require('./models/novedad_personal');
+require('./models/associations'); // Importar las relaciones
+
+// Definir las asociaciones
+module.exports = {
+  Novedades,
+  Persona,
+  NovedadPersona,
+  NovedadPersonal
+};
 
 // Sirve archivos estáticos desde el directorio uploads
 app.use('/uploads', express.static('uploads'));
@@ -16,7 +31,8 @@ admin.initializeApp({
 });
 
 // Middlewares
-app.use(cors({ origin: 'http://localhost:4200' })); // Asegúrate de que esta sea la URL correcta
+app.use(cors({  }));
+
 app.use(bodyParser.json({ limit: '10mb' })); // Configura el límite de tamaño del cuerpo JSON
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true })); // Configura el límite para datos URL-encoded
 
@@ -27,14 +43,18 @@ app.use('/api/unidad_regional', require('./routes/unidad_regional.route.js'));
 app.use('/api/personal', require('./routes/personal.route.js'));
 app.use('/api/departamento', require('./routes/departamento.route.js'));
 app.use('/api/localidad', require('./routes/localidad.route.js'));
-// app.use('/api/funcionario', require('./routes/funcionario.route.js'));
-app.use('/api/vigilancia', require('./routes/vigilancia.route.js'));
+app.use('/api/cuadrante', require('./routes/cuadrante.route.js'));
+app.use('/api/estado', require('./routes/estado.route.js'));
 app.use('/api/novedades', require('./routes/novedades.route.js')); // Agregar esta línea
+app.use('/api/novedadPersona', require('./routes/novedades_persona.route.js')); // Agregar esta línea
+app.use('/api/elemento', require('./routes/elemento.route.js')); // Corregir esta línea
+app.use('/api/categoria', require('./routes/categoria.route.js')); 
+app.use('/api/tipohecho', require('./routes/tipohecho.route.js')); 
+app.use('/api/subtipohecho', require('./routes/subtipohecho.route.js'));
+app.use('/api/descripcion_hecho', require('./routes/descripcion_hecho.route.js')); 
+app.use('/api/modus_operandi', require('./routes/modus_operandi.route.js'));
+app.use('/api/novedadPersonal', require('./routes/novedades_personal.route.js')); // Corregir esta línea
 
-// app.use('/api/turno', require('./routes/turno.route.js'));
-
-// Sincronización de Sequelize y recreación de tablas (esto elimina los datos existentes)
- 
 // Endpoint para obtener usuarios
 app.get('/api/users', async (req, res) => {
   try {
@@ -84,7 +104,13 @@ sequelize.sync().then(() => {
 // Settings
 app.set('port', process.env.PORT || 3000);
 
-// Starting the server
-app.listen(app.get('port'), () => {
-  console.log(`Server started on port ${app.get('port')}`);
+// HTTPS configuration (update paths)
+const sslOptions = {
+  key: fs.readFileSync(path.join(__dirname, 'ssl/192.168.80.31-key.pem')),  // Ruta correcta desde backend
+  cert: fs.readFileSync(path.join(__dirname, 'ssl/192.168.80.31.pem'))     // Ruta correcta desde backend
+};
+
+// Starting the server with HTTPS
+https.createServer(sslOptions, app).listen(app.get('port'), '0.0.0.0', () => {
+  console.log(`Servidor HTTPS corriendo en https://0.0.0.0:${app.get('port')}`);
 });

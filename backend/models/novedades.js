@@ -1,187 +1,244 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../database');
-const Dependencia = require('./dependencia'); // Asegúrate de que la ruta sea correcta
-const Departamento = require('./departamento');
-const Localidad = require('./localidad');
 const Unidad_regional = require('./unidad_regional');
+const Personal = require('./personal');
+const Persona = require('./persona');
+const NovedadPersona = require('./novedad_persona');
+const Cuadrante = require('./cuadrante');
+const Estado = require('./estado');
+const Dependencia = require('./dependencia');
+const Tipo_hecho = require('./tipohecho');
+const Subtipo_hecho = require('./subtipohecho');
+const Descripcion_hecho = require('./descripcion_hecho');
+const Modus_operandi = require('./modus_operandi');
+const NovedadPersonal = require('./novedad_personal');
 
-// Definir el modelo Novedades
 const Novedades = sequelize.define('Novedades', {
-    id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  fecha: {
+    type: DataTypes.STRING,
+  },
+  horario: {
+    type: DataTypes.STRING,
+  },
+  unidad_regional_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Unidad_regional,
+      key: 'id'
     },
-    unidad_regional_id: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: Unidad_regional,
-            key: 'id'
-        },
-        allowNull: false        
-    }, // Relación con el modelo Unidad_regional
-    juridiccion_id: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: Dependencia,
-            key: 'id'
-        },
-        allowNull: false // Relación con el modelo Dependencia
-    },    
-    fecha: {
-        type: DataTypes.DATEONLY,
-    }, // esta es la fecha del inicio de servicio
-    horario: {
-        type: DataTypes.DATEONLY,
-    }, // esta es la fecha del inicio de servicio
-    lugar_hecho: {
-        type: DataTypes.STRING,
-    }, // Lugar donde ocurrió el hecho
-    latitud: {
-        type: DataTypes.STRING,
-    }, // latitud de la vigilancia
-    longitud: {
-        type: DataTypes.STRING,
-    }, // longitud de la vigilancia
-    departamento_id: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: Departamento,
-            key: 'id'
-        },
-        allowNull: false // Relación con el modelo Departamento
-    },
-    localidad_id: {
-        type: DataTypes.INTEGER,
-        references: {
-            model: Localidad,
-            key: 'id'
-        },
-        allowNull: false // Relación con el modelo Localidad
-    },
-    origen_novedad: {
-        type: DataTypes.STRING,
-    }, 
-    unidad_interviniente: {
-        type: DataTypes.STRING,
-    },
-    tipo_hecho: {
-        type: DataTypes.STRING,
-    }, // tipo de hecho
-    modus_operandi: {
-        type: DataTypes.STRING,
-    }, // Modo de operar el delito
-    personal_policial_nombre: {
-        type: DataTypes.STRING,
-    }, // Nombre y Apellido del personal policial
-    personal_policial_legajo: {
-        type: DataTypes.STRING,
-    }, // Legajo del personal policial
-    descripcion: {  
-        type: DataTypes.STRING,
-    },
-    victima_nombre: {
-        type: DataTypes.STRING,
-    }, // Nombre de la víctima
-    victima_dni: {
-        type: DataTypes.STRING,
-    }, // DNI de la víctima
-    victima_edad: {
-        type: DataTypes.STRING,
-    }, // Edad de la víctima
-    victima_sexo: {
-        type: DataTypes.STRING,
-    }, // Sexo de la víctima
-    inculpado_cantidad: {
-        type: DataTypes.STRING,
-    }, // Cantidad de inculpados
-    inculpado_nombre: {
-        type: DataTypes.STRING,
-    }, // Nombre del inculpado
-    inculpado_dni: {
-        type: DataTypes.STRING,
-    }, // DNI del inculpado
-    inculpado_edad: {
-        type: DataTypes.STRING,
-    }, // Edad del inculpado
-    inculpado_sexo: {
-        type: DataTypes.STRING,
-    }, // Sexo del inculpado
-    inculpado_domicilio: {
-        type: DataTypes.STRING,
-    }, // Domicilio del inculpado
-    inculpado_nacionalidad: {
-        type: DataTypes.STRING,
-    }, // Nacionalidad del inculpado
-    vinculo_victima_inculpado: {
-        type: DataTypes.STRING,
-    }, // Vínculo entre la víctima y el inculpado
-    demorado: {
-        type: DataTypes.BOOLEAN,
-    }, // Demorado
-    comparendo: {
-        type: DataTypes.BOOLEAN,
-    }, // Comparendo
-    elemento_secuestrado: {
-        type: DataTypes.BOOLEAN,
-    }, // Elemento secuestrado
-    elemento_secuestrado_descripcion: {
-        type: DataTypes.STRING,
-    }, // Descripción del elemento secuestrado
-    bien_recuperado: {
-        type: DataTypes.BOOLEAN,
-    }, // Bien recuperado
-    bien_recuperado_descripcion: {
-        type: DataTypes.STRING,
-    }, // Descripción del bien recuperado
-    tipo_lugar_hecho: {
-        type: DataTypes.STRING,
-    }, // Tipo de lugar donde ocurrió el hecho
-    oficial_cargo: {
-        type: DataTypes.STRING,
-    }, // oficial a cargo nombre y apellido
-    legajo: {    
-        type: DataTypes.STRING,
-    },
-    observaciones: { 
-        type: DataTypes.STRING,
-    },
-    archivo: {
-        type: DataTypes.STRING, // Contenido del archivo en base64
-    },
-    archivo1: {
-        type: DataTypes.STRING,
-    },
-    archivo2: {
-        type: DataTypes.STRING,
-    },
-    archivo3: {
-        type: DataTypes.STRING,
-    },
-    archivo4: {
-        type: DataTypes.STRING,
-    },
-    archivo5: {
-        type: DataTypes.STRING,
+    allowNull: false        
+  },
+  cuadrante_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Cuadrante,
+      key: 'id'
     }
+  },
+  lugar_hecho: {
+    type: DataTypes.STRING,
+  },
+  latitud: {
+    type: DataTypes.STRING,
+  },
+  longitud: {
+    type: DataTypes.STRING,
+  },
+  origen_novedad: {
+    type: DataTypes.STRING,
+  },
+  horaIncidencia: {
+    type: DataTypes.STRING,
+  },
+  n_incidencia: {
+    type: DataTypes.INTEGER,
+  },
+  unidad_interviniente: {
+    type: DataTypes.STRING,
+  },
+  tipo_hecho_id: {  
+    type: DataTypes.INTEGER,
+    references: {
+      model: Tipo_hecho,
+      key: 'id'
+    },
+  },
+  tipo_hecho: {
+    type: DataTypes.STRING,
+  },
+  subtipo_hecho_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Subtipo_hecho,
+      key: 'id'
+    },
+  },
+  subtipo_hecho: {
+    type: DataTypes.STRING,
+  },
+  descripcion_hecho_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Descripcion_hecho,
+      key: 'id'
+    },
+  },
+  descripcion_hecho: {
+    type: DataTypes.STRING,
+  },
+  codigo: {
+    type: DataTypes.STRING,
+  },
+  modus_operandi_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Modus_operandi,
+      key: 'id'
+    },
+  },
+  modus_operandi_nombre: { // Cambiar el nombre del atributo para evitar colisión
+    type: DataTypes.STRING,
+  },
+  descripcion: {
+    type: DataTypes.TEXT,
+  },
+  tipo_lugar: {
+    type: DataTypes.STRING,
+  },
+  personal_autor_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Personal,
+      key: 'id'
+    }
+  },
+  personal_autor_nombre: { 
+    type: DataTypes.STRING,
+  },
+  elemento_secuestrado: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: []
+  },
+  bien_recuperado_no: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: []
+  },
+  bien_recuperado: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: []
+  },
+  observaciones: {
+    type: DataTypes.STRING,
+  },
+  unidad_actuante: {
+    type: DataTypes.STRING
+  },
+  oficial_cargo_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Personal,
+      key: 'id'
+    }
+  },
+  oficial_cargo_nombre: {
+    type: DataTypes.STRING,
+  },
+  estado: {
+    type: DataTypes.BOOLEAN,
+  },
+  archivo: {
+    type: DataTypes.TEXT,
+  },
+  archivo1: {
+    type: DataTypes.TEXT,
+  },
+  archivo2: {
+    type: DataTypes.TEXT,
+  },
+  archivo3: {
+    type: DataTypes.TEXT,
+  },
+  archivo4: {
+    type: DataTypes.TEXT,
+  },
+  archivo5: {
+    type: DataTypes.TEXT,
+  },
+  tipoArchivo: {
+    type: DataTypes.STRING,
+  },
+  tipoArchivo1: {
+    type: DataTypes.STRING,
+  },
+  tipoArchivo2: {
+    type: DataTypes.STRING,
+  },
+  tipoArchivo3: {
+    type: DataTypes.STRING,
+  },
+  tipoArchivo4: {
+    type: DataTypes.STRING,
+  },
+  tipoArchivo5: {
+    type: DataTypes.STRING,
+  },
+  nombreArchivo: {
+    type: DataTypes.STRING,
+  },
+  nombreArchivo1: {
+    type: DataTypes.STRING,
+  },
+  nombreArchivo2: {
+    type: DataTypes.STRING,
+  },
+  nombreArchivo3: {
+    type: DataTypes.STRING,
+  },
+  nombreArchivo4: {
+    type: DataTypes.STRING,
+  },
+  nombreArchivo5: {
+    type: DataTypes.STRING,
+  },
 }, {
-    tableName: 'novedades', // nombre de la tabla en la BD
-    timestamps: false // Deshabilitar timestamps automáticos (createdAt, updatedAt)
+  tableName: 'novedades',
+  timestamps: false
 });
 
-// Sincronizar el modelo con la base de datos
+// Crear tablas de manera automatica
 Novedades.sync({ alter: true })
-    .then(() => {
-        console.log("Tabla 'novedades' sincronizada correctamente.");
-    })
-    .catch((error) => {
-        console.error("Error al sincronizar la tabla 'novedades':", error);
-    });
+  .then(() => {
+    console.log("Tabla 'novedades' sincronizada correctamente.");
+  })
+  .catch((error) => {
+    console.error("Error al sincronizar la tabla 'novedades':", error);
+  });
 
 // Definir las asociaciones
-Novedades.belongsTo(Dependencia, { foreignKey: 'juridiccion_id', as: 'juridiccion' });
-Novedades.belongsTo(Departamento, { foreignKey: 'departamento_id', as: 'departamento' });
-Novedades.belongsTo(Localidad, { foreignKey: 'localidad_id', as: 'localidad' });
 Novedades.belongsTo(Unidad_regional, { foreignKey: 'unidad_regional_id', as: 'unidad_regional' });
+Novedades.belongsTo(Cuadrante, { foreignKey: 'cuadrante_id', as: 'cuadrante' });
+Novedades.belongsTo(Modus_operandi, { foreignKey: 'modus_operandi_id', as: 'modus_operandi' });
+Novedades.belongsTo(Tipo_hecho, { foreignKey: 'tipo_hecho_id', as: 'tipoHecho' }); // Cambiar alias a 'tipoHecho'
+Novedades.belongsTo(Subtipo_hecho, { foreignKey: 'subtipo_hecho_id', as: 'subtipoHecho' }); // Cambiar alias a 'subtipoHecho'
+Novedades.belongsTo(Descripcion_hecho, { foreignKey: 'descripcion_hecho_id', as: 'descripcionHecho' }); // Cambiar alias a 'descripcionHecho'
+// Asociaciones con el modelo Personal
+Novedades.belongsTo(Personal, { foreignKey: 'personal_autor_id', as: 'personal_autor' });
+Novedades.belongsTo(Personal, { foreignKey: 'oficial_cargo_id', as: 'oficial_cargo' });
+Novedades.belongsToMany(Persona, { through: NovedadPersona, as: 'personas', foreignKey: 'novedad_id' });
+Persona.belongsToMany(Novedades, { through: NovedadPersona, as: 'novedades', foreignKey: 'persona_id' });
+Novedades.belongsToMany(Personal, { through: NovedadPersonal, as: 'personales', foreignKey: 'novedad_id' });
+Personal.belongsToMany(Novedades, { through: NovedadPersonal, as: 'novedades', foreignKey: 'personal_id' });
+
+Novedades.associate = function(models) {
+  Novedades.hasMany(models.Estado, { foreignKey: 'novedad_id', as: 'estados' });
+};
 
 module.exports = Novedades;

@@ -1,20 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const novedadesController = require('../controllers/novedades.controllers');
+const novedadesController = require('../controllers/novedades.controllers'); // Asegúrate de que la ruta sea correcta
 
-// Ruta para obtener todas las novedades
+// Definir las rutas para la gestión de novedades
 router.get('/', novedadesController.getAllNovedades);
-
-// Ruta para obtener una novedad por ID
 router.get('/:id', novedadesController.getNovedadById);
-
-// Ruta para crear una nueva novedad
 router.post('/', novedadesController.createNovedad);
-
-// Ruta para actualizar una novedad por ID
 router.put('/:id', novedadesController.updateNovedad);
-
-// Ruta para eliminar una novedad por ID
 router.delete('/:id', novedadesController.deleteNovedad);
+router.get('/:id/personas', novedadesController.getPersonasByNovedadId); // Nueva ruta
+router.get('/:id/personas', novedadesController.getPersonasByNovedadId); // Nueva ruta
+router.get('/:id/personal', novedadesController.getPersonalByNovedadId); // Nueva ruta
+router.delete('/:novedadId/personas/:personaId', novedadesController.deletePersonaFromNovedad); // Nueva ruta
+router.get('/novedades/personal_autor/:legajo', novedadesController.getNovedadByPersonalAutorByLegajo);
+
 
 module.exports = router;

@@ -1,0 +1,10 @@
+# Excluir todos los node_modules
+frontend/node_modules/
+backend/node_modules/
+backend/config/
+backend/ssl
+# Otros archivos o carpetas que desees excluir
+.vscode/
+.idea/
+*.log
+*.env
