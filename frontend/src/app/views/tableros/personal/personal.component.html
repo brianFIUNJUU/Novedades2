@@ -23,7 +23,7 @@
             <!-- Formulario para buscar por legajo  -->
             <div class="form-group mb-2">
               <div class="input-group input-group-sm">
-                <input type="text" id="legajoBuscar" [(ngModel)]="legajo" name="legajoBuscar" placeholder="Buscar Legajo" class="form-control form-control-sm" [readonly]="userInfo.perfil === 'usuario'" />
+                <input type="text" id="legajoBuscar" [(ngModel)]="legajo" name="legajoBuscar" placeholder="Buscar Legajo" class="form-control form-control-sm" [readonly]="userInfo.perfil === 'usuario'|| userInfo.perfil === 'EncargadoUnidad'|| userInfo.perfil === 'usuarioDOP'" />
                 <div class="input-group-append">
                   <button type="button" class="btn btn-primary btn-sm" (click)="buscarPersonalPorLegajo()">
                     <i class="bi bi-search"></i>
@@ -34,9 +34,9 @@
             </div>
           </div>
           <div class="col-md-3 d-flex align-items-center">
-            <button (click)="getPersonales()" class="btn btn-primary btn-sm">Cargar Planta</button>
+            <button (click)="getPersonales()" class="btn btn-primary btn-sm">Recargar mis datos</button>
           </div>
-          <div class="col-md-3 d-flex align-items-center">
+          <div  *ngIf="userType === 'administrador'|| userType === 'usuarioDOP'" class="col-md-3 d-flex align-items-center">
             <button (click)="exportToExcel()" class="btn btn-success btn-sm">Exportar a Excel</button>
           </div>
         </div>
@@ -70,7 +70,7 @@
             <td class="text-small">{{ personal.email }}</td>
             <td>
               <button class="btn btn-warning btn-sm" (click)="editarPersonal(personal)">Editar</button>
-              <button class="btn btn-danger btn-sm" (click)="eliminarPersonal(personal.id.toString())">Eliminar</button>
+              <button  *ngIf="userType === 'administrador'" class="btn btn-danger btn-sm" (click)="eliminarPersonal(personal.id.toString())">Eliminar</button>
             </td>
           </tr>
         </tbody>
@@ -92,7 +92,7 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="legajo">Legajo</label>
-                <input type="text" id="legajo" [(ngModel)]="personal.legajo" name="legajo" class="form-control" required [readonly]="userInfo.perfil === 'usuario'" />
+                <input type="text" id="legajo" [(ngModel)]="personal.legajo" name="legajo" class="form-control" required [readonly]="userInfo.perfil === 'usuario' || userInfo.perfil === 'EncargadoUnidad'|| userInfo.perfil === 'usuarioDOP'" />
               </div>
               <!-- aqui si el userInfo:usuario entonces me tiene que cargar en este campo el userInfo.legajo como valor de manera bloqueada -->
             </div>
@@ -151,7 +151,7 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" [(ngModel)]="personal.email" name="email" class="form-control" required />
+                <input type="email" id="email" [(ngModel)]="personal.email" name="email" class="form-control" required [readonly]="userInfo.perfil === 'usuario' || userInfo.perfil === 'EncargadoUnidad'|| userInfo.perfil === 'usuarioDOP'"/>
               </div>
             </div>
           </div>

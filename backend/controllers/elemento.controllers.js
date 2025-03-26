@@ -86,13 +86,14 @@ elementoCtrl.getCategoriaByElemento = async (req, res) => {
 };
 
 // Crear un nuevo elemento
+// Crear un nuevo elemento
 elementoCtrl.createElemento = async (req, res) => {
-    const { elemento_nombre, categoria_id } = req.body;
+    const { elemento_nombre,  categoria_id } = req.body;
 
     if (!elemento_nombre || !categoria_id) {
         return res.status(400).json({
             status: '0',
-            msg: 'Los campos elemento_nombre y categoria_id son obligatorios.',
+            msg: 'Los campos elemento_nombre, caracteristicas y categoria_id son obligatorios.',
         });
     }
 
@@ -112,10 +113,12 @@ elementoCtrl.createElemento = async (req, res) => {
     }
 };
 
+
+// Actualizar un elemento
 // Actualizar un elemento
 elementoCtrl.updateElemento = async (req, res) => {
     const { id } = req.params;
-    const { elemento_nombre, categoria_id } = req.body;
+    const { elemento_nombre,  categoria_id } = req.body;
 
     try {
         const [updated] = await Elemento.update(

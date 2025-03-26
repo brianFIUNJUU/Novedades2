@@ -192,3 +192,161 @@ video {
   font-weight: bold;
   color: #333;
 }
+/* Estilos para el modal */
+#camera-modal .modal-content {
+  position: relative;
+  background: transparent; /* Fondo transparente para el modal */
+  border: none; /* Elimina el borde del modal */
+}
+/* Estilos para el header personalizado */
+.custom-modal-header2 {
+  position: absolute; /* Posiciona el header de manera absoluta */
+  top: 0; /* Lo coloca en la parte superior */
+  left: 0; /* Lo alinea a la izquierda */
+  right: 0; /* Lo alinea a la derecha */
+  background: rgba(0, 0, 0, 0); /* Fondo semi-transparente */
+  border: none; /* Elimina el borde del header */
+  padding: 16px; /* Aumenta el padding para dar más altura */
+  min-height: 60px; /* Establece una altura mínima */
+  z-index: 1; /* Asegura que el header esté por encima del video */
+  display: flex;
+  align-items: center; /* Centra el botón verticalmente */
+  justify-content: flex-end; /* Alinea el botón a la derecha */
+}
+/* Estilos para el botón de cierre */
+.custom-modal-header2 .btn-close {
+  background-color: red; /* Color rojo del botón */
+  opacity: 1; /* Asegura que el botón sea completamente visible */
+  border-radius: 50%; /* Hace que el botón sea circular */
+  width: 30px; /* Tamaño del botón */
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-modal-header2 .btn-close:hover {
+  background-color: darkred; /* Color rojo oscuro al hacer hover */
+  opacity: 0.8; /* Reduce la opacidad al hacer hover */
+}
+/* Estilos para el footer */
+.custom-modal-footer {
+  position: absolute; /* Posiciona el footer de manera absoluta */
+  bottom: 0; /* Lo coloca en la parte inferior */
+  left: 0; /* Lo alinea a la izquierda */
+  right: 0; /* Lo alinea a la derecha */
+  background: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
+  border: none; /* Elimina el borde del footer */
+  display: flex;
+  justify-content: center; /* Centra los botones horizontalmente */
+  gap: 10px; /* Espacio entre los botones */
+  padding: 10px; /* Espaciado interno */
+}
+
+/* Estilos para los botones del footer */
+.custom-modal-footer .btn {
+  color: white; /* Texto blanco */
+  background: rgba(255, 255, 255, 0.2); /* Fondo semi-transparente */
+  border: 1px solid rgba(255, 255, 255, 0.5); /* Borde semi-transparente */
+  transition: background 0.3s ease; /* Transición suave al hacer hover */
+}
+
+.custom-modal-footer .btn:hover {
+  background: rgba(255, 255, 255, 0.4); /* Fondo más claro al hacer hover */
+}
+
+/* Estilos para el modal en dispositivos móviles */
+@media (max-width: 767.98px) {
+  .fullscreen-modal .modal-dialog {
+    margin: 0; /* Elimina el margen */
+    max-width: 100%; /* Ocupa el ancho completo */
+    height: 100vh; /* Ocupa la altura completa de la pantalla */
+  }
+
+  .fullscreen-modal .modal-content {
+    height: 100%; /* Ocupa la altura completa */
+    border-radius: 0; /* Elimina el borde redondeado */
+  }
+
+  .fullscreen-modal .modal-body {
+    flex-grow: 1; /* Hace que el cuerpo del modal ocupe el espacio restante */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fullscreen-modal .modal-footer {
+    position: absolute; /* Posiciona el footer de manera absoluta */
+    bottom: 0; /* Lo coloca en la parte inferior */
+    left: 0; /* Lo alinea a la izquierda */
+    right: 0; /* Lo alinea a la derecha */
+    background: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
+    border: none; /* Elimina el borde del footer */
+    display: flex;
+    justify-content: center; /* Centra los botones horizontalmente */
+    gap: 10px; /* Espacio entre los botones */
+    padding: 10px; /* Espaciado interno */
+  }
+
+  .fullscreen-modal .modal-footer .btn {
+    color: white; /* Texto blanco */
+    background: rgba(255, 255, 255, 0.2); /* Fondo semi-transparente */
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Borde semi-transparente */
+    transition: background 0.3s ease; /* Transición suave al hacer hover */
+  }
+
+  .fullscreen-modal .modal-footer .btn:hover {
+    background: rgba(255, 255, 255, 0.4); /* Fondo más claro al hacer hover */
+  }
+  #camera-modal-N .modal-dialog {
+    width: 100% !important; /* Asegura que el modal ocupe toda la pantalla */
+    margin: 0; /* Elimina márgenes */
+    height: 100vh; /* Ajusta el modal a toda la altura de la pantalla */
+    max-width: 100%;
+  }
+
+  #camera-modal-N .modal-content {
+    height: 100%; /* Hace que el contenido del modal ocupe toda la altura disponible */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centra el contenido */
+    padding: 0;
+  }
+
+  #camera-modal-N .modal-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    height: 100%; /* Asegura que el video se ajuste a toda la altura */
+  }
+  #camera-modal .modal-dialog {
+    width: 100% !important; /* Asegura que el modal ocupe toda la pantalla */
+    margin: 0; /* Elimina márgenes */
+    height: 100vh; /* Ajusta el modal a toda la altura de la pantalla */
+    max-width: 100%;
+  }
+
+  #camera-modal .modal-content {
+    height: 100%; /* Hace que el contenido del modal ocupe toda la altura disponible */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centra el contenido */
+    padding: 0;
+  }
+
+  #camera-modal .modal-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    height: 100%; /* Asegura que el video se ajuste a toda la altura */
+  }
+  video {
+    max-height: 100vh; /* Asegura que el video ocupe la altura máxima */
+    width: 100%;
+    object-fit: cover; /* Asegura que el video ocupe todo el espacio disponible */
+  }
+  
+  
+}

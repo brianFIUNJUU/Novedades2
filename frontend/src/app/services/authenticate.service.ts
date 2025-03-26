@@ -39,6 +39,14 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
      * @param email
      * @param password
      */
+    getUsuarioPorLegajo(legajo: string): Observable<any> {
+      return this.http.get<any>(`${this.apiUrl}/users/legajo/${legajo}`);
+    }
+      // Método para actualizar un usuario por legajo
+  actualizarUsuarioPorLegajo(legajo: string, nuevosDatos: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/users/legajo/${legajo}`, nuevosDatos);
+  }
+
     register(email: string, password: string,nombre:string,perfil:string,legajo:string,estado:boolean): Promise<void> {
       return createUserWithEmailAndPassword(this.auth, email, password)
         .then((result) => {
@@ -58,7 +66,9 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
           };
     
           // Guardar los datos del usuario en Firestore
-          return this.createUsuario(usuarioData);
+          return this.createUsuario(usuarioData).then(() => {
+            return this.http.post<any>(`${this.apiUrl}/usuarios/crear`, usuarioData).toPromise();
+          });
         })
         .catch((error) => {
           console.error('Error en el registro: ', error);
@@ -84,6 +94,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
      * @param email
      * @param password
      */
+
     login(email: string, password: string): Promise<void> {
       return signInWithEmailAndPassword(this.auth, email, password)
         .then((result) => {

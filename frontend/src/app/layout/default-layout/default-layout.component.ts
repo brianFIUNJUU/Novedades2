@@ -62,9 +62,8 @@ export class DefaultLayoutComponent implements OnInit {
   }
 
   filterNavItems(): void {
-    if (this.userType !== 'administrador') {
-      this.navItems = this.navItems.filter(item => item.name !== 'Gestion de Usuarios');
-    }
+    this.navItems = this.userType === 'administrador' || this.userType === 'usuarioDOP' ? 
+      this.navItems : this.navItems.filter(item => item.name !== 'Gestion de Usuarios');
   }
 
   onScrollbarUpdate($event: any) {

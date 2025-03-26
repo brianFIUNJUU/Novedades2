@@ -30,6 +30,8 @@ export class PersonaComponent implements OnInit {
   localidades: Localidad[] = [];
   isUpdating: boolean = false;
   mensajeError: string = '';
+  userType: string = ''; // Variable para almacenar el tipo de usuario
+
 
   archivosPersonas: { file: File | null, base64: string, mimeType: string, fileName: string }[] = [
     { file: null, base64: '', mimeType: '', fileName: '' }
@@ -47,20 +49,38 @@ export class PersonaComponent implements OnInit {
   ngOnInit(): void {
     this.getPersonas();
     this.cargarDepartamentos();
+    this.persona.departamento_id = null;
+    this.persona.localidad_id = null;
+    this.authService.getUserType().subscribe(userType => {
+      console.log('Tipo de usuario:', userType); // Mostrar el tipo de usuario en la consola
+      this.userType = userType ? userType.trim() : ''; // Asigna el tipo de usuario desde el servicio de autenticación y elimina espacios adicionales
+    });
   }
-
   getPersonas(): void {
     this.personaService.getPersonas().subscribe(
       (data: Persona[]) => {
-        this.personas = data;
+        this.personas = data.map(persona => {
+          // Convertir todo a string para evitar conflictos de tipos
+          const departamentoId = persona.departamento_id ? persona.departamento_id.toString() : '';
+          const localidadId = persona.localidad_id ? persona.localidad_id.toString() : '';
+  
+          const departamento = this.departamentos.find(dep => dep.id.toString() === departamentoId);
+          const localidad = this.localidades.find(loc => loc.id.toString() === localidadId);
+  
+          // Asignar los nombres de departamento y localidad
+          persona.departamento_nombre = departamento ? departamento.nombre : 'Sin departamento';
+          persona.localidad_nombre = localidad ? localidad.nombre : 'Sin localidad';
+  
+          return persona;
+        });
       },
       (error: HttpErrorResponse) => {
         console.error('Error al obtener personas:', error.message);
         Swal.fire('Error', 'Error al obtener personas: ' + error.message, 'error');
       }
     );
-  } 
-
+  }
+  
 
 
     cargarDepartamentos(): void {
@@ -75,7 +95,8 @@ export class PersonaComponent implements OnInit {
       );
     }
   
-    cargarLocalidades(departamentoId:number): void {
+    cargarLocalidades(departamentoId: number | null | undefined): void {
+      if (departamentoId == null) return; // Si es null o undefined, salir
       this.localidadService.getLocalidadesByDepartamento(departamentoId.toString()).subscribe(
         data => {
           this.localidades = data;
@@ -86,7 +107,7 @@ export class PersonaComponent implements OnInit {
         }
       );
     }
-  
+    
     buscarPersonaPorDNI(dni: string): void {
       if (!dni) {
         Swal.fire({
@@ -106,7 +127,9 @@ export class PersonaComponent implements OnInit {
           });
           this.persona = data;
           this.cargarArchivosPersona(data); // Cargar los archivos de la persona
-          this.cargarLocalidadPorId(+data.localidad_id); // Cargar la localidad por ID
+          if (data.localidad_id !== null && data.localidad_id !== undefined) {
+            this.cargarLocalidadPorId(+data.localidad_id); // Cargar la localidad por ID
+          }
 
         },
         (error) => {
@@ -157,6 +180,7 @@ export class PersonaComponent implements OnInit {
               });
               this.getPersonas();
               this.resetFormulario();
+              this.cerrarModalPersona();
             },
             (error) => {
               console.error('Error al actualizar persona:', error);
@@ -178,6 +202,7 @@ export class PersonaComponent implements OnInit {
               });
               this.getPersonas();
               this.resetFormulario();
+              this.cerrarModalPersona();
             },
             (error) => {
               console.error('Error al crear persona:', error);
@@ -197,6 +222,13 @@ export class PersonaComponent implements OnInit {
         });
       }
     }
+  cerrarModalPersona(): void {
+    const modalElement = document.getElementById('modalPersona');
+    if (modalElement) {
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      if (modal) modal.hide();
+    }
+  }
   
     verificarDuplicidadDNI(dni: string): void {
       this.personaService.getPersonaByDni(dni).subscribe(
@@ -291,7 +323,9 @@ editarPersona(persona: Persona): void {
   this.cargarArchivosPersona(persona); // Cargar los archivos de la persona
   this.isUpdating = true;
   this.showModal();
-  this.cargarLocalidadPorId(+persona.localidad_id); // Cargar la localidad por ID
+  if (persona.localidad_id !== null && persona.localidad_id !== undefined) {
+    this.cargarLocalidadPorId(+persona.localidad_id); // Cargar la localidad por ID
+  }
 
 }
   eliminarPersona(id: string): void {

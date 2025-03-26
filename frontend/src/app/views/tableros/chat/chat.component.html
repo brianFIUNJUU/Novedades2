@@ -1,0 +1,18 @@
+<div class="chat-container" *ngIf="isChatVisible">
+  <div class="chat-header">
+    <span>Chat en Tiempo Real</span>
+    <button (click)="toggleChat()">Cerrar</button>
+  </div>
+  <div class="chat-body">
+    <div *ngFor="let mensaje of mensajes">
+      <p>{{ mensaje.texto }}</p>
+    </div>
+  </div>
+  <div class="chat-footer">
+    <input [(ngModel)]="mensaje" placeholder="Escribe un mensaje..." />
+    <button (click)="enviarMensaje()">Enviar</button>
+  </div>
+</div>
+
+<!-- Botón flotante para abrir el chat -->
+<button class="chat-button" (click)="toggleChat()">Abrir Chat</button>

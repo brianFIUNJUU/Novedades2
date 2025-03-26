@@ -13,6 +13,7 @@ const Elemento = sequelize.define('Elemento', {
         type: DataTypes.STRING,
         allowNull: false
     },
+  
     categoria_id: {
         type: DataTypes.INTEGER,
         references: {

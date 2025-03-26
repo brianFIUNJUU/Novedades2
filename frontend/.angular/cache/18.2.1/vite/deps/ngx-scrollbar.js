@@ -1,18 +1,18 @@
 import {
   Directionality
-} from "./chunk-LOTZC5CL.js";
+} from "./chunk-7LZMDODY.js";
 import {
   Platform,
   coerceBooleanProperty,
   coerceElement,
   coerceNumberProperty,
   getRtlScrollAxisType
-} from "./chunk-YXHVJVT5.js";
+} from "./chunk-K6YW2B3A.js";
 import {
   DOCUMENT,
   NgIf,
   isPlatformBrowser
-} from "./chunk-JLJADSE3.js";
+} from "./chunk-QH5W3VI2.js";
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -64,7 +64,7 @@ import {
   ɵɵqueryRefresh,
   ɵɵtemplate,
   ɵɵviewQuery
-} from "./chunk-KN7A5A4F.js";
+} from "./chunk-6L4HWLVT.js";
 import {
   animationFrameScheduler,
   fromEvent,
@@ -97,7 +97,7 @@ import "./chunk-WCSART4P.js";
 import {
   __spreadProps,
   __spreadValues
-} from "./chunk-TIZIBVCZ.js";
+} from "./chunk-SIIEUOVM.js";
 
 // node_modules/ngx-scrollbar/fesm2022/ngx-scrollbar-smooth-scroll.mjs
 var NEWTON_ITERATIONS = 4;

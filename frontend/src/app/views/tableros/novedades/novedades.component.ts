@@ -42,12 +42,11 @@ import {DescripcionHechoService} from '../../../services/descripcionhecho.servic
 import {ModusOperandi} from '../../../models/modus_operandi'
 import {ModusOperandiService} from '../../../services/modus_operandi.service'
 import { NovedadesPersonalService } from '../../../services/novedades_personal.services';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { NgSelectModule } from '@ng-select/ng-select';
 import {  ReactiveFormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs'; // Importa la función of
 import { ChangeDetectorRef } from '@angular/core';
 // Configurar Leaflet para usar las imágenes desde la carpeta de activos
 L.Icon.Default.imagePath = 'assets/leaflet/';
@@ -80,15 +79,19 @@ export class NovedadesComponent implements OnInit {
   policiasIds:number[]=[]; // Lista temporal para almacenar los IDs de los policías
  personal: Personal[] = []; // Variable para almacenar los datos del personal
    nuevaPersonal:Personal = new Personal();
-   
 
   novedadId: number | null = null; // Inicializa novedadId con null
   unidadesRegionales: UnidadRegional[] = [];
   localidades: Localidad[] = [];
   modusOperandiList: ModusOperandi[] = [];
+  searchModusOperandi$ = new Subject<string>();
+  modusOperandiOriginal: any[] = []; // Lista original sin filtrar
+
   departamentos: Departamento[] = [];
   dependencias: Dependencia[] = [];
   cuadrantes: Cuadrante[] = [];
+
+  descripcionActual: string = '';
 
   filteredElementos: any[] = []; // Elementos filtrados
   searchText: string = ''; // Texto de búsqueda
@@ -99,14 +102,14 @@ export class NovedadesComponent implements OnInit {
   elementosOriginales: any[] = []; // Lista original de elementos
   elemento: any[] = []; // Lista de elementos filtrados
   descripcionSeleccionada: string = ''; // Para el ngModel del ng-select
-  nuevoElementoSecuestrado: { elemento: string, descripcion: string } = { elemento: '', descripcion: '' };
-  nuevoBienRecuperado: { elemento: string, descripcion: string } = { elemento: '', descripcion: '' };
-  nuevoBienNoRecuperado: { elemento: string, descripcion: string } = { elemento: '', descripcion: '' };
-  mostrarCategoriaElemento: boolean = false;
-  categoriaSeleccionada: string = '';
-  elementosAgregados: { elemento: string, descripcion: string, tipo: string }[] = [];
+  nuevoElementoSecuestrado: { elemento: string, descripcion: string, caracteristicas: string } = { elemento: '', descripcion: '', caracteristicas: '' };
+  nuevoBienRecuperado: { elemento: string, descripcion: string, caracteristicas: string } = { elemento: '', descripcion: '', caracteristicas: '' };
+  nuevoBienNoRecuperado: { elemento: string, descripcion: string, caracteristicas: string } = { elemento: '', descripcion: '', caracteristicas: '' };
+  mostrarSelectorDudoso: boolean = false;  categoriaSeleccionada: string = '';
+  elementosAgregados: { elemento: string, descripcion: string, caracteristicas:string, tipo: string }[] = [];
   modalBienRecuperadoAbierto: boolean = false;
   elementoRecuperado: boolean = false;
+  modalElementoSecuestradoAbierto: boolean = false;
 
   tiposHecho: TipoHecho[] = [];
   subtiposHecho: SubtipoHecho[] = [];
@@ -121,9 +124,6 @@ export class NovedadesComponent implements OnInit {
   usuarioNombre: string = '';
   usuarioLegajo: string = '';
   
-  // Variable para almacenar los dispositivos de cámara disponibles
-availableCameras: MediaDeviceInfo[] = [];
-currentCameraIndex: number = 0;
 // Variables para manejar la cámara de novedades
 availableCamerasN: MediaDeviceInfo[] = []; // Lista de cámaras disponibles
 currentCameraIndexN: number = 0; // Índice de la cámara actual
@@ -142,10 +142,15 @@ currentCameraIndexN: number = 0; // Índice de la cámara actual
   map!: L.Map;
   marker: L.Marker | undefined;
   mostrarCamara: boolean = false;
-videoElementRef!: HTMLVideoElement;
+
 streamNovedad!: MediaStream;
 stream!: MediaStream;
+videoElementRef!: HTMLVideoElement;
+  // Variable para almacenar los dispositivos de cámara disponibles
+availableCameras: MediaDeviceInfo[] = [];
+currentCameraIndex: number = 0;
 private scrollPosition: number = 0; // Almacena la posición del scroll
+
   // Variable temporal para indicar el contexto actual
   contextoActual: 'victima' | 'victimario'  | 'protagonista'| 'testigo'| null = null;
   constructor(
@@ -174,7 +179,9 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     ,private cdr: ChangeDetectorRef
     
     
-  ) {}
+  ) {
+    
+  }
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       this.novedadId = params['id'] ? +params['id'] : null;
@@ -192,6 +199,7 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     this.setDefaultTime();
     this.cargarModusOperandi();
     this.inicializarArchivos();
+    this.configurarFiltradoModusOperandi();
     const today = new Date();
     this.nuevaNovedad.fecha = today.toISOString().split('T')[0];
     this.authService.getUserInfo().subscribe(userInfo => {
@@ -206,6 +214,18 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     this.nuevaNovedad.bien_recuperado_no = [];
     this.nuevaNovedad.oficial_cargo_id = null; // Inicializar en null
     this.nuevaNovedad.modus_operandi_id=null; // Inicializar
+    this.victima.departamento_id = null;
+    this.victimario.departamento_id = null;
+    this.protagonista.departamento_id = null;
+    this.testigo.departamento_id = null;
+    this.victima.localidad_id = null;
+    this.victimario.localidad_id = null;
+    this.protagonista.localidad_id = null;
+    this.testigo.localidad_id = null;
+      this.nuevaPersona.departamento_id = null;
+    this.nuevaPersona.localidad_id = null;
+  
+    
     // this.cargarTiposHecho();
     this.configurarFiltrado(); // Configura el filtrado aquí
     this.cargarDescripcionesHechos();
@@ -261,6 +281,69 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
       }
     );
   }
+  configurarFiltradoModusOperandi() {
+    this.searchModusOperandi$
+      .pipe(
+        debounceTime(300), // Espera 300ms después de cada tecla
+        distinctUntilChanged(), // Evita llamadas repetitivas con el mismo valor
+        switchMap((texto) => this.filtrarModusOperandi(texto)) // Filtra los resultados
+      )
+      .subscribe((resultados) => {
+        this.modusOperandiList = resultados; // Actualiza la lista filtrada
+      });
+  }
+
+  filtrarModusOperandi(texto: string): Observable<ModusOperandi[]> {
+    if (!texto) {
+      return of(this.modusOperandiOriginal); // Si no hay texto, devuelve la lista completa
+    }
+    const textoNormalizado = texto.toLowerCase().trim();
+    const resultados = this.modusOperandiOriginal.filter((modus) =>
+      modus.modus_operandi.toLowerCase().includes(textoNormalizado) // Filtra los elementos
+    );
+    return of(resultados); // Devuelve los resultados filtrados
+  }
+
+
+  asignarModusOperandi(modusOperandiId: number | null): void {
+    if (!modusOperandiId) {
+      this.nuevaNovedad.modus_operandi_id = null;
+      this.nuevaNovedad.modus_operandi_nombre = '';
+      return;
+    }
+    const modusOperandiSeleccionado = this.modusOperandiOriginal.find(
+      (modus) => modus.id === modusOperandiId
+    );
+    if (modusOperandiSeleccionado) {
+      this.nuevaNovedad.modus_operandi_id = modusOperandiSeleccionado.id;
+      this.nuevaNovedad.modus_operandi_nombre = modusOperandiSeleccionado.modus_operandi;
+    }
+  }
+  cargarModusOperandi(): void {
+    this.modusOperandiService.getAllModusOperandi().subscribe(
+      (data: ModusOperandi[]) => {
+        this.modusOperandiOriginal = data; // Guarda la lista completa
+        this.modusOperandiList = data; // Inicializa la lista filtrada con la lista completa
+      },
+      (error) => {
+        console.error('Error al cargar modus operandi:', error);
+      }
+    );
+  }
+
+  cargarModusOperandiPorId(modusOperandiId: number): void {
+    this.modusOperandiService.getModusOperandiById(modusOperandiId).subscribe(
+      (data) => {
+        this.nuevaNovedad.modus_operandi_id = data.id;
+        this.nuevaNovedad.modus_operandi_nombre = data.modus_operandi;
+      },
+      (error) => {
+        console.error('Error al cargar modus operandi de hecho:', error);
+      }
+    );
+  }
+  
+
   // editarElemento(index: number): void { 
   //   const elemento = this.elementosAgregados[index];
   //   this.editIndex = index;
@@ -285,56 +368,7 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
   //     }, 100);
   //   }
   // }
-  
-  editarElemento(index: number): void { 
-    const elemento = this.elementosAgregados[index];
-    this.editIndex = index;
-  
-    // Determinar si es un bien recuperado o no
-    this.elementoRecuperado = elemento.tipo === 'Bien Recuperado';
-  
-    // Asignar los valores correctos antes de abrir el modal
-    if (this.elementoRecuperado) {
-      this.nuevoBienRecuperado = { elemento: elemento.elemento, descripcion: elemento.descripcion };
-      this.descripcionSeleccionada = elemento.descripcion;
-    } else {
-      this.nuevoBienNoRecuperado = { elemento: elemento.elemento, descripcion: elemento.descripcion };
-      this.descripcionSeleccionada = elemento.descripcion;
-    }
-  
-    // Forzar la actualización del modal
-    this.modalBienRecuperadoAbierto = false;
-    setTimeout(() => {
-      this.modalBienRecuperadoAbierto = true;
-    }, 100);
-  }
-  
-  
-  
-
- // Método para eliminar un elemento
-// Método para eliminar un elemento
-eliminarElemento(index: number): void {
-  const elemento = this.elementosAgregados[index];
-  if (elemento.tipo === 'Elemento Secuestrado') {
-    const indexInArray = this.nuevaNovedad.elemento_secuestrado.findIndex((el: any) => el.elemento === elemento.elemento && el.descripcion === elemento.descripcion);
-    if (indexInArray !== -1) {
-      this.nuevaNovedad.elemento_secuestrado.splice(indexInArray, 1);
-    }
-  } else if (elemento.tipo === 'Bien Recuperado') {
-    const indexInArray = this.nuevaNovedad.bien_recuperado.findIndex((el: any) => el.elemento === elemento.elemento && el.descripcion === elemento.descripcion);
-    if (indexInArray !== -1) {
-      this.nuevaNovedad.bien_recuperado.splice(indexInArray, 1);
-    }
-  } else if (elemento.tipo === 'Bien No Recuperado') {
-    const indexInArray = this.nuevaNovedad.bien_recuperado_no.findIndex((el: any) => el.elemento === elemento.elemento && el.descripcion === elemento.descripcion);
-    if (indexInArray !== -1) {
-      this.nuevaNovedad.bien_recuperado_no.splice(indexInArray, 1);
-    }
-  }
-  this.elementosAgregados.splice(index, 1);
-  this.actualizarElementosAgregados(); // Llamar a actualizarElementosAgregados después de eliminar
-}   
+     
  cargarDatosPersonalPorId(id: number): void {
     this.personalService.getPersonal(id.toString()).subscribe(
       (personal: Personal) => {
@@ -439,8 +473,6 @@ eliminarElemento(index: number): void {
   }
 
 
-    
-  
     getNovedadById(id: string): void {
       this.novedadesService.getNovedadById(id).subscribe(
         (data: Novedades) => {
@@ -598,43 +630,8 @@ asignarDescripcionHecho(descripcionId: number): void {
     //     this.nuevaNovedad.codigo= descripcionHechoSeleccionado.codigo;
     //   }
     // }
-     cargarModusOperandi(): void {
-        this.modusOperandiService.getAllModusOperandi().subscribe(
-          (data: ModusOperandi[]) => {
-            this.modusOperandiList = data;
-          },
-          (error) => {
-            console.error('Error al cargar modus operandi:', error);
-          }
-        );
-     }
-     cargarModusOperandiPorId(modusOperandiId: number): void {
-      this.modusOperandiService.getModusOperandiById(modusOperandiId).subscribe(
-        data => {
-          this.nuevaNovedad.modus_operandi_id = data.id;
-          this.nuevaNovedad.modus_operandi_nombre = data.modus_operandi;
-
-        },
-        error => {
-          console.error('Error al cargar modus operandi de hecho:', error);
-        }
-      );
-    }
-    asignarModusOperandi(modusOperandiId: number | null): void {
-      if (!modusOperandiId) { // Verifica si es null, undefined o 0
-        this.nuevaNovedad.modus_operandi_id = null;
+  
    
-        return;
-      }
-    
-      const modusOperandiSeleccionado = this.modusOperandiList.find(modus => modus.id === modusOperandiId);
-      if (modusOperandiSeleccionado) {
-        this.nuevaNovedad.modus_operandi_id = modusOperandiSeleccionado.id;
-        this.nuevaNovedad.modus_operandi_nombre = modusOperandiSeleccionado.modus_operandi;
-      }
-    }
-    
-
     cargarTipoHechoPorId(tipoHechoId: number): void {
       this.tipoHechoService.getTipoHecho(tipoHechoId).subscribe(
         data => {
@@ -731,14 +728,109 @@ asignarDescripcionHecho(descripcionId: number): void {
       }
     });
   }
-  onElementoChange(): void {
-    if (this.nuevoElementoSecuestrado.elemento === 'Elemento de dudosa procedencia') {
-      this.mostrarCategoriaElemento = true;
-    } else {
-      this.mostrarCategoriaElemento = false;
+  
+
+  onElementoSecuestradoChange(): void {
+    this.mostrarSelectorDudoso = this.nuevoElementoSecuestrado.descripcion === "Elemento de dudosa procedencia";
+  
+    // Si el usuario cambia a otra opción, limpiar la selección previa
+    if (!this.mostrarSelectorDudoso) {
+      this.nuevoElementoSecuestrado.caracteristicas = '';
     }
   }
+  cargarCategoriaPorElementoSecuestrado(elementoNombre: string): void {
+    console.log("Elemento seleccionado (Secuestrado):", elementoNombre);
+  
+    if (elementoNombre) {
+      this.elementoService.getCategoriaByElemento(elementoNombre).subscribe(
+        (data) => {
+          this.categoriaSeleccionada = data.categoria_nombre;
+          this.nuevoElementoSecuestrado.descripcion = elementoNombre;
+          this.nuevoElementoSecuestrado.elemento = data.categoria_nombre;
+        },
+        (error) => {
+          console.error('Error al cargar la categoría:', error);
+        }
+      );
+    } else {
+      this.categoriaSeleccionada = '';
+      this.nuevoElementoSecuestrado = { elemento: '', descripcion: '', caracteristicas: '' };
+    }
+  }
+  
+  
+  editarElemento(index: number): void {
+    const elemento = this.elementosAgregados[index];
+    this.editIndex = index;
+  
+    // Verificar qué tipo de elemento es
+    if (elemento.tipo === 'Bien Recuperado') {
+      this.elementoRecuperado = true;
+      this.nuevoBienRecuperado = {
+        elemento: elemento.elemento,
+        descripcion: elemento.descripcion,
+        caracteristicas: elemento.caracteristicas || ''
+      };
+      this.descripcionSeleccionada = elemento.descripcion;
+  
+      // Asegurar que el modal correcto se abra
+      this.modalBienRecuperadoAbierto = false;
+      setTimeout(() => {
+        this.modalBienRecuperadoAbierto = true;
+      }, 100);
+    } 
+    else if (elemento.tipo === 'Bien No Recuperado') {
+      this.elementoRecuperado = false;
+      this.nuevoBienNoRecuperado = {
+        elemento: elemento.elemento,
+        descripcion: elemento.descripcion,
+        caracteristicas: elemento.caracteristicas || ''
+      };
+      this.descripcionSeleccionada = elemento.descripcion;
+  
+      // Asegurar que el modal correcto se abra
+      this.modalBienRecuperadoAbierto = false;
+      setTimeout(() => {
+        this.modalBienRecuperadoAbierto = true;
+      }, 100);
+    } 
+    else if (elemento.tipo === 'Elemento Secuestrado') {
+      this.nuevoElementoSecuestrado = {
+        elemento: elemento.elemento,
+        descripcion: elemento.descripcion,
+        caracteristicas: elemento.caracteristicas || ''
+      };
+  
+      // Asegurar que se abre el modal de Elemento Secuestrado
+      this.openModalSecuestrado();
+    }
+  }
+  
+  
 
+ // Método para eliminar un elemento
+// Método para eliminar un elemento
+eliminarElemento(index: number): void {
+  const elemento = this.elementosAgregados[index];
+  if (elemento.tipo === 'Elemento Secuestrado') {
+    const indexInArray = this.nuevaNovedad.elemento_secuestrado.findIndex((el: any) => el.elemento === elemento.elemento && el.descripcion === elemento.descripcion);
+    if (indexInArray !== -1) {
+      this.nuevaNovedad.elemento_secuestrado.splice(indexInArray, 1);
+    }
+  } else if (elemento.tipo === 'Bien Recuperado') {
+    const indexInArray = this.nuevaNovedad.bien_recuperado.findIndex((el: any) => el.elemento === elemento.elemento && el.descripcion === elemento.descripcion);
+    if (indexInArray !== -1) {
+      this.nuevaNovedad.bien_recuperado.splice(indexInArray, 1);
+    }
+  } else if (elemento.tipo === 'Bien No Recuperado') {
+    const indexInArray = this.nuevaNovedad.bien_recuperado_no.findIndex((el: any) => el.elemento === elemento.elemento && el.descripcion === elemento.descripcion);
+    if (indexInArray !== -1) {
+      this.nuevaNovedad.bien_recuperado_no.splice(indexInArray, 1);
+    }
+  }
+  this.elementosAgregados.splice(index, 1);
+  this.actualizarElementosAgregados(); // Llamar a actualizarElementosAgregados después de eliminar
+}
   actualizarElementosAgregados(): void {
     this.elementosAgregados = [
       ...this.nuevaNovedad.elemento_secuestrado.map((item: any) => ({ ...item, tipo: 'Elemento Secuestrado' })),
@@ -747,48 +839,20 @@ asignarDescripcionHecho(descripcionId: number): void {
     ];
   }
 
-  openModalSecuestrado() {
-    const modalElement = document.getElementById('modalSecuestrado');
-    if (modalElement) {
-      const modal = new bootstrap.Modal(modalElement);
-      modal.show();
-    }
-  }
+
   resetFormularioE(): void {
     // Restablece los valores a los objetos originales vacíos
-    this.nuevoElementoSecuestrado = { elemento: '', descripcion: '' };
-    this.nuevoBienRecuperado = { elemento: '', descripcion: '' };
-    this.nuevoBienNoRecuperado = { elemento: '', descripcion: '' };
+    this.nuevoElementoSecuestrado = { elemento: '', descripcion: '', caracteristicas: '' };
+    this.nuevoBienRecuperado = { elemento: '', descripcion: '', caracteristicas: '' };
+    this.nuevoBienNoRecuperado = { elemento: '', descripcion: '', caracteristicas: '' };
     this.elementoRecuperado = false; // Restablece el valor del checkbox
     // Restablece otras propiedades como las que manejan el estado del modal
-    this.mostrarCategoriaElemento = false; // Dependiendo de la lógica, puede que quieras mostrar/ocultar algo
+    this.mostrarSelectorDudoso = false;
     this.categoriaSeleccionada = ''; // Limpiar la categoría
     this.descripcionSeleccionada = ''; // Limpiar la descripción seleccionada
   }
   
-  
-
-  agregarElementoSecuestrado() {
-    const nuevoElemento = { ...this.nuevoElementoSecuestrado, tipo: 'Elemento Secuestrado', elementos: this.nuevoElementoSecuestrado.elemento };
-    if (this.editIndex !== null) {
-      this.elementosAgregados[this.editIndex] = nuevoElemento;
-      this.nuevaNovedad.elemento_secuestrado[this.editIndex] = nuevoElemento;
-      this.editIndex = null;
-    } else {
-      this.nuevaNovedad.elemento_secuestrado.push(nuevoElemento);
-      this.elementosAgregados.push(nuevoElemento);
-    }
-    this.nuevoElementoSecuestrado = { elemento: '', descripcion: '' };
-    const modalElement = document.getElementById('modalSecuestrado');
-    if (modalElement) {
-      const modal = bootstrap.Modal.getInstance(modalElement);
-      if (modal) {
-        modal.hide();
-      }
-    }
-  }
-
-  agregarElemento(): void {
+    agregarElemento(): void {
     console.log("Estado antes de agregar:", this.elementoRecuperado, this.nuevoBienRecuperado, this.nuevoBienNoRecuperado);
   
     // Dependiendo de elementoRecuperado, se agrega al objeto adecuado
@@ -798,9 +862,32 @@ asignarDescripcionHecho(descripcionId: number): void {
       this.agregarBienNoRecuperado(); // Si el checkbox no está marcado
     }
   }
+  agregarElementoSecuestrado() {
+    const nuevoElemento = {
+      ...this.nuevoElementoSecuestrado,
+      tipo: 'Elemento Secuestrado',
+      elementos: this.nuevoElementoSecuestrado.elemento,
+      caracteristicas: this.nuevoElementoSecuestrado.caracteristicas || '' // Asegurar que existe
+    };
+    if (this.editIndex !== null) {
+      this.elementosAgregados[this.editIndex] = nuevoElemento;
+      this.nuevaNovedad.elemento_secuestrado[this.editIndex] = nuevoElemento;
+      this.editIndex = null;
+    } else {
+      this.nuevaNovedad.elemento_secuestrado.push(nuevoElemento);
+      this.elementosAgregados.push(nuevoElemento);
+    }
+    this.nuevoElementoSecuestrado = { elemento: '', descripcion: '', caracteristicas: '' }; // Restablece el formulario
+    this.cerrarModalElementoSecuestrado();
+  }
   
   agregarBienRecuperado() {
-    const nuevoElemento = { ...this.nuevoBienRecuperado, tipo: 'Bien Recuperado', elementos: this.nuevoBienRecuperado.elemento };
+    const nuevoElemento = {
+      ...this.nuevoBienRecuperado,
+      tipo: 'Bien Recuperado',
+      elementos: this.nuevoBienRecuperado.elemento,
+      caracteristicas: this.nuevoBienRecuperado.caracteristicas || '' // Asegurar que existe
+    };
     if (this.editIndex !== null) {
       this.elementosAgregados[this.editIndex] = nuevoElemento;
       this.nuevaNovedad.bien_recuperado[this.editIndex] = nuevoElemento;
@@ -809,13 +896,18 @@ asignarDescripcionHecho(descripcionId: number): void {
       this.nuevaNovedad.bien_recuperado.push(nuevoElemento);
       this.elementosAgregados.push(nuevoElemento);
     }
-    this.nuevoBienRecuperado = { elemento: '', descripcion: '' };
-    this.cerrarModal(); // Cerrar el modal
-    this.resetFormularioE()
+    this.nuevoBienRecuperado = { elemento: '', descripcion: '', caracteristicas: '' }; 
+    this.cerrarModal();
+    this.resetFormularioE();
   }
-
+  
   agregarBienNoRecuperado() {
-    const nuevoElemento = { ...this.nuevoBienNoRecuperado, tipo: 'Bien No Recuperado', elementos: this.nuevoBienNoRecuperado.elemento };
+    const nuevoElemento = {
+      ...this.nuevoBienNoRecuperado,
+      tipo: 'Bien No Recuperado',
+      elementos: this.nuevoBienNoRecuperado.elemento,
+      caracteristicas: this.nuevoBienNoRecuperado.caracteristicas || '' // Asegurar que existe
+    };
     if (this.editIndex !== null) {
       this.elementosAgregados[this.editIndex] = nuevoElemento;
       this.nuevaNovedad.bien_recuperado_no[this.editIndex] = nuevoElemento;
@@ -824,11 +916,135 @@ asignarDescripcionHecho(descripcionId: number): void {
       this.nuevaNovedad.bien_recuperado_no.push(nuevoElemento);
       this.elementosAgregados.push(nuevoElemento);
     }
-    this.nuevoBienNoRecuperado = { elemento: '', descripcion: '' };
-    this.cerrarModal(); // Cerrar el modal
-    this.resetFormularioE()
+    this.nuevoBienNoRecuperado = { elemento: '', descripcion: '', caracteristicas: '' };
+    this.resetFormularioE();
   }
   
+  
+  cargarElementosPorCategoria(categoriaNombre: string): void {
+    this.elementoService.getElementosByCategoria(categoriaNombre).subscribe(
+      data => {
+        this.elementos = data;
+      },
+      error => {
+        this.mensajeError = 'Error al cargar elementos';
+        Swal.fire('Error', 'Error al cargar elementos: ' + error.message, 'error');
+      }
+    );
+  }
+  // mi-componente.component.ts
+  
+  cargarElementos(): void {
+    this.elementoService.getElementos().subscribe(
+      (data) => {
+        this.elementos = data; // Asignar los elementos a la variable
+        this.elementosOriginales = data; // Guardar una copia de la lista original
+      },
+      (error) => {
+        this.mensajeError = 'Error al cargar elementos';
+        Swal.fire('Error', 'Error al cargar elementos: ' + error.message, 'error');
+      }
+    );
+  }
+
+
+  
+
+  cargarCategoriaPorElemento(elementoNombre: string): void {
+    console.log("Elemento seleccionado:", elementoNombre);
+    console.log("Elemento recuperado:", this.elementoRecuperado);
+  
+    if (elementoNombre) {
+      this.elementoService.getCategoriaByElemento(elementoNombre).subscribe(
+        (data) => {
+          this.categoriaSeleccionada = data.categoria_nombre;
+  
+          if (this.elementoRecuperado) {
+            console.log("Actualizando nuevoBienRecuperado:", data);
+            this.nuevoBienRecuperado.descripcion = elementoNombre;
+            this.nuevoBienRecuperado.elemento = data.categoria_nombre;
+          } else {
+            console.log("Actualizando nuevoBienNoRecuperado:", data);
+            this.nuevoBienNoRecuperado.descripcion = elementoNombre;
+            this.nuevoBienNoRecuperado.elemento = data.categoria_nombre;
+          }
+  
+          // Mantener la descripción actual si el usuario ya la modificó
+          this.actualizarDescripcion();
+        },
+        (error) => {
+          console.error('Error al cargar la categoría:', error);
+        }
+      );
+    } else {
+      this.categoriaSeleccionada = '';
+      this.nuevoBienRecuperado = { elemento: '', descripcion: '', caracteristicas: '' };
+      this.nuevoBienNoRecuperado = { elemento: '', descripcion: '', caracteristicas: '' };
+      this.actualizarDescripcion();
+    }
+  }
+  
+  actualizarDescripcion() {
+    // Si el usuario ya escribió algo, no lo sobrescribimos
+    if (!this.descripcionActual || this.descripcionActual === this.nuevoBienRecuperado.caracteristicas || this.descripcionActual === this.nuevoBienNoRecuperado.caracteristicas) {
+      this.descripcionActual = this.elementoRecuperado ? this.nuevoBienRecuperado.caracteristicas : this.nuevoBienNoRecuperado.caracteristicas;
+    }
+  }
+  
+  guardarDescripcion(event: any) {
+    // Guardar en el objeto correspondiente cuando el usuario escribe en el textarea
+    if (this.elementoRecuperado) {
+      this.nuevoBienRecuperado.caracteristicas = event.target.value;
+    } else {
+      this.nuevoBienNoRecuperado.caracteristicas = event.target.value;
+    }
+  }
+  
+  
+  cambiarDescripcion() {
+    this.descripcionActual = this.elementoRecuperado
+      ? this.nuevoBienRecuperado.caracteristicas
+      : this.nuevoBienNoRecuperado.caracteristicas;
+  }
+  
+ 
+  cerrarModalElementoSecuestrado() {
+    this.modalElementoSecuestradoAbierto = false;
+  }
+  openModalSecuestrado() {
+    this.modalElementoSecuestradoAbierto = true; // Para el *ngIf
+    const modalElement = document.getElementById('modalSecuestrado');
+    if (modalElement) {
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+    }
+  }
+  
+
+  configurarFiltrado() {
+    this.searchText$
+      .pipe(
+        debounceTime(300), // Espera 300ms después de cada tecla
+        distinctUntilChanged(), // Evita llamadas repetitivas con el mismo valor
+        switchMap((text) => this.filtrarElementos(text)) // Filtra elementos
+      )
+      .subscribe((resultados) => {
+        this.elementos = resultados; // Actualiza la lista de elementos una sola vez
+      });
+  }
+  
+  filtrarElementos(texto: string) {
+    if (!texto) {
+      return of(this.elementosOriginales); // Si no hay texto, devuelve la lista original
+    }
+    const textoNormalizado = texto.toLowerCase().trim(); // Normaliza el texto ingresado
+  
+    const resultados = this.elementosOriginales.filter((elemento) =>
+      elemento.elemento_nombre.toLowerCase().startsWith(textoNormalizado) // Filtra solo los que comienzan con el texto ingresado
+    );
+  
+    return of(resultados); // Retorna los resultados filtrados como un observable
+  }
    initMap(): void {
     // Inicializa el mapa centrado en una ubicación predeterminada
     this.map = L.map('map').setView([-24.18769889437684, -65.29709953331486], 15);
@@ -1135,8 +1351,7 @@ actualizarRelacionesPersonal(): void {
           );
         }
       });
-
-      // Agregar nuevas relaciones
+ 
       this.policiasIds.forEach(personalId => {
         if (!personalActualIds.includes(personalId)) {
           if (!personalId || personalId === 0) {
@@ -1160,7 +1375,6 @@ actualizarRelacionesPersonal(): void {
     }
   );
 }
-
 
 actualizarRelacionesPersonas(): void {
   const novedadId = this.novedadGuardadaId || this.nuevaNovedad.id; // Usar el ID de la novedad guardada o el ID de la nueva novedad
@@ -1254,93 +1468,6 @@ actualizarRelacionesPersonas(): void {
     );
   }
 
-  cargarElementosPorCategoria(categoriaNombre: string): void {
-    this.elementoService.getElementosByCategoria(categoriaNombre).subscribe(
-      data => {
-        this.elementos = data;
-      },
-      error => {
-        this.mensajeError = 'Error al cargar elementos';
-        Swal.fire('Error', 'Error al cargar elementos: ' + error.message, 'error');
-      }
-    );
-  }
-  // mi-componente.component.ts
-  
-  cargarElementos(): void {
-    this.elementoService.getElementos().subscribe(
-      (data) => {
-        this.elementos = data; // Asignar los elementos a la variable
-        this.elementosOriginales = data; // Guardar una copia de la lista original
-      },
-      (error) => {
-        this.mensajeError = 'Error al cargar elementos';
-        Swal.fire('Error', 'Error al cargar elementos: ' + error.message, 'error');
-      }
-    );
-  }
-  cargarCategoriaPorElemento(elementoNombre: string): void {
-    console.log("Elemento seleccionado:", elementoNombre);
-    console.log("Elemento recuperado:", this.elementoRecuperado); // Verificar si es 'true'
-  
-    if (elementoNombre) {
-      this.elementoService.getCategoriaByElemento(elementoNombre).subscribe(
-        (data) => {
-          this.categoriaSeleccionada = data.categoria_nombre; // Asignar la categoría a la propiedad
-  
-          if (this.elementoRecuperado) {
-            // Si elementoRecuperado es true, asignamos los valores a nuevoBienRecuperado
-            console.log("Actualizando nuevoBienRecuperado:", data);
-            this.nuevoBienRecuperado.descripcion = elementoNombre;
-            this.nuevoBienRecuperado.elemento = data.categoria_nombre;
-          } else {
-            // Si no, asignamos a nuevoBienNoRecuperado
-            console.log("Actualizando nuevoBienNoRecuperado:", data);
-            this.nuevoBienNoRecuperado.descripcion = elementoNombre;
-            this.nuevoBienNoRecuperado.elemento = data.categoria_nombre;
-          }
-        },
-        (error) => {
-          console.error('Error al cargar la categoría:', error);
-        }
-      );
-    } else {
-      // Limpiar los objetos si no hay elemento seleccionado
-      this.categoriaSeleccionada = '';
-      if (this.elementoRecuperado) {
-        this.nuevoBienRecuperado = { elemento: '', descripcion: '' };
-      } else {
-        this.nuevoBienNoRecuperado = { elemento: '', descripcion: '' };
-      }
-    }
-  }
-  
-  
-  
-  configurarFiltrado() {
-    this.searchText$
-      .pipe(
-        debounceTime(300), // Espera 300ms después de cada tecla
-        distinctUntilChanged(), // Evita llamadas repetitivas con el mismo valor
-        switchMap((text) => this.filtrarElementos(text)) // Filtra elementos
-      )
-      .subscribe((resultados) => {
-        this.elementos = resultados; // Actualiza la lista de elementos una sola vez
-      });
-  }
-  
-  filtrarElementos(texto: string) {
-    if (!texto) {
-      return of(this.elementosOriginales); // Si no hay texto, devuelve la lista original
-    }
-    const textoNormalizado = texto.toLowerCase().trim(); // Normaliza el texto ingresado
-  
-    const resultados = this.elementosOriginales.filter((elemento) =>
-      elemento.elemento_nombre.toLowerCase().startsWith(textoNormalizado) // Filtra solo los que comienzan con el texto ingresado
-    );
-  
-    return of(resultados); // Retorna los resultados filtrados como un observable
-  }
   
 
   cargarUnidadesRegionales(): void {
@@ -1390,7 +1517,8 @@ actualizarRelacionesPersonas(): void {
     );
   }
 
-  cargarLocalidades(departamentoId:number): void {
+  cargarLocalidades(departamentoId: number | null | undefined): void {
+    if (departamentoId == null) return; // Si es null o undefined, salir
     this.localidadService.getLocalidadesByDepartamento(departamentoId.toString()).subscribe(
       data => {
         this.localidades = data;
@@ -1401,7 +1529,8 @@ actualizarRelacionesPersonas(): void {
       }
     );
   }
-
+  
+  
 ///////////////////////////////////////////////////////////////////
 // Método para inicializar los archivos al crear una nueva novedad
 inicializarArchivos(): void {
@@ -1537,7 +1666,15 @@ iniciarCamaraN(deviceId: string): void {
     this.streamNovedad.getTracks().forEach(track => track.stop()); // Detener la cámara actual
   }
 
-  navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: deviceId } } })
+  const constraints = {
+    video: {
+      deviceId: deviceId ? { ideal: deviceId } : undefined, // Usar "ideal" en lugar de "exact"
+      width: { ideal: 1280 },
+      height: { ideal: 720 }
+    }
+  };
+
+  navigator.mediaDevices.getUserMedia(constraints)
     .then((stream) => {
       this.streamNovedad = stream;
 
@@ -1549,9 +1686,7 @@ iniciarCamaraN(deviceId: string): void {
     })
     .catch((error) => {
       console.error('Error al acceder a la cámara:', error);
-      // Solo mostrar un mensaje de error si no es un caso de "una sola cámara"
-      if (this.availableCamerasN.length > 1) {
-        Swal.fire('Advertencia', 'Solo hay una cámara disponible.', 'warning');      }
+      Swal.fire('No puedes invertir la camara', 'Solo hay una cámara disponible.', 'warning');
       this.cerrarCamaraN();
     });
 }
@@ -1939,14 +2074,10 @@ cargarPersonalRelacionado(novedadId: number): void {
       
           if (persona.id) {
             console.log('Datos enviados para actualizar persona:', JSON.stringify(persona, null, 2)); // Agregar un log para ver los datos enviados
-            
+            this.actualizarPersona(estado);
             this.agregarPersonaTemporal(estado)
+            
                 this.actualizarRelacionesPersonas(); // Actualizar las relaciones en la base de datos
-                Swal.fire({
-                        icon: 'success',
-                        title: 'Persona actualizada',
-                        text: 'Los datos de la persona han sido actualizados exitosamente.',
-                      });
                // Cerrar el modal después de mostrar el mensaje de éxito
               const modalElement = document.getElementById(estado === 'victima' ? 'modalVictima' : estado === 'victimario' ? 'modalVictimario'  : estado === 'testigo' ? 'modalTestigo' : 'modalProtagonista');
               if (modalElement) {
@@ -1958,11 +2089,7 @@ cargarPersonalRelacionado(novedadId: number): void {
             console.log('Datos enviados para crear persona:', JSON.stringify(persona, null, 2)); // Agregar un log para ver los datos enviados
             this.personaService.createPersona(persona).subscribe(
               (response) => {
-                Swal.fire({
-                  icon: 'success',
-                  title: 'Persona guardada',
-                  text: 'La persona ha sido guardada exitosamente.',
-                });
+               
                 this.actualizarPersonaTemporal(persona, estado); // Actualizar la persona en la lista temporal
                 this.actualizarRelacionesPersonas(); // Actualizar las relaciones en la base de datos
                 this.agregarPersonaTemporal(estado)
@@ -2009,11 +2136,7 @@ cargarPersonalRelacionado(novedadId: number): void {
       console.log('Datos enviados para actualizar persona:', JSON.stringify(persona, null, 2)); // Agregar un log para ver los datos enviados
       this.personaService.updatePersona(persona).subscribe(
         (response) => {
-          Swal.fire({
-            icon: 'success',
-            title: 'Persona actualizada',
-            text: 'Los datos de la persona han sido actualizados exitosamente.',
-          });
+         
           this.actualizarPersonaTemporal(persona, estado); // Actualizar la persona en la lista temporal
         
           this.resetFormulario(estado); // Resetear el formulario después de actualizar
@@ -2048,23 +2171,31 @@ cargarPersonalRelacionado(novedadId: number): void {
         if (estado === 'victima') {
           this.victima = { ...personaTemporal.persona };
           this.cargarArchivosPersona(this.victima); // Cargar los archivos de la persona
-          this.cargarLocalidadPorId(+this.victima.localidad_id); // Cargar la localidad por ID
+          if (this.victima.localidad_id) {
+            this.cargarLocalidadPorId(+this.victima.localidad_id); // Cargar la localidad por ID
+          }
           this.openModal(); // Abrir el modal de víctima
         } else if (estado === 'victimario') {
           this.victimario = { ...personaTemporal.persona };
           this.cargarArchivosPersona(this.victimario); // Cargar los archivos de la persona
-          this.cargarLocalidadPorId(+this.victimario.localidad_id); // Cargar la localidad por ID
+          if (this.victimario.localidad_id) {
+            this.cargarLocalidadPorId(+this.victimario.localidad_id); // Cargar la localidad por ID
+          }
           this.openModalInculpado();     
         } else if (estado === 'protagonista') {
           this.protagonista = { ...personaTemporal.persona };
           this.cargarArchivosPersona(this.protagonista); // Cargar los archivos de la persona
-          this.cargarLocalidadPorId(+this.protagonista.localidad_id); // Cargar la localidad por ID
+          if (this.protagonista.localidad_id) {
+            this.cargarLocalidadPorId(+this.protagonista.localidad_id); // Cargar la localidad por ID
+          }
           this.openModalProtagonista(); // Abrir el modal de protagonista
         }
         else if (estado === 'testigo') {
           this.testigo = { ...personaTemporal.persona }; // Estabas asignando this.protagonista aquí
           this.cargarArchivosPersona(this.testigo);
-          this.cargarLocalidadPorId(+this.testigo.localidad_id);
+          if (this.testigo.localidad_id) {
+            this.cargarLocalidadPorId(+this.testigo.localidad_id);
+          }
           this.openModalTestigo();
         }
         
@@ -2454,6 +2585,7 @@ alternarCamara(): void {
   } else {
     // Mostrar un mensaje si solo hay una cámara disponible
     Swal.fire('Advertencia', 'Solo hay una cámara disponible.', 'warning');
+    this.cerrarCamara();
   }
 }
 
@@ -2463,7 +2595,15 @@ iniciarCamara(deviceId: string): void {
     this.stream.getTracks().forEach(track => track.stop()); // Detener la cámara actual
   }
 
-  navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: deviceId } } })
+  const constraints = {
+    video: {
+      deviceId: deviceId ? { ideal: deviceId } : undefined,
+      width: { ideal: 1280 },
+      height: { ideal: 720 }
+    }
+  };
+
+  navigator.mediaDevices.getUserMedia(constraints)
     .then((stream) => {
       this.stream = stream;
 
@@ -2475,10 +2615,7 @@ iniciarCamara(deviceId: string): void {
     })
     .catch((error) => {
       console.error('Error al acceder a la cámara:', error);
-      // Solo mostrar un mensaje de error si no es un caso de "una sola cámara"
-      if (this.availableCameras.length > 1) {
-        Swal.fire('Advertencia', 'Solo hay una cámara disponible.', 'warning');
-      }
+      Swal.fire('No puedes invertir la camara', 'Solo hay una cámara disponible.', 'warning');
       this.cerrarCamara();
     });
 }

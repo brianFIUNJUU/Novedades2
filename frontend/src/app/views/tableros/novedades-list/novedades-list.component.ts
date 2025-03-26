@@ -714,7 +714,7 @@ reader.readAsDataURL(blob);
     }
   
     try {
-      this.map = L.map('mapaOperativo').setView([-24.18769889437684, -65.29709953331486], 15);
+      this.map = L.map('mapaOperativo').setView([-24.18769889437684, -65.29709953331486], 8);
   
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'

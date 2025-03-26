@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize');
 
 // Crear una nueva instancia de Sequelize
-const sequelize = new Sequelize('novedades', 'postgres', 'Mauro123*', {
+const sequelize = new Sequelize('novedades', 'postgres', '12345', {
     host: 'localhost',
     dialect: 'postgres',
     logging: false,  // deshabilita los logs de SQL en consola

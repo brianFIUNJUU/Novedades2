@@ -27,9 +27,9 @@ export class Novedades {
   personal_autor_id!: number;
   personal_autor_nombre!: string;
   
-  elemento_secuestrado!: { elemento: string, descripcion: string }[];
-  bien_recuperado_no!: { elemento: string, descripcion: string }[];
-  bien_recuperado!: { elemento: string, descripcion: string }[];
+  elemento_secuestrado!: { elemento: string, descripcion: string, caracteristicas:string }[];
+  bien_recuperado_no!: { elemento: string, descripcion: string ,caracteristicas:string}[];
+  bien_recuperado!: { elemento: string, descripcion: string, caracteristicas:string }[];
 
   observaciones!: string;
   unidad_actuante!: string;

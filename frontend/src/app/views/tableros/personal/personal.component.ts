@@ -27,9 +27,12 @@ export class PersonalComponent implements OnInit {
   unidadRegionales: UnidadRegional[] = [];
   personal: Personal = new Personal();
   legajo: string = '';
+  email: string = '';
   mensajeError: string = '';
   isUpdating: boolean = false; // Variable para determinar si estamos en modo de edición
   userInfo: any = {}; // Variable para almacenar la información del usuario
+  userType: string = ''; // Variable para almacenar el tipo de usuario
+
 
   constructor(
     private personalService: PersonalService,
@@ -42,14 +45,19 @@ export class PersonalComponent implements OnInit {
   ngOnInit(): void {
     this.authService.getUserInfo().subscribe(userInfo => {
       this.userInfo = userInfo;
-      if (this.userInfo.perfil === 'usuario') {
+      if (this.userInfo.perfil === 'usuario' || this.userInfo.perfil === 'EncargadoUnidad') {
         this.legajo = this.userInfo.legajo;
         this.buscarPersonalPorLegajo();
       } else {
         this.getPersonales();
       }
+      this.email=this.userInfo.email;
     });
     this.loadUnidadRegionales();
+    this.authService.getUserType().subscribe(userType => {
+      console.log('Tipo de usuario:', userType); // Mostrar el tipo de usuario en la consola
+      this.userType = userType ? userType.trim() : ''; // Asigna el tipo de usuario desde el servicio de autenticación y elimina espacios adicionales
+    });
   }
 
   exportToExcel(): void {
@@ -59,10 +67,12 @@ export class PersonalComponent implements OnInit {
   getPersonales(): void {
     this.personalService.getPersonales().subscribe(
       data => {
-        if (this.userInfo.perfil === 'usuario') {
+        if (this.userInfo.perfil === 'usuario' || this.userInfo.perfil === 'EncargadoUnidad'|| this.userInfo.perfil === 'usuarioDOP') {
           this.personales = data.filter(personal => personal.legajo === this.userInfo.legajo);
+          this.personales =data.filter(personal => personal.email === this.userInfo.email);
         } else {
-          this.personales = data.filter(personal => personal.legajo === this.userInfo.legajo);;
+          this.personales = data.filter(personal => personal.legajo === this.userInfo.legajo);
+          this.personales = data.filter(personal => personal.email === this.userInfo.email);
         }
         this.personales.forEach(personal => {
           this.cargarUnidadRegionalNombre(personal);
@@ -74,8 +84,9 @@ export class PersonalComponent implements OnInit {
   }
 
     showModal(): void {
-    if (this.userInfo.perfil === 'usuario') {
+    if (this.userInfo.perfil === 'usuario'|| this.userInfo.perfil === 'EncargadoUnidad'|| this.userInfo.perfil === 'usuarioDOP') {
       this.personal.legajo = this.userInfo.legajo;
+      this.personal.email = this.userInfo.email;
     }
     const modal = new bootstrap.Modal(document.getElementById('modalPersonal')!);
     modal.show();

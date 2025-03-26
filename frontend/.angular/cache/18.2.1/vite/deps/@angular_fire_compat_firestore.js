@@ -7,9 +7,9 @@ import {
   USE_DEVICE_LANGUAGE,
   USE_EMULATOR,
   ɵauthFactory
-} from "./chunk-TW6CSDJQ.js";
-import "./chunk-GURAVUJR.js";
-import "./chunk-AEANT5AT.js";
+} from "./chunk-2NURUYSJ.js";
+import "./chunk-Q3PLPAYG.js";
+import "./chunk-ULSO2CHY.js";
 import {
   FIREBASE_APP_NAME,
   FIREBASE_OPTIONS,
@@ -19,11 +19,11 @@ import {
   ɵAppCheckInstances,
   ɵcacheInstance,
   ɵfirebaseAppFactory
-} from "./chunk-53ICMKCQ.js";
+} from "./chunk-BZQ4Z5TL.js";
 import {
   firebase
-} from "./chunk-SI2ZW3YA.js";
-import "./chunk-EN3LYU35.js";
+} from "./chunk-D6JT4WCU.js";
+import "./chunk-E2EDJIM5.js";
 import {
   Component,
   FirebaseError,
@@ -38,10 +38,10 @@ import {
   isIndexedDBAvailable,
   isSafari,
   registerVersion
-} from "./chunk-Q7IDJDHE.js";
+} from "./chunk-P5LRW6R5.js";
 import {
   isPlatformServer
-} from "./chunk-JLJADSE3.js";
+} from "./chunk-QH5W3VI2.js";
 import {
   Inject,
   Injectable,
@@ -55,7 +55,7 @@ import {
   ɵɵdefineInjector,
   ɵɵdefineNgModule,
   ɵɵinject
-} from "./chunk-KN7A5A4F.js";
+} from "./chunk-6L4HWLVT.js";
 import "./chunk-ORNLS2RR.js";
 import "./chunk-7KUA62RY.js";
 import {
@@ -75,7 +75,7 @@ import {
   __async,
   __spreadValues,
   __superGet
-} from "./chunk-TIZIBVCZ.js";
+} from "./chunk-SIIEUOVM.js";
 
 // node_modules/@firebase/webchannel-wrapper/dist/bloom-blob/esm/bloom_blob_es2018.js
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};

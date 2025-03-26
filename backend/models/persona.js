@@ -34,7 +34,7 @@ const Persona = sequelize.define('Persona', {
             model: Departamento,
             key: 'id'
         },
-        allowNull: false
+        allowNull: true
     },
     localidad_id: {
         type: DataTypes.INTEGER,
@@ -42,7 +42,7 @@ const Persona = sequelize.define('Persona', {
             model: Localidad,
             key: 'id'
         },
-        allowNull: false
+        allowNull: true
     },
     domicilio: {
         type: DataTypes.STRING, 

@@ -16,12 +16,16 @@ export const navItems: INavData[] = [
       {
         name: 'Formulario de Novedades',
         url: '/tableros/novedades',
-        icon: 'nav-icon-bullet'
+        icon: 'nav-icon-bullet',
+        attributes: { style: 'font-size: 14px;' }
+
       },
       {
         name: 'Listado de Novedades',
         url: '/tableros/novedades-list',
-        icon: 'nav-icon-bullet'
+        icon: 'nav-icon-bullet',
+        attributes: { style: 'font-size: 14px;' }
+
       }
     ]
   },
@@ -35,81 +39,74 @@ export const navItems: INavData[] = [
       {
         name: 'persona',
         url: '/tableros/persona',
-        icon: 'nav-icon-bullet'
+        icon: 'nav-icon-bullet',
+        attributes: { style: 'font-size: 14px;' }
+
       },
       {
         name: 'personal',
         url: '/tableros/personal',
-        icon: 'nav-icon-bullet'
+        icon: 'nav-icon-bullet',
+                attributes: { style: 'font-size: 14px;' }
+
       },
       {
         name: 'dependencia',
         url: '/tableros/dependencia',
-        icon: 'nav-icon-bullet'
+        icon: 'nav-icon-bullet',
+                attributes: { style: 'font-size: 14px;' }
+
       },    
     ]
   },
   
-  // {
-  //   name: 'Tableros',
-  //   url: '/tableros',
-  //   iconComponent: { name: 'cil-chart' },
-  //   children: [
- 
-  //     {
-  //       name: 'Contravenciones',
-  //       url: '/tableros/vigilancia',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Vigilancia y escuela',
-  //       url: '/tableros/escuela',
-  //       icon: 'nav-icon-bullet'
-  //     },
-  //     {
-  //       name: 'Delito contra la propiedad',
-  //       url: '/tableros/delito',
-  //       icon: 'nav-icon-bullet'
-  //     }
-  //     ,
-  //     {
-  //       name: 'Violencia de genero',
-  //       url: '/tableros/violencia',
-  //       icon: 'nav-icon-bullet'
-  //     }
-  //   ]
-  // },
+
   
   {
     name: 'Gestion de Usuarios',
     url: '/login',
     iconComponent: { name: 'cil-user' },
     children: [
-    
       {
         name: 'Register',
         url: '/register',
-        icon: 'nav-icon-bullet'
+        icon: 'nav-icon-bullet',
+        attributes: { style: 'font-size: 14px;' }
       },
       {
         name: 'Usuarios',
         url: '/tableros/usuario',
-        icon: 'nav-icon-bullet'
+        icon: 'nav-icon-bullet',
+        attributes: { style: 'font-size: 14px;' }
       }
-     
+      ,
+      {
+        name: 'Chat',
+        url: '/tableros/chat',
+        icon: 'nav-icon-bullet',
+        attributes: { style: 'font-size: 14px;' }
+      }
     ]
   }
+  
   ,
  
   {
     title: true,
-    name: 'Links',
+    name: 'ASISTENCIA',
     class: 'mt-auto'
   },
   {
-    name: '¡Contactenos!',
-    url: 'https://observatorio.seguridad.jujuy.gob.ar/',
+    name: 'Tutoriales',
     iconComponent: { name: 'cil-description' },
-    attributes: { target: '_blank' }
-  }
+    attributes: { target: '_blank', style: 'font-size: 14px;' }
+  },
+  {
+    name:'Contacto del desarrollador',
+   iconComponent: { name: 'cil-envelope-open' },
+
+    attributes: { target: '_blank', style: 'font-size: 14px;' }
+  },
+    
+
 ];

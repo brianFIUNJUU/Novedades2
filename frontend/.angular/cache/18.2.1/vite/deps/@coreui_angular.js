@@ -1,22 +1,32 @@
 import {
+  createPopper2 as createPopper
+} from "./chunk-MTK2UXHI.js";
+import {
   ActivatedRoute,
   NavigationEnd,
   Router,
   RouterLink,
   RouterLinkActive,
   RouterModule
-} from "./chunk-YKGSGIKN.js";
+} from "./chunk-TTRK7RJQ.js";
+import {
+  IconDirective
+} from "./chunk-CNVUND3J.js";
+import {
+  takeUntilDestroyed,
+  toObservable
+} from "./chunk-2ULZOTVJ.js";
 import {
   A11yModule,
   BreakpointObserver,
   CdkTrapFocus,
   FocusKeyManager,
   FocusMonitor
-} from "./chunk-USI2MRVY.js";
+} from "./chunk-6LEBVM4G.js";
 import {
   coerceBooleanProperty,
   coerceNumberProperty
-} from "./chunk-YXHVJVT5.js";
+} from "./chunk-K6YW2B3A.js";
 import {
   AnimationBuilder,
   animate,
@@ -28,19 +38,9 @@ import {
   transition,
   trigger,
   useAnimation
-} from "./chunk-3BFI3FDX.js";
-import {
-  IconDirective
-} from "./chunk-J6KZGQPL.js";
-import {
-  createPopper2 as createPopper
-} from "./chunk-CO73YZ6L.js";
-import {
-  takeUntilDestroyed,
-  toObservable
-} from "./chunk-SK7AMJRX.js";
-import "./chunk-YM3EL3HJ.js";
-import "./chunk-M73JGANF.js";
+} from "./chunk-IIDSOG53.js";
+import "./chunk-4OO2PO3O.js";
+import "./chunk-Y3G33AUN.js";
 import {
   AsyncPipe,
   DOCUMENT,
@@ -50,7 +50,7 @@ import {
   NgTemplateOutlet,
   isPlatformBrowser,
   isPlatformServer
-} from "./chunk-JLJADSE3.js";
+} from "./chunk-QH5W3VI2.js";
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -156,7 +156,7 @@ import {
   ɵɵtextInterpolate,
   ɵɵtextInterpolate1,
   ɵɵviewQuery
-} from "./chunk-KN7A5A4F.js";
+} from "./chunk-6L4HWLVT.js";
 import {
   fromEvent,
   merge
@@ -182,7 +182,7 @@ import {
   __privateSet,
   __spreadProps,
   __spreadValues
-} from "./chunk-TIZIBVCZ.js";
+} from "./chunk-SIIEUOVM.js";
 
 // node_modules/@coreui/angular/fesm2022/coreui-angular.mjs
 var _c0 = ["*"];

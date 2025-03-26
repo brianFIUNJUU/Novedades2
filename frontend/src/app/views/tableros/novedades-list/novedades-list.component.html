@@ -1,3 +1,4 @@
+<div class="container-fluid p-0"> 
 <div class="card text-white custom-card">
   <div class="card-body text-center p-2">
     <h6 class="card-title font-weight-bold mb-0">LISTADO DE NOVEDADES</h6>
@@ -6,7 +7,7 @@
 <br/>
 <div class="row"> 
    <div class="col-4">
-    <div *ngIf="userInfo.perfil === 'administrador'" class="row d-flex align-items-center">
+    <div *ngIf="userInfo.perfil === 'administrador'|| userInfo.perfil === 'usuarioDOP'" class="row d-flex align-items-center">
       <div class="col-auto">
         <label for="colorFilter">Filtrar por color:</label>
       </div>
@@ -22,9 +23,10 @@
     
    </div> 
 
-  <div *ngIf="userInfo.perfil === 'administrador'"class="col-3 ">
+   <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP'" class="col-3">
     <button (click)="exportToExcel()" class="btn btn-success btn-sm">Exportar a Excel</button>
   </div>
+  
   <div class="col-5 ">
     <button class="btn btn-secondary btn-sm text-small" (click)="abrirModalMapa()">Ver Mapa</button>
   </div>
@@ -33,10 +35,9 @@
   
 </div>
 
-<br/>
 
-<div class="table-responsive">
-  <table class="table table-bordered border-primary table-sm table-custom">
+<div class="table-responsive" style="overflow: auto; max-height: 56vh;"> <!-- Menos altura -->
+    <table class="table table-bordered border-primary table-sm table-custom">
     <thead>
       <tr>
         <th class="text-small">ID</th>
@@ -44,23 +45,22 @@
         <th class="text-small">Cuadrante</th>
         <th class="text-small">Fecha</th>
         <th class="text-small">Horario</th>
-        <!-- <th class="text-small">Unidad</th> -->
         <th class="text-small">Hecho</th>
         <th class="text-small">Involucrado</th>
         <th class="text-small">Personal Autor</th>
-        
         <th class="text-small">Acciones</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let novedad  of filteredNovedades" [ngClass]="getColorClass(novedad.codigo)">
-        <td class="text-small ">{{ novedad.id }}</td>
-        <td class="text-small ">{{ novedad.unidad_regional_nombre }}</td>
+      <tr *ngFor="let novedad of filteredNovedades" [ngClass]="getColorClass(novedad.codigo)">
+        <td class="text-small">{{ novedad.id }}</td>
+        <td class="text-small">{{ novedad.unidad_regional_nombre }}</td>
         <td class="text-small">{{ novedad.cuadrante_nombre }}</td>
-        <td class="text-small ">{{ novedad.fecha }}</td>
-        <td class="text-small ">{{ novedad.horario }}</td>
-        <!-- <td class="text-small ">{{ novedad.unidad_interviniente }}</td> -->
-        <td class="text-small ">{{ novedad.descripcion_hecho }}</td>
+        <td class="text-small">{{ novedad.fecha }}</td>
+        <td class="text-small">{{ novedad.horario }}</td>
+        <td class="text-small text-truncate-custom">
+          {{ novedad.descripcion_hecho }}
+        </td>
         <td class="text-small">
           <ul>
             <ng-container *ngFor="let persona of novedad.personasDetalles">
@@ -71,26 +71,17 @@
           </ul>
         </td>
         <td class="text-small">({{ novedad.personalAutor?.legajo }}){{ novedad.personalAutor?.jerarquia }}:{{ novedad.personalAutor?.apellido }}</td>
-        
         <td class="text-small">
-          
           <button *ngIf="isEditable(novedad)" (click)="navigateToUpdateForm(novedad.id.toString())" class="btn btn-warning btn-sm">
             <i class="bi bi-pencil"></i> <!-- Icono de lápiz -->
           </button>
-          
-          <!-- Botón de documento con icono de líneas -->
           <button (click)="openDocumentOptions(novedad)" class="btn btn-primary btn-sm">
             <i class="bi bi-file-earmark-text"></i> <!-- Icono de documento con líneas -->
           </button>
-          
-          <!-- Botón de eliminar con "X" del mismo tamaño que los demás iconos -->
           <button *ngIf="isEditable(novedad)" (click)="deleteNovedad(novedad.id.toString())" class="btn btn-danger btn-sm">
             <span class="fs-6">X</span> <!-- "X" con tamaño estándar -->
           </button>
         </td>
-        
-        
-        
       </tr>
     </tbody>
   </table>

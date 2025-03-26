@@ -4,7 +4,7 @@ import { AuthenticateService } from '../../../services/authenticate.service';
 import { CommonModule } from '@angular/common';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import Swal from 'sweetalert2';
-
+import { Usuario } from '../../../models/Usuario';
 
 @Component({
   selector: 'app-register',
@@ -26,7 +26,7 @@ export class RegisterComponent {
   public loadingregister: boolean = false;
   userType: string = ''; // Variable para almacenar el tipo de usuario
   public userData: any = null; // Variable para almacenar los datos del usuario
-
+  
 
   constructor(private authService: AuthenticateService, private firestore: AngularFirestore) {}
   ngOnInit(): void {
@@ -123,4 +123,107 @@ export class RegisterComponent {
       }
     });
   }
-}
+
+  buscarUsuario() {
+    if (!this.legajo) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Atención',
+        text: 'Ingrese un número de legajo.',
+      });
+      return;
+    }
+  
+    this.firestore.collection('usuarios', ref => ref.where('legajo', '==', this.legajo))
+      .get()
+      .subscribe(querySnapshot => {
+        if (!querySnapshot.empty) {
+          // Convertir a tipo Usuario
+          const usuarioData = querySnapshot.docs[0].data() as Usuario;
+  
+          // Asignamos los valores a las propiedades del componente
+          this.nombre = usuarioData.nombre || '';
+          this.email = usuarioData.email || '';  // Puede ser null
+          this.perfil = usuarioData.perfil || 'usuario';
+          this.legajo = usuarioData.legajo || '';
+       
+  
+          Swal.fire({
+            icon: 'success',
+            title: 'Usuario encontrado',
+            text: `Datos cargados correctamente.`,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Usuario no encontrado.',
+          });
+        }
+      }, (error) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `Error al obtener los datos: ${error.message}`,
+        });
+      });
+  }
+  
+  
+
+  actualizarDatos() {
+    if (!this.legajo) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Atención',
+        text: 'Ingrese un legajo válido para actualizar.',
+      });
+      return;
+    }
+  
+    // Buscar el documento con el legajo como campo
+    this.firestore.collection('usuarios', ref => ref.where('legajo', '==', this.legajo))
+      .get()
+      .subscribe(querySnapshot => {
+        if (!querySnapshot.empty) {
+          const usuarioDoc = querySnapshot.docs[0]; // Obtenemos el primer documento encontrado
+          const usuarioId = usuarioDoc.id; // ID del documento encontrado
+  
+          // Si el documento existe, se actualizan los datos
+          this.firestore.collection('usuarios').doc(usuarioId).update({
+            nombre: this.nombre,
+            email: this.email,
+            perfil: this.perfil,
+          }).then(() => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Éxito',
+              text: 'Datos actualizados correctamente.',
+            });
+          }).catch(error => {
+            console.log('Error al actualizar:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: `No se pudo actualizar: ${error.message}`,
+            });
+          });
+        } else {
+          console.log('No se encontró el documento con legajo:', this.legajo);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo encontrar el usuario con el legajo proporcionado.',
+          });
+        }
+      }, (error) => {
+        console.log('Error al obtener documento:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `Error al obtener los datos: ${error.message}`,
+        });
+      });
+  }
+  
+}  

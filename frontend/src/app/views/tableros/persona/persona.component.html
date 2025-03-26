@@ -13,7 +13,7 @@
           <div class="col-md-4 d-flex align-items-center">
             <!-- Botón para abrir el modal de Persona -->
             <div class="form-group d-flex align-items-center mb-2">
-              <label for="persona" class="mr-2 mb-0">Agregar Persona:</label>
+              <label for="persona" class="mr-2 mb-0">Buscar/Agregar Persona:</label>
               <button type="button" class="btn btn-primary btn-sm ml-2" (click)="showModal()">
                 <i class="bi bi-plus"></i>
               </button>
@@ -23,7 +23,7 @@
       </div>
     </div>
     <br/>
-    <div class="table-responsive">
+    <div *ngIf="userType === 'administrador'" class="table-responsive ">
       <table class="table table-bordered border-primary table-sm">
         <thead>
           <tr>
@@ -49,14 +49,14 @@
             <td class="text-small">{{ persona.dni }}</td>
             <td class="text-small">{{ persona.sexo }}</td>
             <td class="text-small">{{ persona.provincia }}</td>
-            <td class="text-small">{{ persona.departamento_id}}</td>
-            <td class="text-small">{{ persona.localidad_id}}</td>
+            <td>{{ persona.departamento_nombre }}</td> <!-- Mostrar nombre del departamento -->
+      <td>{{ persona.localidad_nombre }}</td> <!-- Mostrar nombre de la localidad -->
             <td class="text-small">{{ persona.domicilio }}</td>
             <td class="text-small">{{ persona.fechaNacimiento }}</td>
             <td class="text-small">{{ persona.edad }}</td>
             <td>
               <button class="btn btn-warning btn-sm" (click)="editarPersona(persona)">Editar</button>
-              <button class="btn btn-danger btn-sm" (click)="eliminarPersona(persona.id.toString())">Eliminar</button>
+              <button  *ngIf="userType === 'administrador'" class="btn btn-danger btn-sm" (click)="eliminarPersona(persona.id.toString())">Eliminar</button>
               <button class="btn btn-info btn-sm" (click)="verPersona(persona)">Ver</button>
               <!-- este boton es solo para el usuario userInfo= usuario -->
             </td>
@@ -110,7 +110,7 @@
           </div>
           <div class="col-md-6">
             <label for="persona_departamento">Departamento:</label>
-            <select id="persona_departamento" name="persona_departamento" [(ngModel)]="persona.departamento_id" class="form-select" (change)="cargarLocalidades(+persona.departamento_id)">
+            <select id="persona_departamento" name="persona_departamento" [(ngModel)]="persona.departamento_id" class="form-select" (change)="cargarLocalidades(persona.departamento_id ? +persona.departamento_id : null)">
               <option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</option>
             </select>
           </div>

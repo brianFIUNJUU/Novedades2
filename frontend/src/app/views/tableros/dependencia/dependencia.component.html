@@ -41,8 +41,8 @@
     </div>
   </div>
   <br/>
-  <!-- Botón para abrir el modal de Dependencia -->
-  <div *ngIf="userType === 'administrador'" class="mb-2">
+  <!-- Botón para abrir el modal de Dependenciaa -->
+  <div *ngIf="userType === 'administrador'|| userType === 'usuarioDOP'" class="mb-2">
     <button type="button" class="btn btn-primary" (click)="showModal()">
       Agregar Dependencia
     </button>
@@ -63,7 +63,7 @@
           <td>{{ dep.id}}</td>
           <td>{{ dep.juridiccion }}</td>
           <td>{{ dep.unidad_regional_nombre }}</td>
-          <td class="text-small" *ngIf="userType === 'administrador'">
+          <td class="text-small" *ngIf="userType === 'administrador'|| userType === 'usuarioDOP'">
             <button class="btn btn-primary" (click)="editarDependencia(dep)">Editar</button>
             <button class="btn btn-danger" (click)="eliminarDependencia(dep.id)">Eliminar</button>
           </td>

@@ -5,9 +5,9 @@ export class Persona {
   dni!: string;
   sexo!: string;
   provincia!: string;
-  departamento_id!: string;
+  departamento_id?:number | null; 
   departamento_nombre!: string;
-  localidad_id!: string;
+  localidad_id?: number | null; 
   localidad_nombre!: string;
   domicilio!: string;
   fechaNacimiento!: string;
@@ -31,9 +31,9 @@ export class Persona {
     this.apellido = '';
     this.dni = '';
     this.provincia = '';
-    this.departamento_id = '';
+   
     this.departamento_nombre = '';
-    this.localidad_id = '';
+  
     this.localidad_nombre = '';
     this.domicilio = '';
     this.fechaNacimiento = '';

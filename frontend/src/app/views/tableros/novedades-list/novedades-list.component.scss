@@ -1,3 +1,11 @@
+/* Ejemplo: Eliminar márgenes y paddings globales */
+body, html {
+  margin: 0;
+  padding: 0;
+}
+.table-custom {
+  width: 100%;
+}
 .text-small {
   font-size: 0.875rem; /* Tamaño de texto más pequeño */
 }
@@ -45,4 +53,10 @@
 .custom-modal-header2 {
   background-color: #0f2f53; /* Color azul */
   color: white; /* Color del texto */
+}
+.text-truncate-custom {
+  white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+  overflow: hidden; /* Oculta el contenido que excede el ancho */
+  text-overflow: ellipsis; /* Muestra puntos suspensivos (...) cuando el texto se trunca */
+  max-width: 200px; /* Limita el ancho máximo de la celda */
 }

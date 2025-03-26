@@ -100,6 +100,13 @@ export const routes: Routes = [
         path: '**',
         redirectTo: 'novedades'
       },
+      {
+        path: 'chat',
+        loadComponent: () => import('./chat/chat.component').then(m => m.ChatComponent),
+        data: { title: 'Chat' },
+      },
+      
+      
     
     ]
   } 

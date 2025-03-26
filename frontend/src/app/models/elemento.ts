@@ -5,9 +5,11 @@ export class Elemento {
     elemento_nombre: string;
     categoria_id: number;
     categoria?: Categoria;
+    caracteristicas:string;
 
     constructor() {
         this.elemento_nombre = "";
+        this.caracteristicas = "";
         this.categoria_id = 0;
     }
 }
