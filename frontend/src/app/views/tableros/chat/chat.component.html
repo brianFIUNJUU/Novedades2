@@ -1,18 +1,117 @@
-<div class="chat-container" *ngIf="isChatVisible">
-  <div class="chat-header">
-    <span>Chat en Tiempo Real</span>
-    <button (click)="toggleChat()">Cerrar</button>
-  </div>
-  <div class="chat-body">
-    <div *ngFor="let mensaje of mensajes">
-      <p>{{ mensaje.texto }}</p>
+<div class="container-fluid p-0">
+  <div class="card text-white custom-card">
+    <div class="card-body text-center p-2">
+      <h6 class="card-title font-weight-bold mb-0"> 
+        <!-- <img class="imgDos" src="./assets/images(1).jpg" alt="Imagen Fondo">  -->
+        ASISTENCIA Y AYUDA </h6>
+    </div>
+    <div >
     </div>
   </div>
-  <div class="chat-footer">
-    <input [(ngModel)]="mensaje" placeholder="Escribe un mensaje..." />
-    <button (click)="enviarMensaje()">Enviar</button>
+  
+  <div>
+    <br>
+    <div class="logo">
+    </div>
+  </div>
+</div>
+<!-- <div class="card card3 text-white mb-12" style="position: relative; z-index: 1; margin-bottom: 120px; background-color: rgba(150, 19, 47, 0.635);">
+  <div class="card-body">
+    <h5 class="card-title">TUTORIALES</h5>
+    <p class="card-text">
+    </p>
+  </div>
+</div> Buen dia subcomisario Martinez soy el agente y programador Gutierrez Brian encargado del desarrollo del sistema integral de gestion operativa policiales, queria hacerle algunas consultas-->
+
+<div class="card card3 text-white mb-12" style="position: relative; z-index: 1; margin-bottom: 120px; background-color: rgba(150, 19, 47, 0.635);">
+  <div class="card-body">
+    <h5 class="card-title">Mensaje de Asistencia y Soporte</h5>
+    <p class="card-text">Esta aplicación ha sido desarrollada por el área de programación de la Dirección de Observatorio de Seguridad correspondiente del Ministerio de Seguridad, con el objetivo de ser utilizada por la Policía de la Provincia de Jujuy.
+    <br>Si tiene alguna duda, inquietud o sugerencia de mejora sobre el funcionamiento del sistema, por favor, comuníquese con su desarrollador dejando su mensaje en el buzón de mensajería .
+    <br>Agradecemos su colaboración y estamos a disposición para atender cualquier consulta.</p>
   </div>
 </div>
 
-<!-- Botón flotante para abrir el chat -->
-<button class="chat-button" (click)="toggleChat()">Abrir Chat</button>
+
+<div class="chat-container" *ngIf="isChatVisible">
+  <div class="chat-header">
+    <span style="font-size: 16px;"><i class="bi bi-chat-dots"></i> Buzón de Mensajeria</span>
+    <button (click)="toggleChat()"  class="close-btn">
+      <i class="bi bi-x"></i>
+    </button>
+      </div>
+
+      <div class="search-user animated-box" *ngIf="usuarioPerfil === 'administrador' && mostrarListaDestinatarios" [@fadeIn]>
+      <div class="input-group">
+        <input [(ngModel)]="receptorLegajo" class="form-control shadow-sm" placeholder="🔍 Buscar legajo"/>
+        <button class="btn btn-primary" (click)="buscarReceptor()">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+    </div>
+    
+      
+
+  <div *ngIf="receptorUid">
+    <p style="font-size: 12px;"><strong>Desarrollador: Gutierrez Brian (Legajo: 22654) - Tel: 3884341975</strong> </p>
+    <!-- este es el valor dinamico para mensajes entre usuarios {{ receptorNombre }} -->
+  </div>
+  
+  <!-- Lista de usuarios con los que se tuvo una conversación -->
+  <div class="conversation-list" *ngIf="mostrarListaDestinatarios && destinatarios.length > 0">
+    <div 
+    class="conversation-box" 
+    *ngFor="let destinatario of destinatarios" 
+    (click)="seleccionarReceptor(destinatario)">
+    
+    <div class="conversation-name">
+      {{ destinatario.nombre }} 
+    </div>
+    
+    <!-- <div class="conversation-last-message">
+      Último mensaje...
+    </div> -->
+  </div>
+</div>
+
+<div class="chat-body">
+  <div *ngFor="let mensaje of mensajes">
+    <div [ngClass]="{'sent': mensaje.remitenteUid === usuarioUid, 'received': mensaje.remitenteUid !== usuarioUid}" class="message-bubble">
+      <p style="font-size: 10px; margin-bottom: 2px;"><strong>
+        {{ mensaje.remitenteUid === usuarioUid ? 'Tú' : mensaje.remitente?.nombre || 'Desconocido' }}:
+      </strong></p>
+      <div style="line-height: 1; display: flex; flex-direction: column; gap: 0px;">
+        <p style="font-size: 12px; margin: 0;">{{ mensaje.mensaje }}</p>
+        <span style="font-size: 8px; color: #888; margin-top: 0;">{{ mensaje.fecha | date:'shortTime' }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <div class="chat-footer" *ngIf="receptorUid">
+    <input [(ngModel)]="mensaje" placeholder="Escribe un mensaje..." [disabled]="!mensajeHabilitado" />
+    <button (click)="enviarMensaje()" [disabled]="!mensajeHabilitado">Enviar</button>
+  </div>
+  
+
+  <div class="inbox">
+    <div *ngFor="let mensaje of mensajesRecibidos">
+      <p><strong>De:</strong> {{ mensaje.remitenteUid }}</p>
+      <p>{{ mensaje?.mensaje }}</p>
+
+    </div>
+  </div>
+
+</div>
+
+
+<div class="chat-container2" *ngIf="!isChatVisible">
+  <button class="chat-button" (click)="toggleChat()">
+    <img src="https://www.gifsanimados.org/data/media/56/computadora-y-ordenador-imagen-animada-0178.gif" alt="Escribir al desarrollador" class="chat-gif">
+  </button>
+  <button class="chat-text-button" (click)="toggleChat() ">
+    <i class="bi bi-envelope"></i> Escribir mensaje al desarrollador...
+  </button>
+</div>
+

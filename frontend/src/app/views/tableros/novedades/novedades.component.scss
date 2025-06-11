@@ -5,6 +5,21 @@
   margin-bottom: 10px;
 }
 
+/* Para hacer más pequeñas las opciones del dropdown */
+.small-ng-select .ng-dropdown-panel .ng-option {
+  font-size: 0.1rem; /* Ajusta este valor según lo pequeño que quieras el texto */
+  padding: 0.25rem 0.5rem; /* Ajusta el padding para que coincida con el tamaño de fuente */
+}
+
+/* Opcional: también puedes hacer más pequeño el texto seleccionado */
+.small-ng-select .ng-value {
+  font-size: 0.1rem;
+}
+
+/* Opcional: hacer más pequeño el texto del input de búsqueda */
+.small-ng-select .ng-input input {
+  font-size: 0.1rem;
+}
 .custom-card {
   background-color: #081a2e; /* Color azul */
   color: white; /* Color del texto */
@@ -262,7 +277,20 @@ video {
     max-width: 100%; /* Ocupa el ancho completo */
     height: 100vh; /* Ocupa la altura completa de la pantalla */
   }
+  .titulo {
+    font-size: 14px;
 
+  }
+  .card-title {
+    font-size: 16px;
+  }
+  .container-fluid {
+    font-size: 13px;
+  }
+  .input{
+    font-size: 13px;
+    padding: 5px;
+  }
   .fullscreen-modal .modal-content {
     height: 100%; /* Ocupa la altura completa */
     border-radius: 0; /* Elimina el borde redondeado */
@@ -349,4 +377,56 @@ video {
   }
   
   
+  /* Media query para pantallas de celular (ancho máximo de 768px) */
+@media (max-width: 768px) {
+  .form-control, .form-select, .btn {
+    font-size: 12px; /* Reducir el tamaño de fuente en celulares */
+    padding: 5px; /* Reducir el padding */
+  }
+
+  label, p {
+    font-size: 12px; /* Reducir el tamaño de fuente de etiquetas y texto */
+  }
+  h5, h6{
+    font-size: 16px; /* Reducir el tamaño de fuente de encabezados */
+  }
+  .table {
+    font-size: 10px; /* Reducir el tamaño de fuente para tablas */
+  }
+
+  .col-md-4, .col-md-6, .col-md-12 {
+    width: 100%; /* Las columnas ocupan todo el ancho en celulares */
+  }
+
+
+  .form-group.d-flex label {
+    margin-bottom: 5px; /* Agregar margen inferior a las etiquetas */
+  }
+
+
+
+  .table-responsive {
+    overflow-x: auto; /* Permitir scroll horizontal en tablas */
+  }
+}
+
+/* Media query para pantallas aún más pequeñas (ancho máximo de 480px) */
+@media (max-width: 480px) {
+  .form-control, .form-select, .btn {
+    font-size: 12px; /* Reducir aún más el tamaño de fuente */
+  }
+
+  label, p {
+    font-size: 12px; /* Reducir el tamaño de fuente de etiquetas y texto */
+  }
+  h5, h6{
+    font-size: 16px; /* Reducir el tamaño de fuente de encabezados */
+  }
+
+  .table {
+    font-size: 8px; /* Reducir aún más el tamaño de fuente para tablas */
+  }
+
+
+}
 }

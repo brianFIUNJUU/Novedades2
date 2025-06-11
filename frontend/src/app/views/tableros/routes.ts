@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { roleGuard } from '../../guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -12,12 +13,11 @@ export const routes: Routes = [
         redirectTo: '/dashboard',
         pathMatch: 'full'
       },
-      {
+        {
         path: 'vigilancia',
         loadComponent: () => import('./vigilancia/vigilancia.component').then(m => m.VigilanciaComponent),
-        data: {
-          title: 'Vigilancia'
-        }
+        canActivate: [roleGuard],
+        data: { title: 'Vigilancia', roles: ['administrador', 'usuarioDOP'] }
       },
       {
         path: 'escuela',
@@ -89,22 +89,41 @@ export const routes: Routes = [
           title: 'Actualizar Novedad'
         }
       },
+        {
+        path: 'distribucionlist',
+        loadComponent: () => import('./distribucionlist/distribucionlist.component').then(m => m.DistribucionlistComponent),
+        data: { title: 'DistribucionList'}
+      },
+      {
+        path: 'distribucionlist/:id',
+        loadComponent: () => import('./distribucionlist/distribucionlist.component').then(m => m.DistribucionlistComponent),
+        canActivate: [roleGuard],
+        data: { title: 'DistribucionList', roles: ['administrador'] }
+      },
+      {
+        path: 'distribucionform',
+        loadComponent: () => import('./distribucionform/distribucionform.component').then(m => m.DistribucionformComponent),
+        canActivate: [roleGuard],
+        data: { title: 'Distribucionform', roles: ['administrador'] }
+      },
       {
         path: 'usuario',
         loadComponent: () => import('./usuario/usuario.component').then(m => m.UsuarioComponent),
-        data: {
-          title: 'usuario'
-        }
+        canActivate: [roleGuard],
+        data: { title: 'usuario', roles: ['administrador'] }
+      },
+       {
+        path: 'chat',
+        loadComponent: () => import('./chat/chat.component').then(m => m.ChatComponent),
+        data: { 
+          title: 'chat'
+         },
       },
       {
         path: '**',
         redirectTo: 'novedades'
       },
-      {
-        path: 'chat',
-        loadComponent: () => import('./chat/chat.component').then(m => m.ChatComponent),
-        data: { title: 'Chat' },
-      },
+     
       
       
     

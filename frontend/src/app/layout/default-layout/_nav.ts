@@ -13,6 +13,19 @@ export const navItems: INavData[] = [
     url: '/tableros',
     iconComponent: { name: 'cil-notes' },
     children: [
+         
+      {
+        name: 'Formulario de Operativos',
+        url: '/tableros/distribucionform',
+        icon: 'nav-icon-bullet',
+                attributes: { style: 'font-size: 14px;' }
+      },
+      {
+        name: 'Listado de Operativos',  
+        url: '/tableros/distribucionlist',
+        icon: 'nav-icon-bullet',
+        attributes: { style: 'font-size: 14px;' }
+      },
       {
         name: 'Formulario de Novedades',
         url: '/tableros/novedades',
@@ -27,6 +40,7 @@ export const navItems: INavData[] = [
         attributes: { style: 'font-size: 14px;' }
 
       }
+      
     ]
   },
 
@@ -57,6 +71,12 @@ export const navItems: INavData[] = [
                 attributes: { style: 'font-size: 14px;' }
 
       },    
+      {
+        name: 'vigilancia',
+        url: '/tableros/vigilancia',
+        icon: 'nav-icon-bullet',
+        attributes: { style: 'font-size: 14px;' }
+      }
     ]
   },
   
@@ -79,13 +99,7 @@ export const navItems: INavData[] = [
         icon: 'nav-icon-bullet',
         attributes: { style: 'font-size: 14px;' }
       }
-      ,
-      {
-        name: 'Chat',
-        url: '/tableros/chat',
-        icon: 'nav-icon-bullet',
-        attributes: { style: 'font-size: 14px;' }
-      }
+ 
     ]
   }
   
@@ -96,16 +110,16 @@ export const navItems: INavData[] = [
     name: 'ASISTENCIA',
     class: 'mt-auto'
   },
+  // {
+  //   name: 'Tutoriales',
+  //   iconComponent: { name: 'cil-description' },
+  //   attributes: { style: 'font-size: 14px;' }
+  // },
   {
-    name: 'Tutoriales',
-    iconComponent: { name: 'cil-description' },
-    attributes: { target: '_blank', style: 'font-size: 14px;' }
-  },
-  {
-    name:'Contacto del desarrollador',
+    name:'Ayuda y contacto',
    iconComponent: { name: 'cil-envelope-open' },
-
-    attributes: { target: '_blank', style: 'font-size: 14px;' }
+   url: '/tableros/chat',
+    attributes: {  style: 'font-size: 14px;' }
   },
     
 

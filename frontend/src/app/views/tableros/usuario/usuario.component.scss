@@ -33,3 +33,93 @@
   background-color: #124b8d; /* Color azul */
   color: white; /* Color del texto */
 }
+@media (max-width: 768px) {
+  .form-control, .form-select, .btn {
+    font-size: 12px; /* Reducir el tamaño de fuente en celulares */
+    padding: 5px; /* Reducir el padding */
+  }
+
+  label, p {
+    font-size: 12px; /* Reducir el tamaño de fuente de etiquetas y texto */
+  }
+  h5, h6{
+    font-size: 16px; /* Reducir el tamaño de fuente de encabezados */
+  }
+  .table {
+    font-size: 10px; /* Reducir el tamaño de fuente para tablas */
+  }
+
+  .col-md-4, .col-md-6, .col-md-12 {
+    width: 100%; /* Las columnas ocupan todo el ancho en celulares */
+  }
+
+
+  .form-group.d-flex label {
+    margin-bottom: 5px; /* Agregar margen inferior a las etiquetas */
+  }
+
+
+
+  .table-responsive {
+    overflow-x: auto; /* Permitir scroll horizontal en tablas */
+  }
+}
+
+/* Media query para pantallas aún más pequeñas (ancho máximo de 480px) */
+@media (max-width: 480px) {
+  .form-control, .form-select, .btn {
+    font-size: 12px; /* Reducir aún más el tamaño de fuente */
+  }
+
+  label, p {
+    font-size: 12px; /* Reducir el tamaño de fuente de etiquetas y texto */
+  }
+  h5, h6{
+    font-size: 16px; /* Reducir el tamaño de fuente de encabezados */
+  }
+
+  .table {
+    font-size: 8px; /* Reducir aún más el tamaño de fuente para tablas */
+  }
+
+  
+}
+/* Estilos generales para la tabla (pueden estar ya definidos) */
+.table-responsive {
+overflow-x: auto;
+max-width: 100%;
+max-height: 56vh;
+}
+
+.table-bordered {
+border: 1px solid #dee2e6; /* Ejemplo de borde */
+}
+
+.table-sm td, .table-sm th {
+padding: 0.5rem; /* Padding base, puedes ajustarlo */
+}
+
+.text-small {
+font-size: 0.9rem; /* Tamaño de fuente base, puedes ajustarlo */
+}
+
+/* Estilos específicos para pantallas de celular */
+@media (max-width: 768px) { /* Ajusta el breakpoint según necesites */
+.table-sm td, .table-sm th {
+  padding: 0.2rem; /* Reduce el padding en pantallas pequeñas */
+}
+
+.text-small {
+  font-size: 0.7rem; /* Reduce el tamaño de fuente en pantallas pequeñas */
+}
+
+/* Ajusta el ancho máximo del texto truncado si es necesario */
+.text-truncate-custom {
+  max-width: 100px; /* Ejemplo, ajusta según el espacio disponible */
+}
+
+/* Opcional: Si necesitas reducir aún más el espacio entre columnas */
+th, td {
+  white-space: nowrap; /* Evita el salto de línea forzado */
+}
+}

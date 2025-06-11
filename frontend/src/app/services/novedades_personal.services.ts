@@ -12,21 +12,45 @@ export class NovedadesPersonalService {
 
   constructor(private http: HttpClient) {}
 
+  // Método para obtener el token de autenticación desde el localStorage
+  private getAuthToken(): string | null {
+    const token = localStorage.getItem('token');
+    return token;
+  }
+
   // Obtener personal asociado a una novedad
   getPersonalByNovedadId(novedadId: number): Observable<Personal[]> {
-    return this.http.get<Personal[]>(`${this.apiNovedadPersonalUrl}/novedad-personal/${novedadId}`);
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this.http.get<Personal[]>(`${this.apiNovedadPersonalUrl}/novedad-personal/${novedadId}`, httpOptions);
   }
 
   // Agregar un personal a una novedad
   addPersonalToNovedad(novedadId: number, personalId: number): Observable<void> {
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    const token = this.getAuthToken();
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    });
     const body = { novedad_id: novedadId, personal_id: personalId };
     console.log('Datos enviados para agregar personal a la novedad:', body);
-    return this.http.post<void>(`${this.apiNovedadPersonalUrl}//add`, body, { headers });
+    return this.http.post<void>(`${this.apiNovedadPersonalUrl}/add`, body, { headers });
   }
 
   // Eliminar un personal de una novedad
   removePersonalFromNovedad(novedadId: number, personalId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiNovedadPersonalUrl}/novedad-personal/${novedadId}/${personalId}`);
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this.http.delete<void>(`${this.apiNovedadPersonalUrl}/novedad-personal/${novedadId}/${personalId}`, httpOptions);
   }
 }

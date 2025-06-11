@@ -1,45 +1,111 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Personal } from '../models/personal'; // Ajusta la ruta según tu estructura de proyecto
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { Personal } from '../models/personal';
 import { environment } from '../environments/environment';
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class PersonalService {
-  // private apiUrl = 'http://localhost:3000/api/personal'; // Ajusta la URL si es necesario
-  private apiUrl =environment.apiUrl + '/personal'; // URL base del backend
+  private apiUrl = environment.apiUrl + '/personal';
 
+  private personalesCache: Personal[] | null = null;
+  private personalByIdCache: { [id: string]: Personal } = {};
+  private personalByLegajoCache: { [legajo: string]: Personal } = {};
 
   constructor(private http: HttpClient) {}
-  
-  // Obtener todos los personales
-  getPersonales(): Observable<Personal[]> {
-    return this.http.get<Personal[]>(this.apiUrl);
+
+  private getAuthToken(): string | null {
+    const token = localStorage.getItem('token');
+    return token;
   }
-  // jajaja que haria sin este visual studio code 
-  // Obtener un personal por ID
+
+  clearCache() {
+    this.personalesCache = null;
+    this.personalByIdCache = {};
+    this.personalByLegajoCache = {};
+  }
+
+  // Obtener todos los personales (con cache)
+  getPersonales(): Observable<Personal[]> {
+    if (this.personalesCache) {
+      return of(this.personalesCache);
+    }
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<Personal[]>(this.apiUrl, { headers }).pipe(
+      tap(data => this.personalesCache = data)
+    );
+  }
+
+  // Obtener un personal por ID (con cache)
   getPersonal(id: string): Observable<Personal> {
-    return this.http.get<Personal>(`${this.apiUrl}/${id}`);
+    if (this.personalByIdCache[id]) {
+      return of(this.personalByIdCache[id]);
+    }
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<Personal>(`${this.apiUrl}/${id}`, { headers }).pipe(
+      tap(data => this.personalByIdCache[id] = data)
+    );
   }
 
   // Crear un nuevo personal
   createPersonal(personal: Personal): Observable<Personal> {
-    return this.http.post<Personal>(this.apiUrl, personal);
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.post<Personal>(this.apiUrl, personal, { headers }).pipe(
+      tap(() => this.clearCache())
+    );
   }
 
   // Actualizar un personal existente
   updatePersonal(personal: Personal): Observable<Personal> {
-    return this.http.put<Personal>(`${this.apiUrl}/${personal.id}`, personal);
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.put<Personal>(`${this.apiUrl}/${personal.id}`, personal, { headers }).pipe(
+      tap(() => this.clearCache())
+    );
   }
 
   // Eliminar un personal
   deletePersonal(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers }).pipe(
+      tap(() => this.clearCache())
+    );
   }
+
+  // Obtener personal por legajo (con cache)
   getPersonalByLegajo(legajo: string): Observable<Personal> {
-    return this.http.get<Personal>(`${this.apiUrl}/search/legajo/${legajo}`);
+    if (this.personalByLegajoCache[legajo]) {
+      return of(this.personalByLegajoCache[legajo]);
+    }
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<Personal>(`${this.apiUrl}/search/legajo/${legajo}`, { headers }).pipe(
+      tap(data => this.personalByLegajoCache[legajo] = data)
+    );
   }
 }

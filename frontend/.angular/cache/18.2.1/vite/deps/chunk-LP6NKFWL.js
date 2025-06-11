@@ -331,6 +331,22 @@ var getDefaultEmulatorHost = (productName) => {
   var _a, _b;
   return (_b = (_a = getDefaults()) === null || _a === void 0 ? void 0 : _a.emulatorHosts) === null || _b === void 0 ? void 0 : _b[productName];
 };
+var getDefaultEmulatorHostnameAndPort = (productName) => {
+  const host = getDefaultEmulatorHost(productName);
+  if (!host) {
+    return void 0;
+  }
+  const separatorIndex = host.lastIndexOf(":");
+  if (separatorIndex <= 0 || separatorIndex + 1 === host.length) {
+    throw new Error(`Invalid host ${host} with no separate hostname and port!`);
+  }
+  const port = parseInt(host.substring(separatorIndex + 1), 10);
+  if (host[0] === "[") {
+    return [host.substring(1, separatorIndex - 1), port];
+  } else {
+    return [host.substring(0, separatorIndex), port];
+  }
+};
 var getDefaultAppConfig = () => {
   var _a;
   return (_a = getDefaults()) === null || _a === void 0 ? void 0 : _a.config;
@@ -2204,6 +2220,7 @@ export {
   deepExtend,
   getGlobal,
   getDefaultEmulatorHost,
+  getDefaultEmulatorHostnameAndPort,
   getExperimentalSetting,
   Deferred,
   createMockUserToken,
@@ -2326,8 +2343,6 @@ export {
    * See the License for the specific language governing permissions and
    * limitations under the License.
    *)
-
-@firebase/util/dist/index.esm2017.js:
   (**
    * @license
    * Copyright 2017 Google LLC
@@ -2643,4 +2658,4 @@ export {
    * limitations under the License.
    *)
 */
-//# sourceMappingURL=chunk-P5LRW6R5.js.map
+//# sourceMappingURL=chunk-LP6NKFWL.js.map

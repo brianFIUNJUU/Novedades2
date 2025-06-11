@@ -2,10 +2,14 @@ import { Persona } from "./persona";
 import { Personal } from "./personal";
 export class Novedades {
   id!: number;
+  operativo_id!: number | null;  
+  operativo_nombre!: string;
   fecha!: string;
   horario!: string;
   unidad_regional_id!: number;
+  unidad_regional_nombre!: string;
   cuadrante_id!: string;
+  cuadrante_nombre!: string;
   lugar_hecho!: string;
   latitud!: string;
   longitud!: string;
@@ -26,7 +30,8 @@ export class Novedades {
   tipo_lugar!: string;
   personal_autor_id!: number;
   personal_autor_nombre!: string;
-  
+  personal_autor_legajo!: string;
+  personas_involucrados!: { id: number,legajo:string,jerarquia:string, nombre: string }[]; // Array de objetos con ID y nombre de personal involucrado
   elemento_secuestrado!: { elemento: string, descripcion: string, caracteristicas:string }[];
   bien_recuperado_no!: { elemento: string, descripcion: string ,caracteristicas:string}[];
   bien_recuperado!: { elemento: string, descripcion: string, caracteristicas:string }[];
@@ -57,8 +62,7 @@ export class Novedades {
   personas!: number[]; // Array de números para la vinculación con la base de datos
   policias!: number[]; // Array de números para la vinculación con la base de datos
   personaEstado!: { id: number, estado: string }[]; // Array de objetos con ID y estado de personas
-  unidad_regional_nombre!: string;
-  cuadrante_nombre!: string;
+ 
   personasDetalles!: Persona[]; // Array de objetos Persona
   personalAutor?: Personal; // Agregar esta propiedad para almacenar los datos del personal autor
 
@@ -67,7 +71,9 @@ export class Novedades {
     this.fecha = '';
     this.horario = '';
     this.unidad_regional_id = 0;
+    this.unidad_regional_nombre = '';
     this.cuadrante_id = '';
+    this.cuadrante_nombre = '';
     this.lugar_hecho = '';
     this.latitud = '';
     this.longitud = '';
@@ -85,6 +91,7 @@ export class Novedades {
     this.tipo_lugar = '';
     this.personal_autor_id = 0;
     this.personal_autor_nombre = '';
+    
     this.observaciones = '';
     this.oficial_cargo_id = 0;
  

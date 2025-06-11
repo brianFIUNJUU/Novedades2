@@ -34,7 +34,7 @@ exports.removePersonalFromNovedad = async (req, res) => {
         res.status(400).json({ error: 'Error al eliminar personal de la novedad' });
     }
 };
-
+//dame el get add y delete e el controllers para estos modelos y tambien el achivo routes para luego llamarlo en el index
 // Obtener todos los personales de una novedad
 exports.getPersonalesByNovedadId = async (req, res) => {
     try {

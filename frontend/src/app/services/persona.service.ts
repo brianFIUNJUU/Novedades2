@@ -1,9 +1,9 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Persona } from '../models/persona';  // Asegúrate de que la ruta sea correcta
+import { Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { Persona } from '../models/persona';
 import { environment } from '../environments/environment';
-
 
 @Injectable({
   providedIn: 'root',
@@ -11,74 +11,121 @@ import { environment } from '../environments/environment';
 export class PersonaService {
   private hostBase: string;
 
-  constructor(private _http: HttpClient) {
-    // this.hostBase = 'http://localhost:3000/api/persona';
-    this.hostBase = environment.apiUrl + '/persona'; // URL base del backend
+  private personasCache: Persona[] | null = null;
+  private personaByIdCache: { [id: number]: Persona } = {};
+  private personaByDniCache: { [dni: string]: Persona } = {};
 
+  constructor(private _http: HttpClient) {
+    this.hostBase = environment.apiUrl + '/persona';
   }
 
-  // Obtener todas las personas
+  private getAuthToken(): string | null {
+    const token = localStorage.getItem('token');
+    return token;
+  }
+
+  clearCache() {
+    this.personasCache = null;
+    this.personaByIdCache = {};
+    this.personaByDniCache = {};
+  }
+
+  // Obtener todas las personas (con cache)
   getPersonas(): Observable<any> {
-    let httpOptions = {
+    if (this.personasCache) {
+      return of(this.personasCache);
+    }
+    const token = this.getAuthToken();
+    const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       }),
     };
-    return this._http.get(this.hostBase + '/', httpOptions);
+    return this._http.get<Persona[]>(this.hostBase + '/', httpOptions).pipe(
+      tap(data => this.personasCache = data)
+    );
   }
-// Obtener una persona por DNI
-getPersonaByDni(dni: string): Observable<any> {
-  let httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json',
-    }),
-  };
-  return this._http.get(this.hostBase + '/dni/' + dni, httpOptions);
-}
+
+  // Obtener una persona por DNI (con cache)
+  getPersonaByDni(dni: string): Observable<any> {
+    if (this.personaByDniCache[dni]) {
+      return of(this.personaByDniCache[dni]);
+    }
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this._http.get<Persona>(this.hostBase + '/dni/' + dni, httpOptions).pipe(
+      tap(data => this.personaByDniCache[dni] = data)
+    );
+  }
 
   // Crear una nueva persona
   createPersona(persona: Persona): Observable<any> {
-    let httpOptions = {
+    const token = this.getAuthToken();
+    const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       }),
     };
-    let body: any = JSON.stringify(persona);
-    return this._http.post(this.hostBase + '/', body, httpOptions);
+    const body: any = JSON.stringify(persona);
+    return this._http.post(this.hostBase + '/', body, httpOptions).pipe(
+      tap(() => this.clearCache())
+    );
   }
 
-  // Obtener una persona por ID
+  // Obtener una persona por ID (con cache)
   getPersona(id: number): Observable<any> {
-    let httpOptions = {
+    if (this.personaByIdCache[id]) {
+      return of(this.personaByIdCache[id]);
+    }
+    const token = this.getAuthToken();
+    const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       }),
     };
-    return this._http.get(this.hostBase + '/' + id, httpOptions);
+    return this._http.get<Persona>(this.hostBase + '/' + id, httpOptions).pipe(
+      tap(data => this.personaByIdCache[id] = data)
+    );
   }
 
   // Editar una persona
   updatePersona(persona: Persona): Observable<any> {
-    let httpOptions = {
+    const token = this.getAuthToken();
+    const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       }),
     };
-    let body: any = JSON.stringify(persona);
+    const body: any = JSON.stringify(persona);
     return this._http.put(
       this.hostBase + '/' + persona.id,
       body,
       httpOptions
+    ).pipe(
+      tap(() => this.clearCache())
     );
   }
 
   // Eliminar una persona
   deletePersona(id: string): Observable<any> {
-    let httpOptions = {
+    const token = this.getAuthToken();
+    const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       }),
     };
-    return this._http.delete(this.hostBase + '/' + id, httpOptions);
+    return this._http.delete(this.hostBase + '/' + id, httpOptions).pipe(
+      tap(() => this.clearCache())
+    );
   }
 }

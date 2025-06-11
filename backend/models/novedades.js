@@ -12,6 +12,7 @@ const Subtipo_hecho = require('./subtipohecho');
 const Descripcion_hecho = require('./descripcion_hecho');
 const Modus_operandi = require('./modus_operandi');
 const NovedadPersonal = require('./novedad_personal');
+const Operativo = require('./operativo');
 
 const Novedades = sequelize.define('Novedades', {
   id: {
@@ -19,6 +20,18 @@ const Novedades = sequelize.define('Novedades', {
     autoIncrement: true,
     primaryKey: true
   },
+  operativo_id: {
+  type: DataTypes.INTEGER,
+  references: {
+    model:Operativo, // nombre de la tabla, no del modelo
+    key: 'id'
+  },
+  allowNull: true // o true si quieres que sea opcional
+},
+operativo_nombre: {
+  type: DataTypes.STRING,
+  allowNull: true // o true si quieres que sea opcional
+},
   fecha: {
     type: DataTypes.STRING,
   },
@@ -33,12 +46,18 @@ const Novedades = sequelize.define('Novedades', {
     },
     allowNull: false        
   },
+  unidad_regional_nombre: {
+    type: DataTypes.STRING,
+  },
   cuadrante_id: {
     type: DataTypes.INTEGER,
     references: {
       model: Cuadrante,
       key: 'id'
     }
+  },
+  cuadrante_nombre: {
+    type: DataTypes.STRING,
   },
   lugar_hecho: {
     type: DataTypes.STRING,
@@ -119,6 +138,14 @@ const Novedades = sequelize.define('Novedades', {
   },
   personal_autor_nombre: { 
     type: DataTypes.STRING,
+  },
+  personal_autor_legajo: {
+    type: DataTypes.STRING,
+  },
+  personas_involucrados: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: []
   },
   elemento_secuestrado: {
     type: DataTypes.JSONB,
@@ -236,6 +263,7 @@ Novedades.belongsToMany(Persona, { through: NovedadPersona, as: 'personas', fore
 Persona.belongsToMany(Novedades, { through: NovedadPersona, as: 'novedades', foreignKey: 'persona_id' });
 Novedades.belongsToMany(Personal, { through: NovedadPersonal, as: 'personales', foreignKey: 'novedad_id' });
 Personal.belongsToMany(Novedades, { through: NovedadPersonal, as: 'novedades', foreignKey: 'personal_id' });
+Novedades.belongsTo(Operativo, {foreignKey: 'operativo_id',as: 'operativo'});
 
 Novedades.associate = function(models) {
   Novedades.hasMany(models.Estado, { foreignKey: 'novedad_id', as: 'estados' });

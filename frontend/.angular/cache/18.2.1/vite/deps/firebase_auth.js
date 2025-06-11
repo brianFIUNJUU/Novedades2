@@ -1,3 +1,4 @@
+import "./chunk-JQJXKPM6.js";
 import {
   AUTH_ERROR_CODES_MAP_DO_NOT_USE_INTERNALLY,
   ActionCodeOperation,
@@ -83,8 +84,8 @@ import {
   validatePassword,
   verifyBeforeUpdateEmail,
   verifyPasswordResetCode
-} from "./chunk-ULSO2CHY.js";
-import "./chunk-P5LRW6R5.js";
+} from "./chunk-RQ4UYQEV.js";
+import "./chunk-LP6NKFWL.js";
 import "./chunk-WCSART4P.js";
 import "./chunk-SIIEUOVM.js";
 export {

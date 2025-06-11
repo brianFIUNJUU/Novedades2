@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { Vigilancia } from '../models/vigilancia'; // Ajusta la ruta según tu estructura de proyecto
 import { environment } from '../environments/environment';
 
-
 @Injectable({
   providedIn: 'root',
 })
@@ -14,35 +13,79 @@ export class VigilanciaService {
   constructor(private _http: HttpClient) {
     // this.hostBase = 'http://localhost:3000/api/vigilancia'; // URL base para la API de Vigilancia
     this.hostBase = environment.apiUrl + '/vigilancia'; // URL base del backend
+  }
 
+  // Método para obtener el token de autenticación desde el localStorage
+  private getAuthToken(): string | null {
+    const token = localStorage.getItem('token');
+    return token;
   }
 
   // Obtener todas las vigilancias
   getVigilancias(): Observable<any> {
-    return this._http.get(this.hostBase + '/');
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this._http.get(this.hostBase + '/', httpOptions);
   }
 
-  // Obtener una vigilancia por ID p
+  // Obtener una vigilancia por ID
   getVigilancia(id: string): Observable<Vigilancia> {
-    return this._http.get<Vigilancia>(`${this.hostBase}/${id}`);
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this._http.get<Vigilancia>(`${this.hostBase}/${id}`, httpOptions);
   }
 
   // Crear una nueva vigilancia
   createVigilancia(data: FormData): Observable<any> {
-     return this._http.post(this.hostBase + '/', data);
- }
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this._http.post(this.hostBase + '/', data, httpOptions);
+  }
 
   // Editar una vigilancia
   editVigilancia(id: string, data: FormData): Observable<any> {
-    return this._http.put(this.hostBase + '/' + id, data);
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this._http.put(this.hostBase + '/' + id, data, httpOptions);
   }
 
-  // Eliminar una vigilancia que sueño me da esta vergada
+  // Eliminar una vigilancia
   deleteVigilancia(id: string): Observable<any> {
-    return this._http.delete(this.hostBase + '/' + id);
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this._http.delete(this.hostBase + '/' + id, httpOptions);
   }
+
   // Obtener la URL de un archivo de vigilancia
   getFileUrl(fileName: string): Observable<{ fileUrl: string }> {
-    return this._http.get<{ fileUrl: string }>(`${this.hostBase}/file/${fileName}`);
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this._http.get<{ fileUrl: string }>(`${this.hostBase}/file/${fileName}`, httpOptions);
   }
 }

@@ -68,3 +68,19 @@ svg {
   box-shadow: none !important;
 }
 
+/* Media Queries para pantallas más pequeñas */
+@media (max-width: 600px) {
+  .tu {
+    font-size: 20px; /* Cambia el tamaño de fuente para pantallas pequeñas */
+    margin-top: 0; /* Ajusta el margen superior */
+    margin-bottom: 0; /* Ajusta el margen inferior */
+    padding-top: 0; /* Ajusta el relleno superior */
+  }
+  c-dropdown{
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 400px) {
+ 
+}

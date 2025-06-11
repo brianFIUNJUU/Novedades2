@@ -1,0 +1,432 @@
+.titulo {
+    color: #112d4d;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  /* Para hacer más pequeñas las opciones del dropdown */
+  .small-ng-select .ng-dropdown-panel .ng-option {
+    font-size: 0.1rem; /* Ajusta este valor según lo pequeño que quieras el texto */
+    padding: 0.25rem 0.5rem; /* Ajusta el padding para que coincida con el tamaño de fuente */
+  }
+  
+  /* Opcional: también puedes hacer más pequeño el texto seleccionado */
+  .small-ng-select .ng-value {
+    font-size: 0.1rem;
+  }
+  
+  /* Opcional: hacer más pequeño el texto del input de búsqueda */
+  .small-ng-select .ng-input input {
+    font-size: 0.1rem;
+  }
+  .custom-card {
+    background-color: #081a2e; /* Color azul */
+    color: white; /* Color del texto */
+  }
+  
+  .custom-card2 {
+    background-color: #0f2f53; /* Color azul */
+    color: white; /* Color del texto */
+  }
+  
+  .table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .custom-modal-header {
+    background-color: #0f2f53; /* Color azul */
+    color: white; /* Color del texto */
+  }
+  .custom-modal-header2 {
+    background-color: #124b8d; /* Color azul */
+    color: white; /* Color del texto */
+  }
+  
+  .camera-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .camera-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+  }
+  
+  video {
+    max-width: 100%;
+    max-height: 80vh;
+    margin-bottom: 10px;
+  }
+  
+  #camera-modal .modal-dialog {
+    max-width: 600px; /* Ajusta este valor según el tamaño deseado */
+    width: auto !important;
+  }
+  
+  #camera-modal .modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  #camera-modal .modal-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+  }
+  
+  #camera-modal video {
+    width: 100%;
+    height: auto;
+  }
+  .btn-close-red {
+    background-color: red;
+    border: none;
+    opacity: 1;
+  }
+  
+  .btn-close-red:hover {
+    background-color: darkred;
+  }
+  /*/* Clase para bloquear el scroll del body */
+  /* Estilos para el modal personalizado */
+  .modal-personalizado {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semi-transparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Contenedor del contenido del modal */
+  .modal-contenido {
+    background-color: white;
+    border-radius: 8px;
+    width: 500px; /* Ancho del modal */
+    max-width: 90%; /* Para que no se salga de la pantalla en móviles */
+    max-height: 90vh; /* Altura máxima para evitar que el modal sea demasiado grande */
+    overflow-y: auto; /* Permite scroll dentro del modal si el contenido es grande */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative; /* Mantiene su posición */
+  }
+  
+  /* Encabezado del modal */
+  .modal-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background-color: #0f2f53;
+    color: white; /* Color del texto */
+    border-bottom: 1px solid #0f2f53;
+  }
+  
+  /* Botón para cerrar el modal */
+  .btn-cerrar {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  /* Cuerpo del modal */
+  .modal-cuerpo {
+    padding: 16px;
+    overflow-y: auto; /* Permite scroll dentro del cuerpo del modal */
+    max-height: 60vh; /* Altura máxima para evitar que el contenido sea demasiado grande */
+  }
+  
+  /* Pie del modal */
+  .modal-pie {
+    padding: 16px;
+    border-top: 1px solid #ddd;
+    text-align: right;
+  }
+  
+  /* Estilos para los botones */
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .btn-secundario {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .btn-primario {
+    background-color: #007bff;
+    color: white;
+    margin-left: 8px;
+  }
+  
+  /* Estilos para el panel desplegable de ng-select */
+  .ng-dropdown-panel {
+    z-index: 9999 !important; /* Mayor que el modal */
+    position: fixed !important; /* Fija el panel desplegable */
+    background: white !important;
+    border: 1px solid #ccc !important;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  .checkbox-container input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    accent-color: #007bff; /* Color del checkbox */
+    cursor: pointer;
+  }
+  
+  .checkbox-container label {
+    font-weight: bold;
+    color: #333;
+  }
+  /* Estilos para el modal */
+  #camera-modal .modal-content {
+    position: relative;
+    background: transparent; /* Fondo transparente para el modal */
+    border: none; /* Elimina el borde del modal */
+  }
+  /* Estilos para el header personalizado */
+  .custom-modal-header2 {
+    position: absolute; /* Posiciona el header de manera absoluta */
+    top: 0; /* Lo coloca en la parte superior */
+    left: 0; /* Lo alinea a la izquierda */
+    right: 0; /* Lo alinea a la derecha */
+    background: rgba(0, 0, 0, 0); /* Fondo semi-transparente */
+    border: none; /* Elimina el borde del header */
+    padding: 16px; /* Aumenta el padding para dar más altura */
+    min-height: 60px; /* Establece una altura mínima */
+    z-index: 1; /* Asegura que el header esté por encima del video */
+    display: flex;
+    align-items: center; /* Centra el botón verticalmente */
+    justify-content: flex-end; /* Alinea el botón a la derecha */
+  }
+  /* Estilos para el botón de cierre */
+  .custom-modal-header2 .btn-close {
+    background-color: red; /* Color rojo del botón */
+    opacity: 1; /* Asegura que el botón sea completamente visible */
+    border-radius: 50%; /* Hace que el botón sea circular */
+    width: 30px; /* Tamaño del botón */
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .custom-modal-header2 .btn-close:hover {
+    background-color: darkred; /* Color rojo oscuro al hacer hover */
+    opacity: 0.8; /* Reduce la opacidad al hacer hover */
+  }
+  /* Estilos para el footer */
+  .custom-modal-footer {
+    position: absolute; /* Posiciona el footer de manera absoluta */
+    bottom: 0; /* Lo coloca en la parte inferior */
+    left: 0; /* Lo alinea a la izquierda */
+    right: 0; /* Lo alinea a la derecha */
+    background: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
+    border: none; /* Elimina el borde del footer */
+    display: flex;
+    justify-content: center; /* Centra los botones horizontalmente */
+    gap: 10px; /* Espacio entre los botones */
+    padding: 10px; /* Espaciado interno */
+  }
+  
+  /* Estilos para los botones del footer */
+  .custom-modal-footer .btn {
+    color: white; /* Texto blanco */
+    background: rgba(255, 255, 255, 0.2); /* Fondo semi-transparente */
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Borde semi-transparente */
+    transition: background 0.3s ease; /* Transición suave al hacer hover */
+  }
+  
+  .custom-modal-footer .btn:hover {
+    background: rgba(255, 255, 255, 0.4); /* Fondo más claro al hacer hover */
+  }
+  
+  /* Estilos para el modal en dispositivos móviles */
+  @media (max-width: 767.98px) {
+    .fullscreen-modal .modal-dialog {
+      margin: 0; /* Elimina el margen */
+      max-width: 100%; /* Ocupa el ancho completo */
+      height: 100vh; /* Ocupa la altura completa de la pantalla */
+    }
+    .titulo {
+      font-size: 14px;
+  
+    }
+    .card-title {
+      font-size: 16px;
+    }
+    .container-fluid {
+      font-size: 13px;
+    }
+    .input{
+      font-size: 13px;
+      padding: 5px;
+    }
+    .fullscreen-modal .modal-content {
+      height: 100%; /* Ocupa la altura completa */
+      border-radius: 0; /* Elimina el borde redondeado */
+    }
+  
+    .fullscreen-modal .modal-body {
+      flex-grow: 1; /* Hace que el cuerpo del modal ocupe el espacio restante */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  
+    .fullscreen-modal .modal-footer {
+      position: absolute; /* Posiciona el footer de manera absoluta */
+      bottom: 0; /* Lo coloca en la parte inferior */
+      left: 0; /* Lo alinea a la izquierda */
+      right: 0; /* Lo alinea a la derecha */
+      background: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
+      border: none; /* Elimina el borde del footer */
+      display: flex;
+      justify-content: center; /* Centra los botones horizontalmente */
+      gap: 10px; /* Espacio entre los botones */
+      padding: 10px; /* Espaciado interno */
+    }
+  
+    .fullscreen-modal .modal-footer .btn {
+      color: white; /* Texto blanco */
+      background: rgba(255, 255, 255, 0.2); /* Fondo semi-transparente */
+      border: 1px solid rgba(255, 255, 255, 0.5); /* Borde semi-transparente */
+      transition: background 0.3s ease; /* Transición suave al hacer hover */
+    }
+  
+    .fullscreen-modal .modal-footer .btn:hover {
+      background: rgba(255, 255, 255, 0.4); /* Fondo más claro al hacer hover */
+    }
+    #camera-modal-N .modal-dialog {
+      width: 100% !important; /* Asegura que el modal ocupe toda la pantalla */
+      margin: 0; /* Elimina márgenes */
+      height: 100vh; /* Ajusta el modal a toda la altura de la pantalla */
+      max-width: 100%;
+    }
+  
+    #camera-modal-N .modal-content {
+      height: 100%; /* Hace que el contenido del modal ocupe toda la altura disponible */
+      display: flex;
+      flex-direction: column;
+      justify-content: center; /* Centra el contenido */
+      padding: 0;
+    }
+  
+    #camera-modal-N .modal-body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0;
+      height: 100%; /* Asegura que el video se ajuste a toda la altura */
+    }
+    #camera-modal .modal-dialog {
+      width: 100% !important; /* Asegura que el modal ocupe toda la pantalla */
+      margin: 0; /* Elimina márgenes */
+      height: 100vh; /* Ajusta el modal a toda la altura de la pantalla */
+      max-width: 100%;
+    }
+  
+    #camera-modal .modal-content {
+      height: 100%; /* Hace que el contenido del modal ocupe toda la altura disponible */
+      display: flex;
+      flex-direction: column;
+      justify-content: center; /* Centra el contenido */
+      padding: 0;
+    }
+  
+    #camera-modal .modal-body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0;
+      height: 100%; /* Asegura que el video se ajuste a toda la altura */
+    }
+    video {
+      max-height: 100vh; /* Asegura que el video ocupe la altura máxima */
+      width: 100%;
+      object-fit: cover; /* Asegura que el video ocupe todo el espacio disponible */
+    }
+    
+    
+    /* Media query para pantallas de celular (ancho máximo de 768px) */
+  @media (max-width: 768px) {
+    .form-control, .form-select, .btn {
+      font-size: 12px; /* Reducir el tamaño de fuente en celulares */
+      padding: 5px; /* Reducir el padding */
+    }
+  
+    label, p {
+      font-size: 12px; /* Reducir el tamaño de fuente de etiquetas y texto */
+    }
+    h5, h6{
+      font-size: 16px; /* Reducir el tamaño de fuente de encabezados */
+    }
+    .table {
+      font-size: 10px; /* Reducir el tamaño de fuente para tablas */
+    }
+  
+    .col-md-4, .col-md-6, .col-md-12 {
+      width: 100%; /* Las columnas ocupan todo el ancho en celulares */
+    }
+  
+  
+    .form-group.d-flex label {
+      margin-bottom: 5px; /* Agregar margen inferior a las etiquetas */
+    }
+  
+  
+  
+    .table-responsive {
+      overflow-x: auto; /* Permitir scroll horizontal en tablas */
+    }
+  }
+  
+  /* Media query para pantallas aún más pequeñas (ancho máximo de 480px) */
+  @media (max-width: 480px) {
+    .form-control, .form-select, .btn {
+      font-size: 12px; /* Reducir aún más el tamaño de fuente */
+    }
+  
+    label, p {
+      font-size: 12px; /* Reducir el tamaño de fuente de etiquetas y texto */
+    }
+    h5, h6{
+      font-size: 16px; /* Reducir el tamaño de fuente de encabezados */
+    }
+  
+    .table {
+      font-size: 8px; /* Reducir aún más el tamaño de fuente para tablas */
+    }
+  
+  
+  }
+  }

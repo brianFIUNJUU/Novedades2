@@ -42,3 +42,58 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .white-text {
     color: white !important;
   }
+  
+  @media (max-width: 768px) {
+    .swal2-popup {
+      width: 260px !important;
+      max-width: 90% !important;
+      padding: 12px !important;
+      font-size: 20px !important;
+      border-radius: 10px !important;
+    }
+  
+    .swal2-title {
+      font-size: 20px !important;
+      margin-bottom: 10px !important;
+    }
+  
+    .swal2-html-container {
+      font-size: 20px !important;
+      text-align: center !important;
+    }
+  
+    .swal2-content {
+      font-size: 16px !important;
+    }
+  
+    .swal2-confirm, 
+     .swal2-deny, .swal2-cancel{
+      font-size: 16px !important;
+      padding: 6px 12px !important;
+      border-radius: 5px !important;
+    }
+    
+    
+  }
+  @media (max-width: 768px) {
+    ng-select {
+      font-size: 12px !important;
+    }
+    
+    .ng-dropdown-panel .ng-option {
+      font-size: 10px !important;
+    }
+  
+    .ng-dropdown-panel .ng-option-label {
+      font-size: 10px !important;
+    }
+  
+    .ng-select .ng-value-container {
+      font-size: 10px !important;
+    }
+  
+    .ng-select .ng-option-selected {
+      font-size: 10px !important;
+    }
+  }
+  

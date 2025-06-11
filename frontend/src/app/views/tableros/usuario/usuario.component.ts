@@ -12,7 +12,7 @@ import Swal from 'sweetalert2'; // Importar SweetAlert
   styleUrls: ['./usuario.component.scss']
 })
 export class UsuarioComponent implements OnInit {
-
+perfilUsuarioActual: string = '';
   usuarios: any[] = []; // Array para almacenar los usuarios originales
   usuariosFiltrados: any[] = []; // Array para almacenar los usuarios filtrados
   filtroEstado: string = ''; // Variable para el filtro de estado
@@ -20,8 +20,13 @@ export class UsuarioComponent implements OnInit {
 
   constructor(private authService: AuthenticateService) {}
 
+    
+  
   ngOnInit(): void {
-    this.loadUsuarios(); // Cargar usuarios al iniciar
+    this.authService.getUserInfo().subscribe(userInfo => {
+      this.perfilUsuarioActual = userInfo.perfil;
+    });
+    this.loadUsuarios();
   }
   
   loadUsuarios(): void {

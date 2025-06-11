@@ -3,19 +3,13 @@ h2 {
     font-size: 2rem;
     margin-bottom: 20px;
   }
-  
+
   .iframe-container {
-    position: relative;
-    padding-bottom: 56.25%; /* Relación de aspecto de 16:9 */
-    height: 0;
-    overflow: hidden;
-    max-width: 100%;
+    width: 100%;
+    height: 100vh; /* Usa toda la altura de la pantalla */
   }
-  
+
   .iframe-container iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     border: 0;

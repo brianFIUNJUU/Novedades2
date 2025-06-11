@@ -24,20 +24,49 @@ module.exports = {
   NovedadPersonal
 };
 
-// Sirve archivos estáticos desde el directorio uploads
-app.use('/uploads', express.static('uploads'));
 
 // Inicializa Firebase Admin con las credenciales del servicio  
 const serviceAccount = require('./config/serviceAccountKey.json'); // Ajusta la ruta según corresponda
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
+const authenticateFirebaseToken = async (req, res, next) => {
+  const idToken = req.headers['authorization']?.split('Bearer ')[1];  // Extraer token del encabezado Authorization
+  
+  // Verificar si se recibió un token
+  // console.log("Token recibido:", idToken);
+  
+  if (!idToken) {
+    return res.status(401).send('Inicia sesion');
+  }
+
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    req.user = decodedToken;  // Almacenar la información del usuario decodificada en la solicitud
+    next();  // Continúa con la solicitud si el token es válido
+  } catch (error) {
+    console.error("Error al verificar el token:", error);
+    return res.status(401).send('Invalid token');
+  }
+};
+
 
 // Middlewares
-app.use(cors({  }));
+app.use(cors({
+  origin: "https://192.168.88.62:4200",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true, // Permite el uso de cookies o autenticación si es necesario
+}));
+
 app.use(bodyParser.json({ limit: '10mb' })); // Configura el límite de tamaño del cuerpo JSON
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true })); // Configura el límite para datos URL-encoded
 
+// Sirve archivos estáticos desde el directorio uploads
+app.use('/uploads', express.static('uploads'));
+
+// Middleware de autenticación global (se aplica a todas las rutas después de este middleware)
+app.use(authenticateFirebaseToken);
 // Cargar los módulos de direccionamiento de rutas
 app.use('/api/persona', require('./routes/persona.route.js'));
 app.use('/api/dependencia', require('./routes/dependencia.route.js'));
@@ -58,6 +87,9 @@ app.use('/api/modus_operandi', require('./routes/modus_operandi.route.js'));
 app.use('/api/novedadPersonal', require('./routes/novedades_personal.route.js')); // Corregir esta línea
 app.use('/api/usuarios', require('./routes/usuario.route.js'));
 app.use('/api/mensaje', require('./routes/mensaje.route.js'));
+app.use('/api/operativo', require('./routes/operativo_route.js'));
+app.use('/api/operativo-personal', require ('./routes/operativoPersonalRoutes.js'));
+app.use('/api/operativo-cuadrante', require ('./routes/operativo_cuadrante.route.js')); // Agregar esta línea para la nueva ruta
 
 // Endpoint para obtener usuarios
 app.get('/api/users', async (req, res) => {
@@ -179,34 +211,36 @@ app.get('/api/users/legajo/:legajo', async (req, res) => {
     const usuarioDoc = snapshot.docs[0];
     const usuarioFirestore = usuarioDoc.data();
 
-    // Buscar el usuario en Firebase Authentication por UID (si lo tiene)
-    const uid = usuarioFirestore.uid;
-    let usuarioAuth = null;
-    
-    if (uid) {
-      try {
-        usuarioAuth = await admin.auth().getUser(uid);
-      } catch (error) {
-        console.error('Error obteniendo usuario de Firebase Authentication:', error);
-      }
-    }
-
-    // Si encontramos el usuario en Firebase, combinamos la información
-    const usuario = {
-      ...usuarioFirestore,
-      uid: usuarioAuth ? usuarioAuth.uid : null,
-      email: usuarioAuth ? usuarioAuth.email : null,
-      nombre: usuarioAuth ? usuarioAuth.displayName : null,
-      estado: usuarioAuth ? !usuarioAuth.disabled : usuarioFirestore.estado,
-    };
-
-    res.status(200).json(usuario);
+    // Devolver solo los datos de Firestore
+    res.status(200).json(usuarioFirestore);
 
   } catch (error) {
     console.error('Error obteniendo usuario:', error);
     res.status(500).json({ message: 'Error en el servidor' });
   }
 });
+
+// Endpoint para obtener un usuario por UID
+app.get('/api/users/uid/:uid', async (req, res) => {
+  const uid = req.params.uid;
+
+  try {
+    // Obtener el documento de Firestore con el mismo UID
+    const userDoc = await admin.firestore().collection('usuarios').doc(uid).get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({ message: 'Usuario no encontrado en Firestore' });
+    }
+
+    const usuarioFirestore = userDoc.data();
+    res.status(200).json(usuarioFirestore);
+
+  } catch (error) {
+    console.error('Error obteniendo usuario por UID:', error);
+    res.status(500).json({ message: 'Error en el servidor' });
+  }
+});
+
 
 
 // Sincronización con Sequelize
@@ -221,20 +255,36 @@ app.set('port', process.env.PORT || 3000);
 
 // HTTPS configuration (update paths)
 const sslOptions = {
-  key: fs.readFileSync(path.join(__dirname, 'ssl/192.168.80.31-key.pem')),  // Ruta correcta desde backend
-  cert: fs.readFileSync(path.join(__dirname, 'ssl/192.168.80.31.pem'))     // Ruta correcta desde backend
+  key: fs.readFileSync(path.join(__dirname, 'ssl/192.168.88.62-key.pem')),
+  cert: fs.readFileSync(path.join(__dirname, 'ssl/192.168.88.62.pem'))
 };
-// Crear el servidor HTTP para Socket.IO
-const server = https.createServer(sslOptions, app);
 
-// Inicializar Socket.IO con el servidor HTTPS
-const io = socketIo(server);
+// Crear el servidor HTTPS y asociarlo a Socket.IO
+const server = https.createServer(sslOptions, app);
+const io = socketIo(server, {
+  cors: {
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: "https://192.168.88.62:4200", // URL del frontend  cambiar la ip luego de todo 
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+    credentials: true, // Permite autenticación si usas cookies o tokens
+  },
+  transports: ["websocket"], // Solo permitir WebSocket
+});
+
+
 
 // Configurar los eventos de Socket.IO para el servicio de mensajes
 const { configurarSocket } = require('./controllers/mensaje.controllers');
 configurarSocket(io);  // Configura los eventos de socket en el servidor
 
-// Starting the server with HTTPS
-https.createServer(sslOptions, app).listen(app.get('port'), '0.0.0.0', () => {
-  console.log(`Servidor HTTPS corriendo en https://0.0.0.0:${app.get('port')}`);
+// Starting the server with HTTPS 
+// https.createServer(sslOptions, app).listen(app.get('port'), '0.0.0.0', () => {
+//   console.log(`Servidor HTTPS corriendo en https://0.0.0.0:${app.get('port')}`);
+// });
+// quizas podriamos crear  un certificado que pueda ser utilizado en cualquier ip se puede
+
+// Iniciar el servidor con HTTPS y Socket.IO
+server.listen(app.get('port'), '0.0.0.0', () => {
+console.log(`🚀 Servidor HTTPS con Socket.IO corriendo en https://192.168.88.62:${app.get('port')}`);
 });

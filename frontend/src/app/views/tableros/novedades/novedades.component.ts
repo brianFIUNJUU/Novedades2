@@ -27,7 +27,8 @@ import * as bootstrap from 'bootstrap';
 import { AuthenticateService } from '../../../services/authenticate.service';
 import * as L from 'leaflet';
 import { PersonalService } from '../../../services/personal.service'; // Importar el servicio de Personal
-
+import {Operativos} from '../../../models/operativos'; // Importar el modelo de Operativo
+import { OperativoService } from '../../../services/operativo.services';
 import {ElementoService} from '../../../services/elemento.service'; // Importar el servicio de Estado
 import {CategoriaService} from '../../../services/categoria.service'; // Importar el servicio de Categoría
 import { Elemento } from '../../../models/elemento';
@@ -82,6 +83,7 @@ export class NovedadesComponent implements OnInit {
 
   novedadId: number | null = null; // Inicializa novedadId con null
   unidadesRegionales: UnidadRegional[] = [];
+  operativos: Operativos[] = [];
   localidades: Localidad[] = [];
   modusOperandiList: ModusOperandi[] = [];
   searchModusOperandi$ = new Subject<string>();
@@ -135,7 +137,8 @@ currentCameraIndexN: number = 0; // Índice de la cámara actual
   archivosPersonas: { file: File | null, base64: string, mimeType: string, fileName: string }[] = [
     { file: null, base64: '', mimeType: '', fileName: '' }
   ];
-  
+    operativosFiltrados: any[] = [...this.operativos];
+
 
   editIndex: number | null = null;
   inculpados: any[] = [];
@@ -175,8 +178,9 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     private tipoHechoService: TipoHechoService, // Inyectar el servicio de TipoHecho
     private subtipoHechoService: SubtipoHechoService, // Inyectar el servicio de SubtipoHecho
     private descripcionHechoService: DescripcionHechoService,// Inyectar el servicio de DescripcionHecho
-    private novedadesPersonalService: NovedadesPersonalService // Inyectar el servicio de NovedadPersonal,
-    ,private cdr: ChangeDetectorRef
+    private novedadesPersonalService: NovedadesPersonalService, // Inyectar el servicio de NovedadPersonal,
+    private operativoService: OperativoService, // Inyectar el servicio de Operativo
+    private cdr: ChangeDetectorRef
     
     
   ) {
@@ -224,7 +228,12 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     this.testigo.localidad_id = null;
       this.nuevaPersona.departamento_id = null;
     this.nuevaPersona.localidad_id = null;
-  
+        
+    this.authService.getUserInfo().subscribe(userInfo => {
+        this.usuarioLegajo = userInfo.legajo;
+          this.getOperativosPorLegajo(this.usuarioLegajo);
+      });
+    
     
     // this.cargarTiposHecho();
     this.configurarFiltrado(); // Configura el filtrado aquí
@@ -232,12 +241,33 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     this.configurarFiltradoDescripcion();
     this.resetArchivosPersona()
   } 
-  abrirModal() {
+
+  // Función para cerrar el modal
+getOperativosPorLegajo(legajo: string): void {
+    this.operativoService.getOperativosPorLegajo(legajo).subscribe({
+      next: (data: Operativos[]) => {
+        this.operativosFiltrados = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar los operativos por legajo:', err);
+        Swal.fire('Error', 'No se pudieron obtener los operativos por legajo.', 'error');
+      }
+    });
+  }
+     onOperativoChange(event: any): void {
+    const selectedId = +event.target.value || this.nuevaNovedad.operativo_id;
+    const operativoSeleccionado = this.operativosFiltrados.find(o => o.id === selectedId);
+    if (operativoSeleccionado) {
+      this.nuevaNovedad.operativo_id = operativoSeleccionado.id;
+      this.nuevaNovedad.operativo_nombre = operativoSeleccionado.nombre_operativo;
+    } else {
+      this.nuevaNovedad.operativo_nombre = '';
+    }
+  }
+    abrirModal() {
     this.modalBienRecuperadoAbierto = true;
     this.bloquearScroll(); // Bloquear el scroll al abrir el modal
   }
-
-  // Función para cerrar el modal
 
 
   cerrarModal(): void {
@@ -369,24 +399,21 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
   //   }
   // }
      
- cargarDatosPersonalPorId(id: number): void {
-    this.personalService.getPersonal(id.toString()).subscribe(
-      (personal: Personal) => {
-        this.personalAutor = personal; // Almacenar los datos del personal autor
-        console.log('Personal autor encontrado:', personal);
-      },
-      (error: HttpErrorResponse) => {
-        console.error('Error al obtener los datos del personal:', error.message);
+//  cargarDatosPersonalPorId(id: number): void {
+//     this.personalService.getPersonal(id.toString()).subscribe(
+//       (personal: Personal) => {
+//         this.personalAutor = personal; // Almacenar los datos del personal autor
+//         console.log('Personal autor encontrado:', personal);
+//       },
+//       (error: HttpErrorResponse) => {
+//         console.error('Error al obtener los datos del personal:', error.message);
+//       }
+//     );
+//      }
+       cargarDatosPersonal(): void {
+      if (!this.isUpdating) {
+        this.buscarPersonalAutorPorLegajoUsuario();
       }
-    );
-     }
-    cargarDatosPersonal(): void {
-    console.log('Estado de isUpdating:', this.isUpdating);
-    if (this.isUpdating) {
-      this.cargarDatosPersonalPorId(this.nuevaNovedad.personal_autor_id);
-    } else {
-      this.buscarPersonalAutorPorLegajoUsuario();
-    }
     }
 
   buscarPersonalAutorPorLegajoUsuario(): void {
@@ -401,8 +428,9 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     this.personalService.getPersonalByLegajo(legajo).subscribe(
       (personal: Personal) => {
         this.nuevaNovedad.personal_autor_id = personal.id;
-        this.personalAutor = personal; // Almacenar los datos del personal autor
-        console.log('Personal autor encontrado:', personal);
+        this.nuevaNovedad.personal_autor_legajo = personal.legajo;
+        this.nuevaNovedad.personal_autor_nombre = `(${personal.legajo})${personal.jerarquia}:${personal.nombre} ${personal.apellido}`;
+        this.personalAutor = personal;
         this.mensajeError = ''; // Limpiar el mensaje de error
       },
       (error) => {
@@ -572,7 +600,17 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     
       return of(resultados); // Retorna los resultados filtrados como un observable
     }
-
+    onUnidadRegionalChange(event: any) {
+      const selectedId = +event.target.value;
+      const unidad = this.unidadesRegionales.find(u => Number(u.id) === selectedId);
+      this.nuevaNovedad.unidad_regional_nombre = unidad ? unidad.unidad_regional : '';
+      this.cargarCuadrantes(selectedId); // Si quieres seguir llamando a cargarCuadrantes
+    }
+        onCuadranteChange(event: any) {
+      const selectedId = +event.target.value;
+      const cuadrante = this.cuadrantes.find(c => Number(c.id) === selectedId);
+      this.nuevaNovedad.cuadrante_nombre = cuadrante ? cuadrante.nombre : '';
+    }
 cargarDescripcionesHechos() {
   this.descripcionHechoService.getDescripcionesHecho().subscribe(
     (data) => {
@@ -1454,10 +1492,10 @@ actualizarRelacionesPersonas(): void {
     );
   }
     cargarCategorias(): void {
-    console.log('Cargando categorías...');
+    // console.log('Cargando categorías...');
     this.categoriaService.getCategorias().subscribe(
       data => {
-        console.log('Categorías cargadas:', data);
+        // console.log('Categorías cargadas:', data);
         this.categoria = data;
       },
       error => {
@@ -1799,11 +1837,7 @@ getFileUrlNovedad(base64: string, mimeType: string): SafeUrl {
 
     this.personalService.getPersonalByLegajo(legajo).subscribe(
         (data: Personal) => { // <-- Suponiendo que retorna un solo objeto
-            Swal.fire({
-                icon: 'success',
-                title: 'Personal encontrado',
-                text: `El personal con legajo ${legajo} ha sido encontrado.`,
-            });
+          
 
             this.nuevaPersonal = data; // Almacena los datos en nuevaPersonal
         },
@@ -1837,11 +1871,7 @@ agregarPersonalTemporal(): void {
       this.personalTemporales.push({ personal: { ...this.nuevaPersonal } });
       this.policiasIds.push(this.nuevaPersonal.id);
       console.log('Personal agregado temporalmente:', { personal: { ...this.nuevaPersonal } });
-     Swal.fire({
-      icon: 'warning',
-      title: 'Personal agregado',
-     
-    });
+  
     this.cerrarModalPersonal()
     }
 

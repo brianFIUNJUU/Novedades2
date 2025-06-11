@@ -1,0 +1,439 @@
+<div class="card text-white custom-card">
+  <div class="card-body text-center p-2">
+    <h6 class="card-title font-weight-bold mb-0">Datos del Operativo</h6>
+  </div>
+</div>
+
+<form>
+  <br>
+  <div class="row">
+    <div class="col-sm-4">
+      <div class="form-group">
+        <label for="nombre_operativo">Nombre del Operativo:</label>
+        <input id="nombre_operativo" name="nombre_operativo" type="text" class="form-control"
+          placeholder="Ingrese el nombre del Operativo" [(ngModel)]="operativo.nombre_operativo" />
+      </div>
+    </div>
+
+    <div class="col-sm-2">
+      <div class="form-group">
+        <label for="fecha_desde">Fecha desde:</label>
+        <input type="date" id="fecha_desde" name="fecha_desde" [(ngModel)]="operativo.fecha_desde"
+          class="form-control">
+      </div>
+    </div>
+
+    <div class="col-sm-2">
+      <div class="form-group">
+        <label for="fecha_hasta">Fecha hasta:</label>
+        <input type="date" id="fecha_hasta" name="fecha_hasta" [(ngModel)]="operativo.fecha_hasta"
+          class="form-control">
+      </div>
+    </div>
+
+    <div class="col-sm-2">
+      <div class="form-group">
+        <label for="horario_desde">Hora desde:</label>
+        <input type="time" id="horario_desde" name="horario_desde" [(ngModel)]="operativo.horario_desde"
+          class="form-control">
+      </div>
+    </div>
+
+    <div class="col-sm-2">
+      <div class="form-group">
+        <label for="horario_hasta">Hora hasta:</label>
+        <input type="time" id="horario_hasta" name="horario_hasta" [(ngModel)]="operativo.horario_hasta"
+          class="form-control">
+      </div>
+    </div>
+
+    <div class="col-sm-4">
+      <div class="form-group">
+        <label for="turno">Turno:</label>
+        <select id="turno" name="turno" [(ngModel)]="operativo.turno" class="form-select">
+          <option value="" disabled selected class="option-placeholder">Seleccione el turno</option>
+          <option value="Mañana">Mañana</option>
+          <option value="Tarde">Tarde</option>
+          <option value="Noche">Noche</option>
+          <option value="Horario establecido">Horario establecido</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="form-group">
+        <label for="observaciones">Observaciones:</label>
+        <textarea id="observaciones" name="observaciones" class="form-control" [(ngModel)]="operativo.observaciones"
+          placeholder="Ingrese observaciones"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div *ngFor="let cuadrante of cuadrantesForm; let i = index" class="mt-4 border p-3 rounded">
+        <div class="container-fluid p-0">
+        <div class="card text-white custom-card2">
+          <div class="card-body text-center p-2 d-flex justify-content-between align-items-center">
+            <h6 class="card-title font-weight-bold mb-0">Cuadrante {{ i + 1 }}</h6>
+            <button *ngIf="cuadrantesForm.length > 1" type="button" class="btn btn-danger btn-sm ms-2"
+              (click)="eliminarCuadrante(i)">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    <div class="row">
+    <div class="row mt-3 col-md-6">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Unidad Regional:</label>
+        <!-- Unidad Regional -->
+<select [(ngModel)]="cuadrante.unidad_regional_id"
+        name="unidad_regional_{{ i }}"
+        class="form-select"
+        (change)="onUnidadRegionalChange(cuadrante, i)">
+  <option *ngFor="let unidad of unidadRegionales" [value]="unidad.id">{{ unidad.unidad_regional }}</option>
+</select>
+        </div>
+      </div>
+       <div class="col-md-6">
+        <div class="form-group">
+          <label>Cuadrante:</label>
+         <select [(ngModel)]="cuadrante.cuadrante_id"
+        name="cuadrante_{{ i }}"
+        class="form-select"
+        (change)="onCuadranteChange(cuadrante, i)">
+  <option *ngFor="let c of cuadrantesPorIndice[i] || []" [value]="c.id">{{ c.nombre }}</option>
+</select>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Leg. Jefe Supervisor:</label>
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Buscar legajo"
+              [(ngModel)]="cuadrante.legajoJefe" name="legajo_jefe_{{ i }}"
+              (keyup.enter)="buscarOficialCargoPorLegajo(cuadrante.legajoJefe, i)" />
+            <div class="input-group-append">
+              <span class="input-group-text" (click)="buscarOficialCargoPorLegajo(cuadrante.legajoJefe, i)">
+                <i class="bi bi-search"></i>
+              </span>
+            </div>
+          </div>
+              <div *ngIf="cuadrante.mensajeError" class="text-danger">{{ cuadrante.mensajeError }}</div>
+
+          <div *ngIf="cuadrante.oficialCargo" class="mt-2 p-2 border bg-light">
+            <p>Efectivo:<strong>({{ cuadrante.oficialCargo.jerarquia}})</strong> {{ cuadrante.oficialCargo.nombre }} </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group">
+          <label>Leg. Jefe de Cuadrante:</label>
+          <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Buscar legajo"
+              [(ngModel)]="cuadrante.legajoCuadrante" name="legajo_cuadrante_{{ i }}"
+              (keyup.enter)="buscarJefeCuadrantePorLegajo(cuadrante.legajoCuadrante, i)" />
+            <div class="input-group-append">
+              <span class="input-group-text" (click)="buscarJefeCuadrantePorLegajo(cuadrante.legajoCuadrante, i)">
+                <i class="bi bi-search"></i>
+              </span>
+            </div>
+          </div>
+              <div *ngIf="cuadrante.mensajeError2" class="text-danger">{{ cuadrante.mensajeError2 }}</div>
+
+          <div *ngIf="cuadrante.jefeCuadrante" class="mt-2 p-2 border bg-light">
+            <p><strong>Efectivo:({{ cuadrante.jefeCuadrante.jerarquia}})</strong> {{ cuadrante.jefeCuadrante.nombre }} </p>
+          </div>
+        </div>
+      </div>
+   
+    </div>
+      <div class="row mt-3 col-md-6">
+
+                            <div class="form-group d-flex align-items-center justify-content-between">
+                  <label class="mr-2">Personal manos libres:</label>
+                  <span class="badge bg-info ms-auto">{{ cuadrantesForm[i].cant_manos_libres }}</span>            
+                        <button type="button" class="btn btn-primary btn-sm" (click)="openModal('manos_libres', i)">
+                    <i class="bi bi-plus"></i>
+                  </button>
+                </div>
+
+
+          <br>
+          <br>
+
+          <div class="form-group d-flex align-items-center justify-content-between">
+            <label class="mr-2">Personal de UPCAR:</label>
+                  <span class="badge bg-info ms-auto">{{ cuadrantesForm[i].cant_upcar }}</span>                  
+            <button type="button" class="btn btn-primary btn-sm" (click)="openModal('upcar', i)">
+              <i class="bi bi-plus"></i>
+            </button>
+          </div>
+          <br>
+          <br>
+          
+          <div class="form-group d-flex align-items-center justify-content-between">
+            <label class="mr-2">Contravencional:</label>
+                  <span class="badge bg-info ms-auto">{{ cuadrantesForm[i].cant_contravencional }}</span>                  
+            <button type="button" class="btn btn-primary btn-sm" (click)="openModal('contravencional', i)">
+              <i class="bi bi-plus"></i>
+            </button>
+          </div>
+          <br>
+          <br>
+          
+          <div class="form-group d-flex align-items-center justify-content-between">
+            <label class="mr-2">Grupo Dinamico de Prevencion:</label>
+                  <span class="badge bg-info ms-auto">{{ cuadrantesForm[i].cant_dinamicos }}</span>                  
+            <button type="button" class="btn btn-primary btn-sm" (click)="openModal('grupo_dinamico', i)">
+              <i class="bi bi-plus"></i>
+            </button>
+          </div>
+          <br>
+          <br>
+          
+          <div class="form-group d-flex align-items-center justify-content-between">
+            <label class="mr-2">Unidad movil:</label>
+                  <span class="badge bg-info ms-auto">{{ cuadrantesForm[i].cant_moviles }}</span>                  
+            <button type="button" class="btn btn-primary btn-sm" (click)="openModalUnidadMovil('centro')">
+              <i class="bi bi-plus"></i>
+            </button>
+          </div>
+          <br>
+          <br>
+            <div class="form-group">
+              <label for="centro_personal">FUERZA EFECTIVA TOTAL:</label>
+            <span class="badge bg-info ms-auto">{{ cuadrantesForm[i].cant_total_personal }}</span>                  
+
+            </div>
+          
+      </div>
+      </div>
+  </div>
+
+ 
+ 
+
+  <!-- Botones de acción -->
+  <div class="row mt-4">
+    <div class="col">
+      <button class="btn btn-primary" type="button" (click)="guardarOperativo()">Guardar Operativo</button>
+      <button class="btn btn-danger mr-3" type="button" (click)="resetForm()">Cancelar</button>
+      <button type="button" class="btn btn-secondary" (click)="agregarCuadrante()">Añadir Cuadrante</button>
+    </div>
+  </div>
+</form>
+
+
+
+    
+<!-- Modal Añadir Personal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header custom-modal-header p-2">
+        <h5 class="modal-title" id="exampleModalLabel">Añadir Personal</h5>
+        <button type="button" class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" (click)="cerrarModal('exampleModal')" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form >
+          <div class="row">
+            <div class="form-group col-md-6 col-sm-12">
+              <div class="d-flex align-items-center mb-3">
+                <label for="legajo" class="mr-2">Legajo:</label>
+                <div class="input-group">
+                  <input id="legajo" name="legajo" type="text" class="form-control" aria-label="Legajo" placeholder="Buscar" [(ngModel)]="legajoPersonalModal">
+                  <div class="input-group-append">
+                    <span class="input-group-text" (click)="buscarPersonalPorLegajoModal()"><i class="bi bi-search"></i></span>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="mensajeErrorPersonalModal" class="text-danger">{{ mensajeErrorPersonalModal }}</div>
+            </div>   
+            <div class="form-group col-md-6 col-sm-12" *ngIf="personalEncontradoModal">
+              <div class="mt-2 p-2 border bg-light">
+                <p><strong>{{ personalEncontradoModal.jerarquia }}</strong> {{ personalEncontradoModal.nombre }} {{ personalEncontradoModal.apellido }} (DNI: {{ personalEncontradoModal.dni }})</p>
+              </div>
+            </div>
+            <div class="form-group col-md-6 col-sm-12">
+            <div class="d-flex align-items-center mb-3">
+              <label for="asitencia">Asistencia:</label>
+            <select class="form-select" [(ngModel)]="asistenciaPersonalModal" name="asistenciaPersonalModal">
+            <option value="" disabled selected>Seleccione una opción</option>
+            <option value="Presente">Presente</option>
+            <option value="Ausente">Ausente</option>
+            <option value="Justificado">Justificado</option>
+          </select>
+
+            </div>
+            </div>
+               <div class="form-group col-md-6 col-sm-12">
+            <div class="d-flex align-items-center mb-3">
+              <label for="observaciones">Observaciones:</label>
+                   <input id="observaciones" name="observacionesPersonalModal" type="text" class="form-control"
+              placeholder="Ingrese observaciones" [(ngModel)]="observacionesPersonalModal">          
+              </div>
+            </div>
+            
+             <div class="row">
+         <div class=" col-md-6 col-sm-12">
+          <div class="d-flex align-items-center mb-3">
+            <label>Latitud:</label>
+            <input class="form-control" [value]="selectedLat || ''" readonly>
+         </div>  
+          </div>
+          <div class=" col-md-6 col-sm-12">
+            <div class="d-flex align-items-center mb-3">
+            <label>Longitud:</label>
+            <input class="form-control" [value]="selectedLng || ''" readonly>
+          </div> 
+          </div>
+             </div>
+              <div class="mb-3">
+                <label><strong>Ubicación del Personal :</strong></label>
+                <div id="mapPersonalModal" #mapContainer style="height: 250px; width: 100%;"></div>
+              </div>
+            <div class="form-group col-md-6 col-sm-12">
+                                <button class="btn btn-primary btn-sm" type="button"
+                  (click)="personalEncontradoModal && agregarPersonalSeleccionado(personalEncontradoModal)">
+                  {{ (editandoPersonalExistenteId || editandoPersonalPendienteIdx !== null) ? 'Guardar cambios' : 'Agregar a la lista' }}
+                </button>
+             </div>
+          </div>
+        </form>
+
+        <!-- Listado de personal agregado a este cuadrante y grupo -->
+        <div class="table-responsive mt-3" *ngIf="personalExistente.length > 0 || getPersonalPendienteActual().length > 0">          <table class="table table-bordered border-primary">
+            <thead>
+              <tr>
+                <th class="text-small">Legajo</th>
+                <th class="text-small">N y A</th>
+                <th class="text-small">Jerarquía</th>
+                <th class="text-small">Asistencia</th>
+                <th class="text-small">Acciones</th>
+                
+              </tr>
+            </thead>
+                        <tbody>
+              <!-- Personal existente (ya guardado en backend) -->
+              <tr *ngFor="let p of personalExistenteModal">               
+                <td class="text-small">{{ p.personal_legajo }}</td>
+                <td class="text-small">{{ p.personal_nombre }}</td>
+                <td class="text-small">{{ p.personal_jerarquia }}</td>
+                <td class="text-small">{{ p.asistencia }}</td>
+                <td>
+                <button class="btn btn-danger btn-sm" (click)="eliminarPersonalExistente(p.id)"><i class="bi bi-x"></i></button>           
+                <button class="btn btn-warning btn-sm" (click)="editarPersonalExistente(p)"><i class="bi bi-pencil"></i></button>
+               
+                <!-- No mostrar botón eliminar si no quieres permitir borrar los existentes desde aquí -->
+              </tr>
+              <!-- Personal pendiente (nuevo, aún no guardado) -->
+                         <tr *ngFor="let p of getPersonalPendienteActual(); let i = index">
+                <td class="text-small">{{ p.personal_legajo }}</td>
+                <td class="text-small">{{ p.personal_nombre }}</td>
+                <td class="text-small">{{ p.personal_jerarquia }}</td>
+                <td class="text-small">{{ p.asistencia }}</td>
+                <td>
+                  <button class="btn btn-warning btn-sm" (click)="editarPersonalPendiente(i)">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-danger btn-sm" (click)="eliminarPersonalPendiente(i)">
+                    <i class="bi bi-x"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal Unidad Móvil -->
+<div class="modal fade" id="unidadMovilModal" tabindex="-1" aria-labelledby="unidadMovilModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      
+      <div class="modal-header">
+        <h5 class="modal-title" id="unidadMovilModalLabel">Añadir Unidad Móvil</h5>
+        <button type="button" class="close" (click)="cerrarModal('unidadMovilModal')" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <form>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <div class="input-group">
+                <input id="unidad_movil_id" name="unidad_movil_id" type="text" class="form-control" placeholder="ID de la Unidad Móvil" aria-label="ID Unidad Móvil">
+                <div class="input-group-append">
+                  <span class="input-group-text"><i class="bi bi-search"></i></span>
+                </div>
+              </div>
+
+              <div class="form-group mt-2">
+                <label for="unidad_movil_tipo">Tipo:</label>
+                <input type="text" class="form-control" id="unidad_movil_tipo" name="unidad_movil_tipo">
+              </div>
+
+              <div class="form-group">
+                <label for="unidad_movil_marca">Marca:</label>
+                <input type="text" class="form-control" id="unidad_movil_marca" name="unidad_movil_marca">
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" type="button">Agregar Móvil</button>
+        </form>
+
+        <div class="table-responsive mt-3">
+          <table class="table table-bordered border-primary">
+            <thead>
+              <tr>
+                <th class="text-small">ID</th>
+                <th class="text-small">Tipo</th>
+                <th class="text-small">Marca</th>
+                <th class="text-small">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-small">X-12</td>
+                <td class="text-small">Auto</td>
+                <td class="text-small">Fiat Cronos</td>
+                <td class="text-small">
+                  <button class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-danger btn-sm"><i class="bi bi-x"></i></button>
+                </td>
+              </tr>
+              <tr>
+                <td class="text-small">Y-34</td>
+                <td class="text-small">Moto</td>
+                <td class="text-small">ROWSER</td>
+                <td class="text-small">
+                  <button class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-danger btn-sm"><i class="bi bi-x"></i></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModal('unidadMovilModal')">Cerrar</button>
+      </div>
+
+    </div>
+  </div>
+</div>

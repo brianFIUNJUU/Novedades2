@@ -1,22 +1,27 @@
 import {
+  FirebaseApp
+} from "./chunk-BOFTALHR.js";
+import {
   FIREBASE_APP_NAME,
   FIREBASE_OPTIONS,
-  VERSION as VERSION2,
+  ɵapplyMixins,
+  ɵcacheInstance,
+  ɵfirebaseAppFactory,
+  ɵlazySDKProxy
+} from "./chunk-MHEWUCHU.js";
+import {
+  firebase
+} from "./chunk-V33TBWGW.js";
+import {
+  VERSION,
   keepUnstableUntilFirst,
   ɵAPP_CHECK_PROVIDER_NAME,
   ɵAngularFireSchedulers,
   ɵAppCheckInstances,
-  ɵapplyMixins,
-  ɵcacheInstance,
-  ɵfirebaseAppFactory,
   ɵgetAllInstancesOf,
   ɵgetDefaultInstanceOf,
-  ɵlazySDKProxy,
   ɵzoneWrap
-} from "./chunk-BZQ4Z5TL.js";
-import {
-  firebase
-} from "./chunk-D6JT4WCU.js";
+} from "./chunk-UAGISRM3.js";
 import {
   Component,
   Deferred,
@@ -25,19 +30,13 @@ import {
   _getProvider,
   _registerComponent,
   base64,
-  deleteApp,
   getApp,
-  getApps,
   getGlobal,
   getModularInstance,
-  initializeApp,
-  initializeServerApp,
   isIndexedDBAvailable,
-  onLog,
   registerVersion,
-  setLogLevel,
   uuidv4
-} from "./chunk-P5LRW6R5.js";
+} from "./chunk-LP6NKFWL.js";
 import {
   isPlatformServer
 } from "./chunk-QH5W3VI2.js";
@@ -49,7 +48,6 @@ import {
   NgZone,
   Optional,
   PLATFORM_ID,
-  VERSION,
   setClassMetadata,
   ɵɵdefineInjectable,
   ɵɵdefineInjector,
@@ -79,74 +77,6 @@ import {
 import {
   __async
 } from "./chunk-SIIEUOVM.js";
-
-// node_modules/@angular/fire/fesm2022/angular-fire-app.mjs
-var FirebaseApp = class {
-  constructor(app) {
-    return app;
-  }
-};
-var FirebaseApps = class {
-  constructor() {
-    return getApps();
-  }
-};
-var firebaseApp$ = timer(0, 300).pipe(concatMap(() => from(getApps())), distinct());
-function defaultFirebaseAppFactory(provided) {
-  if (provided && provided.length === 1) {
-    return provided[0];
-  }
-  return new FirebaseApp(getApp());
-}
-var PROVIDED_FIREBASE_APPS = new InjectionToken("angularfire2._apps");
-var DEFAULT_FIREBASE_APP_PROVIDER = {
-  provide: FirebaseApp,
-  useFactory: defaultFirebaseAppFactory,
-  deps: [[new Optional(), PROVIDED_FIREBASE_APPS]]
-};
-var FIREBASE_APPS_PROVIDER = {
-  provide: FirebaseApps,
-  deps: [[new Optional(), PROVIDED_FIREBASE_APPS]]
-};
-var FirebaseAppModule = class _FirebaseAppModule {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  constructor(platformId) {
-    registerVersion("angularfire", VERSION2.full, "core");
-    registerVersion("angularfire", VERSION2.full, "app");
-    registerVersion("angular", VERSION.full, platformId.toString());
-  }
-  static ɵfac = function FirebaseAppModule_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _FirebaseAppModule)(ɵɵinject(PLATFORM_ID));
-  };
-  static ɵmod = ɵɵdefineNgModule({
-    type: _FirebaseAppModule
-  });
-  static ɵinj = ɵɵdefineInjector({
-    providers: [DEFAULT_FIREBASE_APP_PROVIDER, FIREBASE_APPS_PROVIDER]
-  });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(FirebaseAppModule, [{
-    type: NgModule,
-    args: [{
-      providers: [DEFAULT_FIREBASE_APP_PROVIDER, FIREBASE_APPS_PROVIDER]
-    }]
-  }], () => [{
-    type: Object,
-    decorators: [{
-      type: Inject,
-      args: [PLATFORM_ID]
-    }]
-  }], null);
-})();
-var deleteApp2 = ɵzoneWrap(deleteApp, true);
-var getApp2 = ɵzoneWrap(getApp, true);
-var getApps2 = ɵzoneWrap(getApps, true);
-var initializeApp2 = ɵzoneWrap(initializeApp, true);
-var initializeServerApp2 = ɵzoneWrap(initializeServerApp, true);
-var onLog2 = ɵzoneWrap(onLog, true);
-var registerVersion2 = ɵzoneWrap(registerVersion, true);
-var setLogLevel2 = ɵzoneWrap(setLogLevel, true);
 
 // node_modules/@firebase/app-check/dist/esm/index.esm2017.js
 var APP_CHECK_STATES = /* @__PURE__ */ new Map();
@@ -957,7 +887,7 @@ var DEFAULT_APP_CHECK_INSTANCE_PROVIDER = {
 };
 var AppCheckModule = class _AppCheckModule {
   constructor() {
-    registerVersion("angularfire", VERSION2.full, "app-check");
+    registerVersion("angularfire", VERSION.full, "app-check");
   }
   static ɵfac = function AppCheckModule_Factory(__ngFactoryType__) {
     return new (__ngFactoryType__ || _AppCheckModule)();
@@ -1073,7 +1003,7 @@ var AngularFireAuth = class _AngularFireAuth {
   credential;
   constructor(options, name2, platformId, zone, schedulers, useEmulator, settings, tenantId, languageCode, useDeviceLanguage, persistence, _appCheckInstances) {
     const logins = new Subject();
-    const auth = of(void 0).pipe(observeOn(schedulers.outsideAngular), switchMap(() => zone.runOutsideAngular(() => import("./index.esm-QT7TPBSK.js"))), map(() => ɵfirebaseAppFactory(options, zone, name2)), map((app) => ɵauthFactory(app, zone, useEmulator, tenantId, languageCode, useDeviceLanguage, settings, persistence)), shareReplay({
+    const auth = of(void 0).pipe(observeOn(schedulers.outsideAngular), switchMap(() => zone.runOutsideAngular(() => import("./index.esm-CTYOH23Q.js"))), map(() => ɵfirebaseAppFactory(options, zone, name2)), map((app) => ɵauthFactory(app, zone, useEmulator, tenantId, languageCode, useDeviceLanguage, settings, persistence)), shareReplay({
       bufferSize: 1,
       refCount: false
     }));
@@ -1216,7 +1146,7 @@ var AngularFireAuth = class _AngularFireAuth {
 ɵapplyMixins(AngularFireAuth, [proxyPolyfillCompat]);
 var AngularFireAuthModule = class _AngularFireAuthModule {
   constructor() {
-    firebase.registerVersion("angularfire", VERSION2.full, "auth-compat");
+    firebase.registerVersion("angularfire", VERSION.full, "auth-compat");
   }
   static ɵfac = function AngularFireAuthModule_Factory(__ngFactoryType__) {
     return new (__ngFactoryType__ || _AngularFireAuthModule)();
@@ -1358,4 +1288,4 @@ export {
    * limitations under the License.
    *)
 */
-//# sourceMappingURL=chunk-2NURUYSJ.js.map
+//# sourceMappingURL=chunk-LFIP5RPF.js.map

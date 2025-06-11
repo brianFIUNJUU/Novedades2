@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';;
 import { Cuadrante } from '../models/cuadrante';
 import { environment } from '../environments/environment';
-
 
 @Injectable({
   providedIn: 'root'
@@ -11,37 +11,93 @@ import { environment } from '../environments/environment';
 export class CuadranteService {
   // private apiUrl = 'http://localhost:3000/api/cuadrante'; // Ajusta la URL si es necesario
   private apiUrl = environment.apiUrl + '/cuadrante'; // URL base del backend
-
-
+  private cuadrantesCache: Cuadrante[] | null = null;
+  private cuadrantesByUnidadCache: { [unidadId: number]: Cuadrante[] } = {};
   constructor(private http: HttpClient) {}
 
-  // Obtener todos los cuadrantes
+  private getAuthToken(): string | null {
+    const token = localStorage.getItem('token');
+    return token;
+  }
+  
   getCuadrantes(): Observable<Cuadrante[]> {
-    return this.http.get<Cuadrante[]>(this.apiUrl);
+    if (this.cuadrantesCache) {
+      return of(this.cuadrantesCache);
+    }
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<Cuadrante[]>(this.apiUrl, { headers }).pipe(
+      tap(data => this.cuadrantesCache = data)
+    );
+  }
+  
+  getCuadrantesByUnidadRegional(unidadRegionalId: number): Observable<Cuadrante[]> {
+    if (this.cuadrantesByUnidadCache[unidadRegionalId]) {
+      return of(this.cuadrantesByUnidadCache[unidadRegionalId]);
+    }
+    const url = `${this.apiUrl}/unidad-regional/${unidadRegionalId}`;
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<Cuadrante[]>(url, { headers }).pipe(
+      tap(data => this.cuadrantesByUnidadCache[unidadRegionalId] = data)
+    );
+  }
+  
+  // Si necesitas limpiar el cache (por ejemplo, si cambian los datos en la BD)
+  clearCache() {
+    this.cuadrantesCache = null;
+    this.cuadrantesByUnidadCache = {};
   }
 
   // Obtener un cuadrante por ID
   getCuadrante(id: string): Observable<Cuadrante> {
-    return this.http.get<Cuadrante>(`${this.apiUrl}/${id}`);
+    const url = `${this.apiUrl}/${id}`;
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<Cuadrante>(url, { headers });
   }
 
   // Crear un nuevo cuadrante
   createCuadrante(cuadrante: Cuadrante): Observable<Cuadrante> {
-    return this.http.post<Cuadrante>(this.apiUrl, cuadrante);
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.post<Cuadrante>(this.apiUrl, cuadrante, { headers });
   }
 
   // Actualizar un cuadrante existente
   updateCuadrante(cuadrante: Cuadrante): Observable<Cuadrante> {
-    return this.http.put<Cuadrante>(`${this.apiUrl}/${cuadrante.id}`, cuadrante);
+    const url = `${this.apiUrl}/${cuadrante.id}`;
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.put<Cuadrante>(url, cuadrante, { headers });
   }
 
   // Eliminar un cuadrante
   deleteCuadrante(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    const url = `${this.apiUrl}/${id}`;
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.delete<void>(url, { headers });
   }
 
   // Obtener cuadrantes por unidad regional
-  getCuadrantesByUnidadRegional(unidadRegionalId: number): Observable<Cuadrante[]> {
-    return this.http.get<Cuadrante[]>(`${this.apiUrl}/unidad-regional/${unidadRegionalId}`);
-  }
+
 }

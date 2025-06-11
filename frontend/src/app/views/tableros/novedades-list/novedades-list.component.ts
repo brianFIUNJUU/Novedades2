@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, FormGroup, FormBuilder } from '@angular/forms';
+import { FormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NovedadesService } from '../../../services/novedades.service';
 import { NovedadesPersonaService } from '../../../services/novedades_persona.service';
@@ -29,8 +29,13 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CellHookData, HAlignType, RowInput } from 'jspdf-autotable';
+import { DepartamentoService } from '../../../services/departamento.service';
+import { Localidad } from '../../../models/localidad';
+import { Departamento } from '../../../models/departamento';
+import { LocalidadService } from '../../../services/localidad.service'
+import { Validator } from '@angular/forms';
 
-// Tipo para los códigos de novedad
+// Tipo para los códigos de novedad 
 type CodigoNovedad = 'R' | 'A' | 'V';
 type FontStyleType = 'normal' | 'bold' | 'italic' ;
 @Component({
@@ -47,19 +52,38 @@ export class NovedadesListComponent implements OnInit {
   marker!: L.Marker;
   unidadesRegionales: UnidadRegional[] = [];
   mensajeError: string = '';
-  userType: string = 'administrador'; // Ajusta esto según tu lógica de autenticación
+  userType: string = 'administrador'; // Ajusta esto según tu lógica de autenticación 
+   userInfo: any = {};
   usuarioNombre: string = '';
   usuarioLegajo: string = '';
-  userInfo: any = {};
+  usuarioUnidad: string = ''; // Almacenar el número de unidad del usuario
+  fechaFiltroUnidadInicio: string = '';
+fechaFiltroUnidadFin: string = '';
   legajoFiltro: string = '';
   filteredNovedades: any[] = [];
   colorFilter: string = '';
   fechaSeleccionada: string = ''; // Almacenar la fecha seleccionada
   actaForm: FormGroup;
   actaSecForm: FormGroup;
+  departamentos: Departamento[] = [];
+  localidades: Localidad[] = [];
   // Declaración de la variable novedadesFiltradas
 novedadesFiltradas: Novedades[] = [];
-// Definir los íconos como una propiedad de la clase
+personasParaActa: Persona[] = [];
+ mostrarFiltroFechaUsuario = false;
+  fechaFiltroUsuario: string = '';
+    mostrarFiltroFechaAdmin = false;
+  fechaFiltroAdmin: string = '';
+   fechaFiltroAdminInicio: string = '';
+  fechaFiltroAdminFin: string = '';
+  fechaFiltroUsuarioInicio: string = '';
+  fechaFiltroUsuarioFin: string = '';
+  mostrarFiltroLegajoAdmin = false;
+  mostrarFiltroIdAdmin = false;
+  mostrarFiltroUnidadAdmin = false;
+  mostrarFiltroFechaUnid = false;
+idFiltro: string = '';
+  unidadFiltro: string = '';
 
   constructor(
     private novedadesService: NovedadesService,
@@ -72,10 +96,14 @@ novedadesFiltradas: Novedades[] = [];
     private authService: AuthenticateService,
     private excelExportService: ExcelExportService,
     private novedadesPersonaService: NovedadesPersonaService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private departamentoService: DepartamentoService,
+    private localidadService: LocalidadService,
     
   ) {
     this.actaForm = this.fb.group({
+      departamento: ['', Validators.required],
+      localidad: ['', Validators.required],
       fechaActa: [''],
       horaActa: [''],
       fechaIntervencion: [''],
@@ -98,12 +126,6 @@ novedadesFiltradas: Novedades[] = [];
       filmacion: [''], //
       descripcion: [''], //
       relato: [''], //
-
-
-
-
-
-
   
     });
   }
@@ -128,21 +150,271 @@ novedadesFiltradas: Novedades[] = [];
       }
     });
   }
-  ngOnInit(): void {
-    this.authService.getUserInfo().subscribe(userInfo => {
-      this.usuarioNombre = userInfo.nombre;
-      this.userInfo = userInfo;
-      this.usuarioLegajo = userInfo.legajo;
-  
-      // Llamamos a getAllNovedades() y filtramos cuando se carguen los datos
-      this.getAllNovedades();
-    });
-     this.initForm(); // Inicializar el formulario en ngOnInit
-    this.loadPersonales();
-      // Inicializamos el formulario
-   
+ ngOnInit(): void {
+  this.authService.getUserInfo().subscribe(userInfo => {
+    this.usuarioNombre = userInfo.nombre;
+    this.userInfo = userInfo;
+    this.usuarioLegajo = userInfo.legajo;
 
+    // Detectar si es EncargadoUnidad y asignar el número de unidad
+    if (userInfo.perfil.startsWith('EncargadoUnidad')) {
+      // Si el perfil es exactamente "EncargadoUnidad", asigna 1
+      // Si es "EncargadoUnidad 2", asigna 2, etc.
+      const match = userInfo.perfil.match(/EncargadoUnidad\s?(\d*)/);
+      this.usuarioUnidad = match && match[1] ? match[1] : '1';
+      // Traer novedades de esa unidad regional
+      this.getNovedadesByUnidadRegionalUsuario();
+    } else if (userInfo.perfil === 'usuario') {
+      this.getNovedadesByLegajoByToday();
+    } else {
+      this.getNovedadesByToday();
+    }
+  });
+}
+
+
+   onFiltroUnidadChange(event: any) {
+    const valor = event.target.value;
+    this.mostrarFiltroFechaUnid = false;
+    if (valor === 'todas') {
+      this.mostrarFiltroFechaUnid = false;
+      this.getNovedadesByUnidadRegionalUsuarioTodas();
+    } else if (valor === 'hoy') {
+      this.mostrarFiltroFechaUnid = false;
+      this.getNovedadesByUnidadRegionalUsuario();
+    } else if (valor === 'fecha') {
+      this.mostrarFiltroFechaUnid = true;
+    }
   }
+getNovedadesByUnidadRegionalUsuario(): void {
+  if (this.usuarioUnidad) {
+    this.novedadesService.getNovedadesByUnidadRegionalByToday(this.usuarioUnidad).subscribe(
+      (data: Novedades[]) => {
+        this.novedades = data;
+        this.filteredNovedades = [...this.novedades];
+        this.novedades.forEach(novedad => {
+          this.filtrarNovedadesC();
+        });
+      },
+      (error: HttpErrorResponse) => {
+        console.error('Error al obtener novedades por unidad regional:', error.message);
+        Swal.fire('Error', 'Error al obtener novedades por unidad regional: ' + error.message, 'error');
+      }
+    );
+  }
+}
+getNovedadesByUnidadRegionalUsuarioTodas(): void {
+  if (this.usuarioUnidad) {
+    this.novedadesService.getNovedadesByUnidadRegional(this.usuarioUnidad).subscribe(
+      (data: Novedades[]) => {
+        this.novedades = data;
+        this.filteredNovedades = [...this.novedades];
+        this.novedades.forEach(novedad => {
+          this.filtrarNovedadesC();
+        });
+      },
+      (error: HttpErrorResponse) => {
+        console.error('Error al obtener novedades por unidad regional:', error.message);
+        Swal.fire('Error', 'Error al obtener novedades por unidad regional: ' + error.message, 'error');
+      }
+    );
+  }
+}
+
+  // Filtrar por rango de fecha
+filtrarNovedadesUnidadPorFecha() {
+  if (this.usuarioUnidad && this.fechaFiltroUnidadInicio && this.fechaFiltroUnidadFin) {
+    this.novedadesService.getNovedadesByUnidadRegionalByRangoFecha(
+      this.usuarioUnidad,
+      this.fechaFiltroUnidadInicio,
+      this.fechaFiltroUnidadFin
+    ).subscribe(
+      (data: Novedades[]) => {
+        this.novedades = data;
+        this.filteredNovedades = [...this.novedades];
+        this.novedades.forEach(novedad => {
+          this.filtrarNovedadesC();
+        });
+      }
+    );
+  }
+}
+ 
+  onFiltroAdminChange(event: any) {
+    const valor = event.target.value;
+    this.mostrarFiltroFechaAdmin = false;
+    this.mostrarFiltroLegajoAdmin = false;
+    this.mostrarFiltroIdAdmin = false;
+    this.mostrarFiltroUnidadAdmin = false;
+    if (valor === 'todas') {
+      this.getAllNovedades();
+    } else if (valor === 'hoy') {
+      this.getNovedadesByToday();
+    } else if (valor === 'fecha') {
+      this.mostrarFiltroFechaAdmin = true;
+    } else if (valor === 'porLegajo') {
+      this.mostrarFiltroLegajoAdmin = true;
+    } else if (valor === 'porId') {
+      this.mostrarFiltroIdAdmin = true;
+    }
+    else if (valor === 'porUnidad') {
+      this.mostrarFiltroUnidadAdmin = true;
+    }
+  }
+    filtrarporUnidadAdmin() {
+    if (this.unidadFiltro) {
+      this.novedadesService.getNovedadesByUnidadRegional(this.unidadFiltro).subscribe(
+        (data: Novedades[]) => {
+          this.novedades = data;
+          this.filteredNovedades = [...this.novedades];
+          this.novedades.forEach(novedad => {
+            this.filtrarNovedadesC();
+          });
+        }
+      );
+    }
+  }
+  filtrarporIdAdmin() {
+    if (this.idFiltro) {
+      this.novedadesService.getNovedadById(this.idFiltro).subscribe(
+        (data: Novedades) => {
+          // Si el backend devuelve un solo objeto, conviértelo en array
+          this.novedades = data ? [data] : [];
+          this.filteredNovedades = [...this.novedades];
+          this.novedades.forEach(novedad => {
+            this.filtrarNovedadesC();
+          });
+        },
+        (error: HttpErrorResponse) => {
+          this.novedades = [];
+          this.filteredNovedades = [];
+          Swal.fire('Error', 'No se encontró novedad con ese ID', 'error');
+        }
+      );
+    }
+  }
+  
+  filtrarporLegajoAdmin() {
+    if (this.legajoFiltro) {
+      this.novedadesService.getNovedadesByPersonalAutorLegajo(this.legajoFiltro).subscribe(
+        (data: Novedades[]) => {
+          this.novedades = data;
+          this.filteredNovedades = [...this.novedades];
+          this.novedades.forEach(novedad => {
+            this.filtrarNovedadesC();
+          });
+        }
+      );
+    }
+  }
+  
+  filtrarNovedadesPorFechaAdmin() {
+    if (this.fechaFiltroAdminInicio && this.fechaFiltroAdminFin) {
+      this.novedadesService.getNovedadesByRangoFecha(this.fechaFiltroAdminInicio, this.fechaFiltroAdminFin).subscribe(
+        (data: Novedades[]) => {
+                    this.novedades = data;
+          this.filteredNovedades = [...this.novedades];
+          this.novedades.forEach(novedad => {
+            this.filtrarNovedadesC();
+          });
+        }
+      );
+    }
+  }
+  getNovedadesByToday(): void {
+  this.novedadesService.getNovedadesByToday().subscribe(
+    (data: Novedades[]) => {
+            this.novedades = data;
+      this.filteredNovedades = [...this.novedades];
+      this.novedades.forEach(novedad => {
+        this.filtrarNovedadesC();
+      });
+    },
+    (error: HttpErrorResponse) => {
+      console.error('Error al obtener novedades del día:', error.message);
+      Swal.fire('Error', 'Error al obtener novedades del día: ' + error.message, 'error');
+    }
+  );
+}
+getAllNovedades(): void {
+    this.novedadesService.getAllNovedades().subscribe(
+      (data: Novedades[]) => {
+                this.novedades = data;
+        this.filteredNovedades = [...this.novedades];
+        this.novedades.forEach(novedad => {
+          // this.cargarPersonas(novedad);
+          this.filtrarNovedadesC()
+        });
+      },
+      (error: HttpErrorResponse) => {
+        console.error('Error al obtener novedades:', error.message);
+        Swal.fire('Error', 'Error al obtener novedades: ' + error.message, 'error');
+      }
+    );
+  }
+  
+  onFiltroUsuarioChange(event: any) {
+    const valor = event.target.value;
+    if (valor === 'todas') {
+      this.mostrarFiltroFechaUsuario = false;
+      this.getNovedadesByLegajo();
+    } else if (valor === 'hoy') {
+      this.mostrarFiltroFechaUsuario = false;
+      this.getNovedadesByLegajoByToday();
+    } else if (valor === 'fecha') {
+      this.mostrarFiltroFechaUsuario = true;
+    }
+  }
+  
+   filtrarMisNovedadesPorFecha() {
+    if (this.fechaFiltroUsuarioInicio && this.fechaFiltroUsuarioFin) {
+      this.novedadesService.getNovedadesByLegajoByRangoFecha(
+        this.usuarioLegajo,
+        this.fechaFiltroUsuarioInicio,
+        this.fechaFiltroUsuarioFin
+      ).subscribe(
+        (data: Novedades[]) => {
+          this.novedades = data;
+          this.filteredNovedades = [...this.novedades];
+          this.novedades.forEach(novedad => {
+            this.filtrarNovedadesC();
+          });
+        }
+      );
+    }
+  }
+  getNovedadesByLegajo(): void {
+    this.novedadesService.getNovedadesByPersonalAutorLegajo(this.usuarioLegajo).subscribe(
+      (data: Novedades[]) => {
+                this.novedades = data;
+        this.filteredNovedades = [...this.novedades];
+        this.novedades.forEach(novedad => {
+          // this.cargarPersonas(novedad);
+          this.filtrarNovedadesC();
+        });
+      },
+      (error: HttpErrorResponse) => {
+        console.error('Error al obtener novedades:', error.message);
+        Swal.fire('Error', 'Error al obtener novedades: ' + error.message, 'error');
+      }
+    );
+  }
+
+   getNovedadesByLegajoByToday(): void {
+  this.novedadesService.getNovedadesByLegajoByToday(this.usuarioLegajo).subscribe(
+    (data: Novedades[]) => {
+            this.novedades = data;
+      this.filteredNovedades = [...this.novedades];
+      this.novedades.forEach(novedad => {
+        this.filtrarNovedadesC();
+      });
+    },
+    (error: HttpErrorResponse) => {
+      console.error('Error al obtener novedades del día por legajo:', error.message);
+      Swal.fire('Error', 'Error al obtener novedades del día por legajo: ' + error.message, 'error');
+    }
+  );
+}
   
   initForm(): void {
     const today = new Date();
@@ -155,6 +427,8 @@ novedadesFiltradas: Novedades[] = [];
       horaActa: [currentTime], 
       fechaIntervencion: [''],
       horaIntervencion: [''],
+      localidad: ['', Validators.required],
+      departamento: ['', Validators.required],
       relato: [''],
       direccion: [''],
       descripcion_hecho: [''],
@@ -177,6 +451,7 @@ novedadesFiltradas: Novedades[] = [];
     });
   }
   openActaModal(novedad: any): void {
+    this.cargarDepartamentos(); // Solo aquí
     this.initForm(); // Asegurar que el formulario se inicializa antes de abrir el modal
     this.actaForm.patchValue({
       fechaIntervencion: novedad.fecha,
@@ -185,6 +460,8 @@ novedadesFiltradas: Novedades[] = [];
       direccion: novedad.lugar_hecho,
       descripcion_hecho: novedad.descripcion_hecho,
     });
+    this.cargarPersonasActa(novedad); // <-- Cargar personas para mostrar en el modal
+// y mary dijo que era funcionaria sin titulo
     // Abrir el modal (usando bootstrap modal API)
     const modalElement = document.getElementById('actaModal');
     if (modalElement) {
@@ -213,93 +490,204 @@ novedadesFiltradas: Novedades[] = [];
       modal.show();
     }
   }
+    cargarDepartamentos(): void {
+      this.departamentoService.getDepartamentos().subscribe(
+        data => {
+          this.departamentos = data;
+        },
+        error => {
+          this.mensajeError = 'Error al cargar departamentos';
+          Swal.fire('Error', 'Error al cargar departamentos: ' + error.message, 'error');
+        }
+      );
+    }
+  
+    cargarLocalidades(departamentoId: number | null | undefined): void {
+      if (departamentoId == null) return; // Si es null o undefined, salir
+      this.localidadService.getLocalidadesByDepartamento(departamentoId.toString()).subscribe(
+        data => {
+          this.localidades = data;
+        },
+        error => {
+          this.mensajeError = 'Error al cargar localidades';
+          Swal.fire('Error', 'Error al cargar localidades: ' + error.message, 'error');
+        }
+      );
+    }
+  
+    onDepartamentoChange(nombreDepartamento: string): void { 
+      this.actaForm.patchValue({ departamento: nombreDepartamento });
+    
+      const deptoSeleccionado = this.departamentos.find(dep => dep.nombre === nombreDepartamento);
+      if (deptoSeleccionado) {
+        this.cargarLocalidades(Number(deptoSeleccionado.id));
+        console.log('Departamento seleccionado:', nombreDepartamento);
+      }
+    }
+    
+    onLocalidadChange(nombreLocalidad: string): void {
+      this.actaForm.patchValue({ localidad: nombreLocalidad });
+      console.log('Localidad seleccionada:', nombreLocalidad);
+    }
+    cargarPersonas(novedad: Novedades): void {
+      // console.log(`Cargando personas para la novedad con ID: ${novedad.id}`);
+      // console.log(`Array de personas: ${JSON.stringify(novedad.personas)}`);
+      if (novedad.personas && novedad.personas.length > 0) {
+        novedad.personas.forEach((personaId: any) => {
+          const id = typeof personaId === 'object' ? personaId.id : personaId;
+          // console.log(`Cargando persona con ID: ${id}`);
+          this.personaService.getPersona(id).subscribe(
+            (persona: Persona) => {
+              // console.log(`Persona cargada: ${JSON.stringify(persona)}`);
+              // Obtener el estado de la persona para la novedad actual
+              this.estadoService.getEstadoByNovedadAndPersona(novedad.id, persona.id).subscribe(
+                (estado: Estado) => {
+                  persona.estado = estado.estado;
+                  // console.log(`Estado de la persona: ${persona.estado}`);
+                  if (!novedad.personasDetalles) {
+                    novedad.personasDetalles = [];
+                  }
+                  novedad.personasDetalles.push(persona);
+                },
+                
+              );
+            },
+            (error: HttpErrorResponse) => {
+              console.error('Error al obtener persona:', error.message);
+            }
+          );
+        });
+      } else {
+        // console.log('El array de personas está vacío o no está definido.');
+      }
+    }
+    
+cargarPersonasActa(novedad: Novedades): void {
+  this.personasParaActa = [];
 
-  
-  
+  if (novedad.personas && novedad.personas.length > 0) {
+    novedad.personas.forEach((personaId: any) => {
+      const id = typeof personaId === 'object' ? personaId.id : personaId;
 
-  
+      this.personaService.getPersona(id).subscribe(
+        (persona: Persona) => {
+          this.estadoService.getEstadoByNovedadAndPersona(novedad.id, persona.id).subscribe(
+            (estado: Estado) => {
+              persona.estado = estado.estado;
+              this.personasParaActa.push(persona);
+            },
+            error => console.error('Error al obtener estado:', error)
+          );
+        },
+        error => console.error('Error al obtener persona:', error)
+      );
+    });
+  }
+}
+
 
    // Función para generar el PDF del acta
   // Función para generar el PDF del acta
-generatePDF(): void {
-  const formData = this.actaForm.value;
-  const pdf = new jsPDF();
-
-  // Definir el título
-  const titulo = 'ACTA DE PROCEDIMIENTO';
-  pdf.setFontSize(11);
-
-  // Calcular ancho del texto y posición centrada
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const textWidth = pdf.getTextWidth(titulo);
-  const x = (pageWidth - textWidth) / 2;
-  const y = 20;
-
-  // Agregar título centrado
-  pdf.text(titulo, x, y);
-
-  // Dibujar una línea debajo del título para subrayarlo
-  pdf.setLineWidth(0.5); // Grosor de la línea
-  pdf.line(x, y + 2, x + textWidth, y + 2); // (x1, y1, x2, y2)
-
-  // Convertir fechaActa en día, mes (texto) y año
-  const fechaActa = new Date(formData.fechaActa + 'T00:00:00');
-  const diaActa = fechaActa.getDate(); // Día en número
-  const añoActa = fechaActa.getFullYear(); // Año en número
-
-  // Convertir fechaIntervencion en día, mes (texto) y año
-  const fechaIntervencion = new Date(formData.fechaIntervencion + 'T00:00:00');
-  const diaIntervencion = fechaIntervencion.getDate();
-  const añoIntervencion = fechaIntervencion.getFullYear();
-
-  // Array con los nombres de los meses en español
-  const meses = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-  ];
-  const mesTextoActa = meses[fechaActa.getMonth()];
-  const mesTextoIntervencion = meses[fechaIntervencion.getMonth()];
-
-  // Lógica para determinar el valor de fechaI
-  const fechaI = formData.fechaActa === formData.fechaIntervencion
-    ? "antes indicada"
-    : `${diaIntervencion} del mes de ${mesTextoIntervencion} del ${añoIntervencion}`;
-
-  // Definir el texto de introducción con sangría
-  const inicio = "             EN LA CIUDAD DE S. S. DE JUJUY, PROVINCIA DE JUJUY, REPUBLICA ARGENTINA";
-  const textoIntroduccion =
-    `, a los ${diaActa} días del mes de ${mesTextoActa} del ${añoActa}, siendo las ${formData.horaActa} horas. El funcionario policial que suscribe, a los efectos legales hace CONSTAR: Que en la fecha ${fechaI}, siendo las ${formData.horaIntervencion} horas, se realiza la siguiente intervención policial con direccion en ${formData.direccion} : ${formData.relato}`;
-
-  pdf.setFontSize(11);
-  const marginLeft = 20; // Margen izquierdo para alineación
-  let marginTop = y + 10; // Un poco más abajo del título
-  const maxWidth = pageWidth - 40; // Ajuste de ancho del párrafo
-
-  // Configurar fuente en negrita solo para "inicio"
-  pdf.setFont("helvetica", "bold");
-  pdf.text(inicio, marginLeft, marginTop, { maxWidth, align: 'justify' });
-
-  // Volver a la fuente normal para el resto del texto
-  pdf.setFont("helvetica", "normal");
-
-  // Actualizar la posición Y después de agregar el texto en negrita
-  marginTop += 5;  // Aumentar la posición Y para el siguiente texto
-
-  // Agregar el resto del texto con sangría y justificado
-  pdf.text(textoIntroduccion, marginLeft, marginTop, { maxWidth, align: 'justify' });
-
-  // Guardar el PDF
-  pdf.save('acta_de_procedimiento.pdf');
+  generatePDF(): void {
+    if (this.actaForm.invalid) {
+      this.actaForm.markAllAsTouched();
+      Swal.fire('Error', 'Por favor, completá todos los campos obligatorios.', 'error');
+      return;
+    }
   
+    const formData = this.actaForm.value;
+    const pdf = new jsPDF();
+  
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const marginHorizontal = 20;
+    const usablePageWidth = pageWidth - marginHorizontal * 2;
+    const lineHeight = 6;
+  
+    // Título
+    const titulo = 'ACTA DE PROCEDIMIENTO';
+    pdf.setFontSize(12);
+    const textWidth = pdf.getTextWidth(titulo);
+    const x = (pageWidth - textWidth) / 2;
+    const y = 20;
+    pdf.text(titulo, x, y);
+    pdf.setLineWidth(0.5);
+    pdf.line(marginHorizontal, y + 2, pageWidth - marginHorizontal, y + 2);
+  
+    // Fechas
+    const fechaActa = new Date(formData.fechaActa + 'T00:00:00');
+    const diaActa = fechaActa.getDate();
+    const añoActa = fechaActa.getFullYear();
+  
+    const fechaIntervencion = new Date(formData.fechaIntervencion + 'T00:00:00');
+    const diaIntervencion = fechaIntervencion.getDate();
+    const añoIntervencion = fechaIntervencion.getFullYear();
+  
+    const meses = [
+      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+  
+    const mesTextoActa = meses[fechaActa.getMonth()];
+    const mesTextoIntervencion = meses[fechaIntervencion.getMonth()];
+    const fechaI = formData.fechaActa === formData.fechaIntervencion
+      ? "antes indicada"
+      : `${diaIntervencion} del mes de ${mesTextoIntervencion} del ${añoIntervencion}`;
+  
+    // Texto principal
+    const textoIntroduccion =
+      `EN LA CIUDAD DE ${formData.localidad.toUpperCase()}, DEPARTAMENTO DE ${formData.departamento.toUpperCase()}, PROVINCIA DE JUJUY, REPÚBLICA ARGENTINA, a los ${diaActa} días del mes de ${mesTextoActa} del ${añoActa}, siendo las ${formData.horaActa} horas, el funcionario policial que suscribe, a los efectos legales, hace CONSTAR: Que en la fecha ${fechaI}, siendo las ${formData.horaIntervencion} horas, se realiza la siguiente intervención policial con dirección en ${formData.direccion}: ${formData.relato}`;
+  
+    // Texto justificado
+    const marginTop = y + 10;
+    pdf.setFont("helvetica", "normal");
+    const textoDividido = pdf.splitTextToSize(textoIntroduccion, usablePageWidth);
+    pdf.text(textoDividido, marginHorizontal, marginTop, { align: 'justify', maxWidth: usablePageWidth });
+  
+    const finalTextoY = marginTop + textoDividido.length * lineHeight;
+  
+    // Tabla
+    const personas = this.personasParaActa || [];
 
-  // Cerrar el modal después de generar el PDF
-  const modalElement = document.getElementById('actaModal');
-  if (modalElement) {
-    const modal = bootstrap.Modal.getInstance(modalElement);
-    modal?.hide();
+    if (personas.length > 0) {
+      const tablaTituloY = finalTextoY + lineHeight; // un renglón debajo del texto
+      pdf.setFontSize(11);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Involucrados en la incidencia:", marginHorizontal, tablaTituloY);
+    
+      autoTable(pdf, {
+        startY: tablaTituloY + lineHeight, // otro renglón más para comenzar la tabla
+        margin: { left: marginHorizontal, right: marginHorizontal },
+        head: [['Nombre y Apellido', 'DNI', 'Sexo', 'Domicilio', 'Edad', 'Estado']],
+        body: personas.map(p => [
+          `${p.nombre} ${p.apellido}`,
+          p.dni,
+          p.sexo,
+          p.domicilio,
+          p.edad,
+          p.estado || ''
+        ]),
+        theme: 'grid',
+        headStyles: { fillColor: [22, 160, 133] },
+        styles: { fontSize: 9 },
+      });
+    }
+    const finalY = (pdf as any).lastAutoTable?.finalY || finalTextoY;
+    const cierreTexto = 'No siendo para más el acto se da por terminado el mismo, firmando al pie de la presente los intervinientes de conformidad y para constancia, ante mí que CERTIFICO.';
+
+    pdf.setFont("helvetica", "normal");
+    const cierreDividido = pdf.splitTextToSize(cierreTexto, usablePageWidth);
+    pdf.text(cierreDividido, marginHorizontal, finalY + lineHeight, { align: 'justify', maxWidth: usablePageWidth });
+    
+    // Mostrar PDF
+    pdf.output('dataurlnewwindow');
+    // Cerrar modal
+    const modalElement = document.getElementById('actaModal');
+    if (modalElement) {
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      modal?.hide();
+    }
   }
   
-}
 
 generateSecPDF(): void {
   const formData = this.actaForm.value;
@@ -376,10 +764,6 @@ const tableData = [
     { content: "Filmación:\n"+"Si"}
   ],
   [{ content: "JUSTIFICACION DEL SECUESTRO IMPOSTERGABLE", colSpan: 3, styles: { halign: 'center', fontStyle: 'bold' as FontStyleType } }],
-
-  
-
-
 ];
 
 // Función para dibujar la tabla
@@ -666,48 +1050,6 @@ reader.readAsDataURL(blob);
     }
   }
 
-  // este es el mapa que toma las imagens a reutilizar initMap(): void {
-  //   if (this.map) {
-  //     this.map.remove();
-  //   }
-  
-  //   try {
-  //     this.map = L.map('mapaOperativo').setView([-24.18769889437684, -65.29709953331486], 15);
-  
-  //     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  //       attribution: '&copy; OpenStreetMap contributors'
-  //     }).addTo(this.map);
-  
-  //     if (this.novedades && this.novedades.length > 0) {
-  //       this.novedades.forEach(novedad => {
-  //         if (novedad.latitud && novedad.longitud) {
-  //           const lat = Number(novedad.latitud);
-  //           const lng = Number(novedad.longitud);
-  
-  //           if (!isNaN(lat) && !isNaN(lng)) {  
-  //             const codigo = novedad.codigo as CodigoNovedad;
-  //             let icono: L.Icon<L.IconOptions> | L.DivIcon = this.iconosNovedades[codigo];
-  
-  //             if (!icono) {
-  //               console.warn(`Icono no encontrado para código ${codigo}, usando icono de Leaflet.`);
-  //               icono = this.getDefaultIcon(codigo);
-  //             }
-  
-  //             L.marker([lat, lng], { icon: icono }).addTo(this.map)
-  //               .bindPopup(`<b>${novedad.descripcion_hecho}</b><br>Fecha: ${novedad.fecha}`);
-  //           } else {
-  //             console.warn("Latitud o longitud inválida:", novedad);
-  //           }
-  //         }
-  //       });
-  //     } else {
-  //       console.warn("No hay novedades disponibles para mostrar en el mapa.");
-  //     }
-  
-  //   } catch (error) {
-  //     console.error("Error al inicializar el mapa:", error);
-  //   }
-  // }
   initMap(): void {
     if (this.map) {
       this.map.remove();
@@ -779,37 +1121,47 @@ reader.readAsDataURL(blob);
   }
 
 
+descargarImagen() {
+  const mapa = document.getElementById('mapaOperativo');
 
-  descargarImagen() {
-    const mapa = document.getElementById('mapaOperativo');
-  
-    if (mapa && this.map) {
-      const zoomActual = this.map.getZoom();
-  
-      // Redibujar el mapa antes de capturar
-      this.map.eachLayer((layer: any) => {
-        if (layer instanceof L.TileLayer) {
-          layer.redraw();
-        }
+  if (mapa && this.map) {
+    const zoomActual = this.map.getZoom();
+
+    // Mostrar loader
+    Swal.fire({
+      title: 'Cargando mapa...',
+      text: 'Por favor espera mientras se genera la imagen.',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    // Redibujar el mapa antes de capturar
+    this.map.eachLayer((layer: any) => {
+      if (layer instanceof L.TileLayer) {
+        layer.redraw();
+      }
+    });
+
+    setTimeout(() => {
+      html2canvas(mapa, { useCORS: true, scale: 4 }).then(canvas => {
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = 'mapa-alta-resolucion.png';
+        link.click();
+
+        // Restaurar el zoom original
+        this.map.setZoom(zoomActual);
+        Swal.close();
+      }).catch(error => {
+        console.error("Error al capturar el mapa:", error);
+        Swal.fire('Error', 'No se pudo capturar el mapa.', 'error');
       });
-  
-      setTimeout(() => {
-        html2canvas(mapa, { useCORS: true }).then(canvas => {
-          const link = document.createElement('a');
-          link.href = canvas.toDataURL('image/png');
-          link.download = 'mapa.png';
-          link.click();
-  
-          // Restaurar el zoom original
-          this.map.setZoom(zoomActual);
-        }).catch(error => {
-          console.error("Error al capturar el mapa:", error);
-        });
-      }, 500);
-    }
+    }, 800); // Puedes aumentar el tiempo si los tiles tardan en cargar
   }
-  
-
+}
   filtrarPorFecha(): void {
     const fechaDesdeInput = (document.getElementById('fechaDesde') as HTMLInputElement).value;
     const fechaHastaInput = (document.getElementById('fechaHasta') as HTMLInputElement).value;
@@ -878,28 +1230,7 @@ actualizarMapa(): void {
       }
     );
   }
-  cargarDatosPersonales(): void {
-    let loadedCount = 0;
-    this.novedades.forEach(novedad => {
-      this.personalService.getPersonal(novedad.personal_autor_id.toString()).subscribe(
-        (personal: Personal) => {
-          novedad.personalAutor = personal; // Almacenar los datos del personal autor en la novedad
-          console.log('Personal autor encontrado:', personal);
-          loadedCount++;
-          if (loadedCount === this.novedades.length) {
-            this.filtrarNovedades();
-          }
-        },
-        (error: HttpErrorResponse) => {
-          console.error('Error al obtener los datos del personal:', error.message);
-          loadedCount++;
-          if (loadedCount === this.novedades.length) {
-            this.filtrarNovedades();
-          }
-        }
-      );
-    });
-  }
+
   getColorClass(codigo: string): string {
     switch (codigo) {
       case 'R':
@@ -912,69 +1243,10 @@ actualizarMapa(): void {
         return '';
     }
   }
-   getAllNovedades(): void {
-    this.novedadesService.getAllNovedades().subscribe(
-      (data: Novedades[]) => {
-        this.novedades = data;
-        this.novedades.forEach(novedad => {
-          this.cargarDatosPersonales();
-          this.cargarUnidadRegionalNombre(novedad);
-          this.cargarCuadranteNombre(novedad);
-          this.cargarPersonas(novedad);
-          this.filtrarNovedades(); // Filtramos una vez que tenemos datos
-          this.filtrarNovedadesC()
-        });
-      },
-      (error: HttpErrorResponse) => {
-        console.error('Error al obtener novedades:', error.message);
-        Swal.fire('Error', 'Error al obtener novedades: ' + error.message, 'error');
-      }
-    );
-  }
-
-// comom 
+  
   navigateToUpdateForm(id: string): void {
     this.router.navigate(['/tableros/novedades', id]);
   }
-  
-  cargarUnidadRegionalNombre(  novedades: Novedades): void {
-    this.unidadRegionalService.getUnidadRegional(novedades.unidad_regional_id).subscribe(
-      (unidadRegional: UnidadRegional) => {
-        novedades.unidad_regional_nombre = unidadRegional.unidad_regional;
-      },
-      (error: HttpErrorResponse) => {
-        console.error('Error al obtener unidad regional:', error.message);
-      }
-    );
-  }
-   cargarCuadranteNombre(novedades: Novedades): void {
-    if (novedades.cuadrante_id) {
-      this.cuadranteService.getCuadrante(novedades.cuadrante_id.toString()).subscribe(
-        (cuadrante: Cuadrante) => {
-          novedades.cuadrante_nombre = cuadrante.nombre;
-        },
-        (error: HttpErrorResponse) => {
-          console.error('Error al obtener jurisdicción:', error.message);
-        }
-      );
-    } else {
-      console.warn(`Novedad con ID ${novedades.id} no tiene cuadrante_id.`);
-    }
-  }
-  filtrarNovedades(): void {
-    console.log("Novedades antes del filtrado:", this.novedades);
-  
-    if (this.userInfo.perfil === 'usuario') {
-      this.filteredNovedades = this.novedades.filter(novedad => 
-        novedad.personalAutor?.legajo === this.userInfo.legajo
-      );
-    } else {
-      this.filteredNovedades = [...this.novedades];
-    }
-  
-    console.log("Novedades después del filtrado:", this.filteredNovedades);
-  }
-    
   
   deleteNovedad(id: string): void {
     this.novedadesService.deleteNovedad(id).subscribe(
@@ -1001,71 +1273,49 @@ actualizarMapa(): void {
     return hours <= 24;
   }
  
-    cargarPersonas(novedad: Novedades): void {
-      console.log(`Cargando personas para la novedad con ID: ${novedad.id}`);
-      console.log(`Array de personas: ${JSON.stringify(novedad.personas)}`);
-      if (novedad.personas && novedad.personas.length > 0) {
-        novedad.personas.forEach((personaId: any) => {
-          const id = typeof personaId === 'object' ? personaId.id : personaId;
-          console.log(`Cargando persona con ID: ${id}`);
-          this.personaService.getPersona(id).subscribe(
-            (persona: Persona) => {
-              console.log(`Persona cargada: ${JSON.stringify(persona)}`);
-              // Obtener el estado de la persona para la novedad actual
-              this.estadoService.getEstadoByNovedadAndPersona(novedad.id, persona.id).subscribe(
-                (estado: Estado) => {
-                  persona.estado = estado.estado;
-                  console.log(`Estado de la persona: ${persona.estado}`);
-                  if (!novedad.personasDetalles) {
-                    novedad.personasDetalles = [];
-                  }
-                  novedad.personasDetalles.push(persona);
-                },
-                
-              );
-            },
-            (error: HttpErrorResponse) => {
-              console.error('Error al obtener persona:', error.message);
-            }
-          );
-        });
-      } else {
-        console.log('El array de personas está vacío o no está definido.');
-      }
-    }
-    loadPersonales(): void {
-      this.personalService.getPersonales().subscribe(personales => {
-        this.personales = personales;
-      });
+    
+    setColorFilter(event: Event): void {
+      const target = event.target as HTMLSelectElement;
+      this.colorFilter = target.value;
+      this.filtrarNovedadesC(); 
     }
     
-  
-    getPersonalNombreById(id: number): string {
-      const personal = this.personales.find(p => p.id === id);
-      return personal ? `${personal.jerarquia} ${personal.nombre} ${personal.apellido} ${personal.legajo}` : '';
+    filtrarNovedadesC(): void {
 
+    
+      if (this.novedades && this.novedades.length > 0) { // Asegurar que hay datos
+        if (this.colorFilter) {
+          this.filteredNovedades = this.novedades.filter(novedad => {
+            console.log(`Comparando ${novedad.codigo} con ${this.colorFilter}`);
+            return String(novedad.codigo) === String(this.colorFilter);
+          });
+        } else {
+          this.filteredNovedades = [...this.novedades]; // Si no hay filtro, mostrar todo
+        }
+      }
     }
-  
+
     exportToExcel(): void {
       console.log('exportToExcel');
       const exportData: ExportRow[] = [];
   
       const processNovedad = (novedad: Novedades) => {
         console.log('Processing novedad:', novedad.id);
-        const elementoSecuestrado = novedad.elemento_secuestrado.map((elem, index) => ({
-          [`elemento_secuestrado_${index + 1}_elemento`]: elem.elemento,
-          [`elemento_secuestrado_${index + 1}_descripcion`]: elem.descripcion
-        })).reduce((acc, curr) => ({ ...acc, ...curr }), {});
-  
-        const bienRecuperadoNo = novedad.bien_recuperado_no.map((elem, index) => ({
-          [`bien_recuperado_no_${index + 1}_elemento`]: elem.elemento,
-          [`bien_recuperado_no_${index + 1}_descripcion`]: elem.descripcion
-        })).reduce((acc, curr) => ({ ...acc, ...curr }), {});
-  
-        const bienRecuperado = novedad.bien_recuperado.map((elem, index) => ({
-          [`bien_recuperado_${index + 1}_elemento`]: elem.elemento,
-          [`bien_recuperado_${index + 1}_descripcion`]: elem.descripcion
-        })).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+const elementoSecuestrado = (novedad.elemento_secuestrado ?? []).map((elem, index) => ({
+  [`elemento_secuestrado_${index + 1}_elemento`]: elem?.elemento ?? '',
+  [`elemento_secuestrado_${index + 1}_descripcion`]: elem?.descripcion ?? ''
+})).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+
+const bienRecuperadoNo = (novedad.bien_recuperado_no ?? []).map((elem, index) => ({
+  [`bien_recuperado_no_${index + 1}_elemento`]: elem?.elemento ?? '',
+  [`bien_recuperado_no_${index + 1}_descripcion`]: elem?.descripcion ?? ''
+})).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+
+const bienRecuperado = (novedad.bien_recuperado ?? []).map((elem, index) => ({
+  [`bien_recuperado_${index + 1}_elemento`]: elem?.elemento ?? '',
+  [`bien_recuperado_${index + 1}_descripcion`]: elem?.descripcion ?? ''
+})).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+
   
         return this.novedadesPersonaService.getPersonasByNovedadId(novedad.id).pipe(
           switchMap(personas => {
@@ -1118,10 +1368,10 @@ actualizarMapa(): void {
               modus_operandi: novedad.modus_operandi_nombre,
               descripcion: novedad.descripcion,
               tipo_lugar: novedad.tipo_lugar,
-              personal_autor_nombre: this.getPersonalNombreById(novedad.personal_autor_id),
+              personal_autor_nombre: novedad.personal_autor_nombre,
               observaciones: novedad.observaciones,
               unidad_actuante: novedad.unidad_actuante,
-              oficial_cargo_nombre: novedad.oficial_cargo_id ? this.getPersonalNombreById(novedad.oficial_cargo_id) : '',
+              oficial_cargo_nombre: "novedad.oficial_cargo_id",
               victimas: JSON.stringify(victimas),
               victimarios: JSON.stringify(victimarios),
               protagonistas: JSON.stringify(protagonistas),
@@ -1144,29 +1394,6 @@ actualizarMapa(): void {
       }, error => {
         console.error('Error during export:', error);
       });
-    }
-    setColorFilter(event: Event): void {
-      const target = event.target as HTMLSelectElement;
-      this.colorFilter = target.value;
-      this.filtrarNovedadesC(); // Llamar a la función de filtrado
-    }
-    
-    filtrarNovedadesC(): void {
-      console.log("Filtrando por color:", this.colorFilter);
-      console.log("Novedades disponibles antes de filtrar por color:", this.novedades);
-    
-      if (this.novedades && this.novedades.length > 0) { // Asegurar que hay datos
-        if (this.colorFilter) {
-          this.filteredNovedades = this.novedades.filter(novedad => {
-            console.log(`Comparando ${novedad.codigo} con ${this.colorFilter}`);
-            return String(novedad.codigo) === String(this.colorFilter);
-          });
-        } else {
-          this.filteredNovedades = [...this.novedades]; // Si no hay filtro, mostrar todo
-        }
-      }
-    
-      console.log("Novedades filtradas por color:", this.filteredNovedades);
     }
 
     

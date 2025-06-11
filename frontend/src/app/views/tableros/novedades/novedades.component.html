@@ -1,7 +1,7 @@
 <div class="container-fluid p-0">
   <div class="card text-white custom-card">
     <div class="card-body text-center p-2">
-      <h6 class="card-title font-weight-bold mb-0">NOVEDADES DE INCIDENCIAS POLICIALES</h6>
+      <h6 class="card-title font-weight-bold mb-0">FORMULARIO DE INTERVENCION POLICIAL</h6>
     </div>
   </div>
 <div>
@@ -10,11 +10,13 @@
     <form>
         
       <div class="row"> 
-        <div class="col-md-4">
+                <div class="col-md-4">
           <div class="form-group row">
             <label for="usuario" class="col-sm-4 col-form-label">Usuario:</label>
             <div class="col-sm-8">
-              <span class="form-control-plaintext">({{ personalAutor?.legajo }}){{ personalAutor?.nombre }} {{ personalAutor?.apellido }}, ({{ personalAutor?.jerarquia }})</span>
+              <span class="form-control-plaintext">
+                {{ nuevaNovedad.personal_autor_nombre }}
+              </span>
             </div>
           </div>
           <div *ngIf="mensajeError" class="text-danger mt-2">
@@ -31,9 +33,10 @@
         </div>
         <div class="col-md-4">
           <div class="form-group row">
-            <label for="horario" class="col-sm-4 col-form-label">Horario:</label>
+            <label for="horario" class="col-sm-4 col-form-label">Horario de llegada:</label>
             <div class="col-sm-8">
               <input type="time" id="horario" name="horario" [(ngModel)]="nuevaNovedad.horario" class="form-control">
+              
             </div>
           </div>
         </div>
@@ -90,23 +93,26 @@
     <form>
       <div class="row">
         
-                  <div class="col-md-6">
+              <div class="col-md-6">
                     <div class="form-group d-flex align-items-center">
               <label for="unidad_regional">Unidad Regional:</label>
-              <select id="unidad_regional" name="unidad_regional" [(ngModel)]="nuevaNovedad.unidad_regional_id" class="form-select" (change)="cargarCuadrantes(+nuevaNovedad.unidad_regional_id)">
+              <select id="unidad_regional" name="unidad_regional" [(ngModel)]="nuevaNovedad.unidad_regional_id" class="form-select" (change)="cargarCuadrantes(+nuevaNovedad.unidad_regional_id)" (change)="onUnidadRegionalChange($event)">
                 <option *ngFor="let unidad_regional of unidadesRegionales" [value]="unidad_regional.id">{{ unidad_regional.unidad_regional}}</option>
               </select>
               </div>
-              
             </div>
+
             <div class="col-md-6">
               <div class="form-group d-flex align-items-center">
               <label for="cuadrante">Cuadrante:</label>
-              <select id="cuadrante" name="cuadrante" [(ngModel)]="nuevaNovedad.cuadrante_id" class="form-select">
+              <select id="cuadrante"
+                      name="cuadrante"
+                      [(ngModel)]="nuevaNovedad.cuadrante_id"
+                      class="form-select"
+                      (change)="onCuadranteChange($event)">
                 <option *ngFor="let cuadrante of cuadrantes" [value]="cuadrante.id">{{ cuadrante.nombre }}</option>
               </select>
             </div>
-           
             </div>
       </div>
       <div class="row">
@@ -181,21 +187,21 @@
               <option value="SEGURIDAD INTERNA">SEGURIDAD PRIVADA</option>
               <option value="TORRE 131">TORRE 131</option>
               <option value="TORRE 911">TORRE 911</option>
-              <option value="TORRE 334">TORRE 125</option>
+              <option value="TORRE 125">TORRE 125(CGSC)</option>
               <option value="T-350">RECORRIDO PREVENTIVO</option>
               <option value="MONITOREO">COMISARIA</option>
             </select>
           </div>
         </div>
-        <div class="col-md-3">
+              <div class="col-md-3" *ngIf="['BASE OPERACIONAL','BASE CONSOLA','TORRE 131','TORRE 911','TORRE 125','COMISARIA'].includes(nuevaNovedad.origen_novedad)">
           <div class="form-group row">
-            <label for="horario" class="col-sm-4 col-form-label">Hora de Incidencia:</label>
+            <label for="horario" class="col-sm-4 col-form-label">Hora de aviso:</label>
             <div class="col-sm-8">
               <input type="time" id="horario" name="horario" [(ngModel)]="nuevaNovedad.horaIncidencia" class="form-control">
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+           <div class="col-md-3" *ngIf="nuevaNovedad.origen_novedad === 'TORRE 911'">
           <div class="form-group row">
             <label for="n_incidencia" class="col-sm-4 col-form-label">N°Incidencia:</label>
             <div class="col-sm-8">
@@ -208,19 +214,32 @@
           <div class="form-group d-flex align-items-center">
             <label for="unidad_interviniente" class="mr-2">Unidad Interviniente</label>
             <select id="unidad_interviniente" name="unidad_interviniente" [(ngModel)]="nuevaNovedad.unidad_interviniente" class="form-select">
+                            <option value="GUARDIA URBANA">GUARDIA URBANA(PARADA EN CALLE)</option>
               <option value="CSPC">CSPC</option>
               <option value="GRUPO DINAMICO DE PREVENCION DEL DELITO">GRUPO DINAMICO DE PREVENCION DEL DELITO</option>
-              <option value="GUARDIA URBANA">GUARDIA URBANA</option>
+              <option value="CONTRAVENCIONAL">CONTRAVENCIONAL</option>
               <option value="POLICIA TURISTICA">POLICIA TURISTICA</option>
               <option value="UNIDAD MOTORIZADA">UNIDAD MOTORIZADA</option>
               <option value="UNIDAD MOVIL">UNIDAD MOVIL</option>
+              <option value="SEGURIDAD VIAL">SEGURIDAD VIAL</option>
               <option value="UPCAR">UPCAR</option>
-              <!-- <option value="INFANTERIA">INFANTERIA</option>
-              <option value="BRIGADA DE INVESTIGACIONES">BRIGADA DE INVESTIGACIONES</option> -->
+              <option value="INFANTERIA">INFANTERIA</option> 
+              <option value ="CEOP">CEOP</option>
+              <option value="BOMBEROS">BOMBEROS</option>
+              <option value="BRIGADA DE INVESTIGACIONES">BRIGADA DE INVESTIGACIONES</option>
             </select>
           </div>
           <br />
         </div> 
+             <div class="col-md-6">
+                    <div class="form-group d-flex align-items-center">
+              <label for="operativo">Operativo:</label>
+                     <select id="operativo" name="operativo" [(ngModel)]="nuevaNovedad.operativo_id" class="form-select" (change)="onOperativoChange($event)">
+                <option *ngFor="let operativo of operativosFiltrados" [value]="operativo.id">{{ operativo.nombre_operativo }} ({{operativo.fecha_desde}}/{{operativo.fecha_hasta}})</option>
+              </select>
+              </div>
+            </div>
+
      
       </div>  
       </form>
@@ -228,9 +247,9 @@
     
 
                 <div class="row">
-                  <div class="col-md-6">
+                  <div class="col-md-6"><label for="descripcion_hecho" class="mr-2">Tipo de hecho</label>
                     <div class="form-group d-flex align-items-center">
-                      <label for="descripcion_hecho" class="mr-2">Tipo de hecho</label>
+                      
                       <ng-select
                         [items]="descripcionesHecho"
                         bindLabel="descripcion_hecho"
@@ -253,9 +272,9 @@
                 </div>
               </div>
               <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-6">  <label for="modus_operandi" class="mr-2">Modus Operandi</label>
                   <div class="form-group d-flex align-items-center">
-                    <label for="modus_operandi" class="mr-2">Modus Operandi</label>
+                  
                     
                       <ng-select
                         [items]="modusOperandiList"
@@ -266,11 +285,12 @@
                         (change)="asignarModusOperandi(nuevaNovedad.modus_operandi_id)"
                         dropdownPosition="bottom"
                         appendTo="body"
-                        class="form-control flex-grow-1">
+                        class="form-control flex-grow-1"
+                        >
                       </ng-select>
                       <i class="bi bi-search ml-2" style="font-size: 1.2rem; color: #6c757d;"></i>
 
-                  </div>
+                  </div><br/>
                 </div>
               
               </div>
@@ -531,7 +551,7 @@
             <label for="victima_dni">DNI:</label>
             <div class="input-group">
               <input type="text" id="victima_dni" name="victima_dni" (click)="resetFormulario('victima')"[(ngModel)]="victima.dni" class="form-control" [readonly]="isEditing">
-              <button class="btn btn-outline-secondary" type="button" (click)="buscarPersonaPorDNI(victima.dni, 'victima')" [disabled]="isEditing">
+              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(victima.dni, 'victima')" [disabled]="isEditing">
                 <i class="bi bi-search"></i>
               </button>
             </div>
@@ -643,7 +663,7 @@
             <label for="protagonista_dni">DNI:</label>
             <div class="input-group">
               <input type="text" id="protagonista_dni" name="protagonista_dni" (click)="resetFormulario('protagonista')" [(ngModel)]="protagonista.dni" class="form-control" [readonly]="isEditing">
-              <button class="btn btn-outline-secondary" type="button" (click)="buscarPersonaPorDNI(protagonista.dni, 'protagonista')" [disabled]="isEditing">
+              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(protagonista.dni, 'protagonista')" [disabled]="isEditing">
                 <i class="bi bi-search"></i>
               </button>
             </div>
@@ -758,7 +778,7 @@
             <label for="victimario_dni">DNI:</label>
             <div class="input-group">
               <input type="text" id="victimario_dni" name="victimario_dni" (click)="resetFormulario('victimario')"[(ngModel)]="victimario.dni" class="form-control" [readonly]="isEditing">
-              <button class="btn btn-outline-secondary" type="button" (click)="buscarPersonaPorDNI(victimario.dni, 'victimario')" [disabled]="isEditing">
+              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(victimario.dni, 'victimario')" [disabled]="isEditing">
                 <i class="bi bi-search"></i>
               </button>
             </div>
@@ -870,7 +890,7 @@
             <label for="testigo_dni">DNI:</label>
             <div class="input-group">
               <input type="text" id="testigo_dni" name="testigo_dni" (click)="resetFormulario('testigo')"[(ngModel)]="testigo.dni" class="form-control" [readonly]="isEditing">
-              <button class="btn btn-outline-secondary" type="button" (click)="buscarPersonaPorDNI(testigo.dni, 'testigo')" [disabled]="isEditing">
+              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(testigo.dni, 'testigo')" [disabled]="isEditing">
                 <i class="bi bi-search"></i>
               </button>
             </div>
@@ -1125,8 +1145,8 @@
             <!-- Primera columna -->
             <div class="col-md-6">
               <div class="mb-3 d-flex">
-                <input type="text" class="form-control me-2" id="legajo" name="legajo" (click)="resetFormularioPersonal()"[(ngModel)]="nuevaPersonal.legajo">
-                <button class="btn btn-outline-secondary" type="button" (click)="buscarPersonalPorLegajo(nuevaPersonal.legajo)" [disabled]="isEditing">
+                <input type="text" class="form-control me-2" id="legajo" name="legajo" placeholder="Buscar legajo" (click)="resetFormularioPersonal()"[(ngModel)]="nuevaPersonal.legajo">
+                <button class="btn btn-primary" type="button" (click)="buscarPersonalPorLegajo(nuevaPersonal.legajo)" [disabled]="isEditing">
                   <i class="bi bi-search"></i>
                 </button>
               </div>
@@ -1160,7 +1180,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"(click)="resetFormularioPersonal()">Cancelar</button>
-        <button type="button" class="btn btn-primary"(click)="agregarPersonalTemporal()">Agregar a la Lista</button>
+        <button type="button" class="btn btn-primary"(click)="agregarPersonalTemporal()">Agregar a efectivo</button>
       </div>
     </div>
   </div>

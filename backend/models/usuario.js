@@ -8,7 +8,6 @@ const Usuario = sequelize.define('Usuario', {
     },
     id: { // ID de Firestore (No es clave primaria)
         type: DataTypes.STRING,
-
     },
     nombre: {
         type: DataTypes.STRING,
@@ -31,18 +30,17 @@ const Usuario = sequelize.define('Usuario', {
     },
     estado: {
         type: DataTypes.BOOLEAN,
-
     }
 }, {
     timestamps: false
 });
 
-
 Usuario.sync({ alter: true })
   .then(() => {
-    console.log("Tabla 'usuario' sincronizada correctamente.");
+      console.log("Tabla 'usuario' sincronizada correctamente.");
   })
   .catch((error) => {
-    console.error("Error al sincronizar la tabla 'usuario':", error);
+      console.error("Error al sincronizar la tabla 'usuario':", error);
   });
-  module.exports = Usuario;
+
+module.exports = Usuario;

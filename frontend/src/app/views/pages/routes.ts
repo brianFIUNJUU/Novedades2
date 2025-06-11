@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from "../../guards/auth.guard"; // Ajusta la ruta de importación
+import { roleGuard } from '../../guards/role.guard';
+
 
 
 export const routes: Routes = [
@@ -24,12 +26,5 @@ export const routes: Routes = [
       title: 'Login Page'
     }
   },
-  {
-    path: 'register',
-    loadComponent: () => import('./register/register.component').then(m => m.RegisterComponent),
-    canActivate: [authGuard], // Protege la ruta con el guard de autenticación
-    data: {
-      title: 'Register Page'
-    }
-  }
+
 ];

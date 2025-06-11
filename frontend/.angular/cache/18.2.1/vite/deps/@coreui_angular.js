@@ -2,6 +2,18 @@ import {
   createPopper2 as createPopper
 } from "./chunk-MTK2UXHI.js";
 import {
+  AnimationBuilder,
+  animate,
+  animation,
+  group,
+  query,
+  state,
+  style,
+  transition,
+  trigger,
+  useAnimation
+} from "./chunk-IIDSOG53.js";
+import {
   ActivatedRoute,
   NavigationEnd,
   Router,
@@ -27,18 +39,6 @@ import {
   coerceBooleanProperty,
   coerceNumberProperty
 } from "./chunk-K6YW2B3A.js";
-import {
-  AnimationBuilder,
-  animate,
-  animation,
-  group,
-  query,
-  state,
-  style,
-  transition,
-  trigger,
-  useAnimation
-} from "./chunk-IIDSOG53.js";
 import "./chunk-4OO2PO3O.js";
 import "./chunk-Y3G33AUN.js";
 import {

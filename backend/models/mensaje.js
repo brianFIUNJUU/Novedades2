@@ -12,19 +12,23 @@ const Mensaje = sequelize.define('Mensaje', {
         type: DataTypes.STRING,
         references: {
             model: Usuario,
-            key: 'uid'
+            key: 'uid' // Referencia al campo uid de Usuario
         }
     },
     destinatarioUid: { // Usuario que recibe el mensaje
         type: DataTypes.STRING,
         references: {
             model: Usuario,
-            key: 'uid'
+            key: 'uid' // Referencia al campo uid de Usuario
         }
     },
     mensaje: {
         type: DataTypes.TEXT,
     },
+    // leido: {
+    //     type: DataTypes.BOOLEAN,
+       
+    // },
     fecha: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW
@@ -38,6 +42,7 @@ Mensaje.belongsTo(Usuario, { foreignKey: 'remitenteUid', targetKey: 'uid', as: '
 Mensaje.belongsTo(Usuario, { foreignKey: 'destinatarioUid', targetKey: 'uid', as: 'destinatario' });
 
 module.exports = Mensaje;
+
 Mensaje.sync({ alter: true })
     .then(() => {
         console.log("Tabla 'mensaje' sincronizada correctamente.");

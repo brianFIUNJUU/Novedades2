@@ -67,10 +67,11 @@ const Persona = sequelize.define('Persona', {
     // telefono:{
     //     type: DataTypes.STRING,
     // },
-    // celular:{
+    // profesion:{
     //     type: DataTypes.STRING,
     // },
-    // profesion:{
+
+    // nacionalidad:{
     //     type: DataTypes.STRING,
     // },
 

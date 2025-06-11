@@ -1,7 +1,4 @@
 import {
-  BidiModule
-} from "./chunk-7LZMDODY.js";
-import {
   ENTER,
   HighContrastModeDetector,
   SPACE,
@@ -9,6 +6,9 @@ import {
   isFakeMousedownFromScreenReader,
   isFakeTouchstartFromScreenReader
 } from "./chunk-6LEBVM4G.js";
+import {
+  BidiModule
+} from "./chunk-7LZMDODY.js";
 import {
   Platform,
   _getEventTarget,

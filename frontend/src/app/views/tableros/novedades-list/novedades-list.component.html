@@ -6,13 +6,99 @@
 </div>
 <br/>
 <div class="row"> 
-   <div class="col-4">
-    <div *ngIf="userInfo.perfil === 'administrador'|| userInfo.perfil === 'usuarioDOP'" class="row d-flex align-items-center">
+    <!-- admin y dop -->
+                 <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP' " class="col-3 d-flex align-items-center gap-2">
+                <label for="filtroAdmin" class="form-label mb-0">Novedades:</label>
+                <select id="filtroAdmin" class="form-select form-select-sm" (change)="onFiltroAdminChange($event)">
+                  <option value="hoy">Del Día</option>
+                  <option value="todas">Todas</option>
+                  <option value="fecha">Por Fecha</option>
+                  <option value="porLegajo">Por legajo</option>
+                  <option value="porId">Por N° ID</option>
+                  <option value="porUnidad">Por U.R.</option>
+
+
+                </select>
+              </div>
+               <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP' " class="col-3 d-flex align-items-center gap-2">
+                <!-- byfecha -->
+                <div *ngIf="mostrarFiltroFechaAdmin" class="d-flex flex-column w-100">
+                  <div class="d-flex gap-2">
+                    <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroAdminInicio" placeholder="Desde" />
+                    <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroAdminFin" placeholder="Hasta" />
+                  </div>
+                  <button class="btn btn-primary btn-sm mt-1" (click)="filtrarNovedadesPorFechaAdmin()">Filtrar</button>
+                </div>
+                <!-- bylegajo -->
+                <div *ngIf="mostrarFiltroLegajoAdmin" class=" d-flex align-items-center gap-2">
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="legajoFiltro" placeholder="Ingrese legajo" />
+                <button class="btn btn-primary btn-sm" (click)="filtrarporLegajoAdmin()">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+              <!-- byid -->
+                <div *ngIf="mostrarFiltroIdAdmin" class=" d-flex align-items-center gap-2">
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="idFiltro" placeholder="Ingrese N° ID" />
+                <button class="btn btn-primary btn-sm" (click)="filtrarporIdAdmin()">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+              <!-- by unidad regional -->
+              <div *ngIf="mostrarFiltroUnidadAdmin" class=" d-flex align-items-center gap-2">
+                <select class="form-select form-select-sm"  [(ngModel)]="unidadFiltro" (change)="filtrarporUnidadAdmin()">
+                 <option value="" disabled selected>Seleccione Unid..</option>
+                  <option value="1">Unidad Regional 1</option>
+                  <option value="2">Unidad Regional 2</option>
+                  <option value="3">Unidad Regional 3</option>
+                  <option value="4">Unidad Regional 4</option>
+                  <option value="5">Unidad Regional 5</option>
+                  <option value="6">Unidad Regional 6</option>
+                  <option value="7">Unidad Regional 7</option>
+                  <option value="8">Unidad Regional 8</option>
+                </select>
+              </div>  
+              </div>
+      <!--usuario Unidad  -->
+              <div *ngIf="userInfo.perfil && userInfo.perfil.startsWith('EncargadoUnidad')" class="col-3 d-flex align-items-center gap-2">
+          <label class="form-label mb-0">Novedades:</label>
+          <select class="form-select form-select-sm" (change)="onFiltroUnidadChange($event)">
+            <option value="hoy">Del Día</option>
+            <option value="todas">Todas</option>
+            <option value="fecha">Por Fecha</option>
+          </select>
+        </div>
+              <div *ngIf="mostrarFiltroFechaUnid" class="col-3">
+          <div class="d-flex flex-column gap-2">
+            <div class="d-flex gap-2">
+              <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUnidadInicio" placeholder="Desde" />
+              <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUnidadFin" placeholder="Hasta" />
+            </div>
+            <button class="btn btn-primary btn-sm" (click)="filtrarNovedadesUnidadPorFecha()">Filtrar</button>
+          </div>
+        </div>
+       <!-- usuario -->
+            <div *ngIf="userInfo.perfil === 'usuario'" class="col-3 d-flex align-items-center gap-2">
+            <label for="filtroUsuario" class="form-label mb-0">Novedades:</label>
+            <select id="filtroUsuario" class="form-select form-select-sm" (change)="onFiltroUsuarioChange($event)">
+              <option value="hoy">Del Día</option>
+              <option value="todas">Todas</option>
+              <option value="fecha">Por Fecha</option>
+            </select>
+          </div>
+          <div *ngIf="userInfo.perfil === 'usuario' && mostrarFiltroFechaUsuario"  class="col-4 d-flex align-items-center gap-2">
+            <div class="d-flex gap-2">
+              <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUsuarioInicio" placeholder="Desde" />
+              <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUsuarioFin" placeholder="Hasta" />
+            </div>
+            <button class="btn btn-primary btn-sm mt-1" (click)="filtrarMisNovedadesPorFecha()">Filtrar</button>
+          </div>
+      <!-- bycoloro -->
+      <div  class="row col-2 d-flex align-items-center">
       <div class="col-auto">
-        <label for="colorFilter">Filtrar por color:</label>
+        <label for="colorFilter ">Filtrar color:</label>
       </div>
       <div class="col-auto">
-        <select id="colorFilter" class="form-select" (change)="setColorFilter($event)">
+        <select id="colorFilter" class="form-select form-select-sm" (change)="setColorFilter($event)">
           <option value="">Todos</option>
           <option value="R">Rojo</option>
           <option value="A">Amarillo</option>
@@ -20,15 +106,13 @@
         </select>
       </div>
     </div>
-    
-   </div> 
-
-   <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP'" class="col-3">
-    <button (click)="exportToExcel()" class="btn btn-success btn-sm">Exportar a Excel</button>
-  </div>
+    <!-- btnExcel -->
+    <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP' || userInfo.perfil === 'EncargadoUnidad'" class="col-2">
+      <button (click)="exportToExcel()" class="btn btn-success btn-sm">Exportar a Excel</button>
+    </div>
   
-  <div class="col-5 ">
-    <button class="btn btn-secondary btn-sm text-small" (click)="abrirModalMapa()">Ver Mapa</button>
+  <div class="col-2 ">
+    <button class="btn btn-primary btn-sm text-small" (click)="abrirModalMapa()">Ver Mapa </button>
   </div>
 
   
@@ -46,7 +130,7 @@
         <th class="text-small">Fecha</th>
         <th class="text-small">Horario</th>
         <th class="text-small">Hecho</th>
-        <th class="text-small">Involucrado</th>
+        <!-- <th class="text-small">Involucrado</th> -->
         <th class="text-small">Personal Autor</th>
         <th class="text-small">Acciones</th>
       </tr>
@@ -61,16 +145,8 @@
         <td class="text-small text-truncate-custom">
           {{ novedad.descripcion_hecho }}
         </td>
-        <td class="text-small">
-          <ul>
-            <ng-container *ngFor="let persona of novedad.personasDetalles">
-              <li>
-                {{ persona.nombre }} {{ persona.apellido }} ({{ persona.estado }})
-              </li>
-            </ng-container>
-          </ul>
-        </td>
-        <td class="text-small">({{ novedad.personalAutor?.legajo }}){{ novedad.personalAutor?.jerarquia }}:{{ novedad.personalAutor?.apellido }}</td>
+      
+        <td class="text-small">{{novedad.personal_autor_nombre}}</td>
         <td class="text-small">
           <button *ngIf="isEditable(novedad)" (click)="navigateToUpdateForm(novedad.id.toString())" class="btn btn-warning btn-sm">
             <i class="bi bi-pencil"></i> <!-- Icono de lápiz -->
@@ -126,7 +202,7 @@
 <div class="modal fade" id="actaModal" tabindex="-1" aria-labelledby="actaModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header custom-modal-header2">
         <h5 class="modal-title" id="actaModalLabel">Generar Acta de Procedimiento</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -134,55 +210,97 @@
         <!-- Formulario de la novedad -->
         <form [formGroup]="actaForm">
           <div class="row">
-            <div class="col-md-6 mb-3">
+            <div class="col-md-3 mb-3">
 
                 <label for="fechaActa" class="form-label">Fecha de emisión de acta</label>
-                <input type="date" id="fechaActa" formControlName="fechaActa" [(ngModel)]="actaForm.value.fechaActa" class="form-control">
-            </div>
-            <div class="col-md-6 mb-3">
+                <input type="date" id="fechaActa" formControlName="fechaActa" class="form-control">        
+                  </div>
+            <div class="col-md-3 mb-3">
                 <label for="horaActa" class="form-label">Hora de emisión de acta</label>
-                <input type="time" id="horaActa" formControlName="horaActa" [(ngModel)]="actaForm.value.horaActa" class="form-control">
-            </div>
+<input type="time" id="horaActa" formControlName="horaActa" class="form-control">            </div>
+                        <div class="col-md-3">
+                <label for="departamento">Departamento:*</label>
+                <select id="departamento" class="form-select"
+                        formControlName="departamento"
+                        (change)="onDepartamentoChange(actaForm.get('departamento')?.value)">
+                  <option value="">-- Seleccionar --</option>
+                  <option *ngFor="let departamento of departamentos" [value]="departamento.nombre">
+                    {{ departamento.nombre }}
+                  </option>
+                </select>
+                <div *ngIf="actaForm.get('departamento')?.invalid && actaForm.get('departamento')?.touched"
+                    class="text-danger mt-1">
+                  Falta cargar el departamento.
+                </div>
+              </div>
+
+              <!-- LOCALIDAD -->
+              <div class="col-md-3">
+                <label for="localidad">Localidad:*</label>
+                <select id="localidad" class="form-select"
+                        formControlName="localidad"
+                        (change)="onLocalidadChange(actaForm.get('localidad')?.value)">
+                  <option value="">-- Seleccionar --</option>
+                  <option *ngFor="let localidad of localidades" [value]="localidad.nombre">
+                    {{ localidad.nombre }}
+                  </option>
+                </select>
+                <div *ngIf="actaForm.get('localidad')?.invalid && actaForm.get('localidad')?.touched"
+                    class="text-danger mt-1">
+                  Falta cargar la localidad.
+                </div>
+              </div>
           </div>
           
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="fechaIntervencion" class="form-label">Fecha de Intervención</label>
-              <input type="date" id="fechaIntervencion" formControlName="fechaIntervencion" class="form-control">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="horaIntervencion" class="form-label">Hora de Intervención</label>
-              <input type="time" id="horaIntervencion" formControlName="horaIntervencion" class="form-control">
-            </div>
-          </div>
+       
+          
+     
+
           
           <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="descripcion_hecho" class="form-label">Descripción del Hecho</label>
-              <input type="text" id="descripcion_hecho" formControlName="descripcion_hecho" class="form-control">
-            </div>
             <div class="col-md-6 mb-3">
               <label for="direccion" class="form-label">Direccion</label>
               <input type="text" id="direccion" formControlName="direccion" class="form-control">
             </div> 
           </div>
           
-          <!-- <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="involucrados" class="form-label">Involucrados</label>
-              <input type="text" id="involucrados" formControlName="involucrados" class="form-control">
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="personalAutor" class="form-label">Personal Autor</label>
-              <input type="text" id="personalAutor" formControlName="personalAutor" class="form-control">
-            </div>
-          </div> -->
+          <div class="table-responsive" style="overflow: auto; max-height: 56vh;"> <!-- Menos altura -->
+            <table class="table table-bordered border-primary table-sm table-custom">
+            <thead>
+              <tr>
+                <th class="text-small">Nombre y Apellido</th>
+                <th class="text-small">DNI</th>
+                <th class="text-small">Sexo</th>
+                <th class="text-small">Departamento</th>
+                <th class="text-small">Localidad</th>
+                <th class="text-small">Domicilio</th>
+                <th class="text-small">Edad</th>
+                <th class="text-small">estado</th>
+         
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let persona of personasParaActa">
+                <td class="text-small">{{ persona.nombre }} {{ persona.apellido }}</td>
+                <td class="text-small">{{ persona.dni }}</td>
+                <td class="text-small">{{ persona.sexo }}</td>
+                <td class="text-small">{{ persona.departamento_id}}</td>
+                <td class="text-small">{{ persona.localidad_id }}</td>
+                <td class="text-small">{{ persona.domicilio }}</td>
+                <td class="text-small">{{ persona.edad }}</td>
+                <td class="text-small">{{ persona.estado}}</td>
+    
+              </tr>
+              
+            </tbody>
+          </table>
+        </div>
+       
           <div class="col-md-12 mb-3">
             <label for="relato" class="form-label">Relato</label>
             <textarea id="relato" formControlName="relato" class="form-control"></textarea> 
           </div>
-          
-          <!-- Agrega más campos según sea necesario -->
+
         </form>
       </div>
       <div class="modal-footer">
@@ -206,22 +324,22 @@
         <!-- Formulario de la novedad -->
         <form [formGroup]="actaSecForm">
           <div class="row">
-            <div class="col-md-3 mb-3">
-                <label for="fechaActa" class="form-label">Fecha de emisión de acta</label>
-                <input type="date" id="fechaActa" formControlName="fechaActa" [(ngModel)]="actaSecForm.value.fechaActa" class="form-control">
-            </div>
-            <div class="col-md-3 mb-3">
-                <label for="horaActa" class="form-label">Hora de emisión de acta</label>
-                <input type="time" id="horaActa" formControlName="horaActa" [(ngModel)]="actaSecForm.value.horaActa" class="form-control">
-            </div>
-            <div class="col-md-3 mb-3">
-                <label for="latitud" class="form-label">Latitud</label>
-                <input type="text" id="latitud" formControlName="latitud" [(ngModel)]="actaSecForm.value.latitud" class="form-control">
-            </div>
-            <div class="col-md-3 mb-3">
-                <label for="longitud" class="form-label">Longitud</label>
-                <input type="text" id="longitud" formControlName="longitud" [(ngModel)]="actaSecForm.value.longitud" class="form-control">
-            </div>
+                      <div class="col-md-3 mb-3">
+                          <label for="fechaActa" class="form-label">Fecha de emisión de acta</label>
+                          <input type="date" id="fechaActa" formControlName="fechaActa" class="form-control">
+                      </div>
+                      <div class="col-md-3 mb-3">
+                          <label for="horaActa" class="form-label">Hora de emisión de acta</label>
+                          <input type="time" id="horaActa" formControlName="horaActa" class="form-control">
+                      </div>
+                      <div class="col-md-3 mb-3">
+                          <label for="latitud" class="form-label">Latitud</label>
+                          <input type="text" id="latitud" formControlName="latitud" class="form-control">
+                      </div>
+                      <div class="col-md-3 mb-3">
+                          <label for="longitud" class="form-label">Longitud</label>
+                          <input type="text" id="longitud" formControlName="longitud" class="form-control">
+                      </div>
           </div>
           
           

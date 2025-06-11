@@ -33,7 +33,7 @@
                     <c-card-body class="custom-card-body p-4">
                       <form cForm>
                         <div class="headercard">
-                        <h4>Inicio de sesion</h4></div>
+                        <h5 class="text-center" style="font-size: 20px;">INICIO DE SESIÓN</h5></div>
                         <!-- Sección de mensajes-->
                         @if (message) {
                           <div class="alert alert-{{type}}" role="alert">
@@ -41,7 +41,7 @@
                           </div>
                         }
                         <!---------------------->
-                        <p class="text-body-secondary">Complete con sus datos</p>
+            
                         <c-input-group class="mb-3">
                           <span cInputGroupText>
                             <svg cIcon name="cilUser"></svg>
@@ -62,22 +62,37 @@
                           />
                         </c-input-group>
                         <c-row>
-                          <c-col xs="6">
-                            <button cButton class="px-4" color="primary" (click)="login()">
+                          <c-col xs="4">
+                            <button cButton class="px-1" color="primary" (click)="login()" style="font-size: 12px;">
                               @if (loadinglogin) {
-                                <c-spinner aria-hidden="false" size="sm"></c-spinner>Cargando...
+                                <c-spinner aria-hidden="false" size="sm"></c-spinner> Cargando...
                               }
                               @else {
                                 Ingresar
                               }
                             </button>
                           </c-col>
-                          <c-col class="text-right" xs="6">
-                            <button cButton class="px-0" color="link" (click)="toggleModal()">
+                        
+                          <c-col class="text-right" xs="4">
+                            <button cButton class="px-0" color="link" (click)="verificarCorreo()" style="font-size: 12px;">
+                              Reenviar correo de verificación
+                            </button>
+                          </c-col>
+                        
+                          <c-col class="text-right" xs="4">
+                            <button cButton class="px-0" color="link" (click)="toggleModal()" style="font-size: 12px;">
                               Olvidaste tu contraseña?
                             </button>
                           </c-col>
+                        
+                          <c-col class="text-center" xs="12">
+                            <p class="text-body" style="font-size: 18px;">
+                              No tienes cuenta? <a routerLink="/register">Registrate</a>
+                            </p>
+                          </c-col>
                         </c-row>
+                        
+                        <!-- NO ME ESTA DIRIGIENDO AL REGISTER -->
                       </form>
                     </c-card-body>
                   </c-card>
@@ -117,7 +132,7 @@
                   </div>
                 }
                 <!---------------------->
-                <input type="email" [(ngModel)]="emailforgot" name="emailforgot" placeholder="Enter your Email Address" cFormControl autoComplete="email">
+                <input type="email" [(ngModel)]="emailforgot" name="emailforgot" placeholder="ingrese el gmail registrado" cFormControl autoComplete="email">
               </c-modal-body>
               <c-modal-footer>
                 <button (click)="toggleModal()" cButton color="secondary">
@@ -132,4 +147,25 @@
                   }
                 </button>
               </c-modal-footer>
+            </c-modal>
+                        <!-- Modal para restablecer contraseña -->
+            <c-modal id="modalResetPassword" [visible]="resetMode" (visibleChange)="resetMode = $event">
+              <c-modal-header>
+                <h5 cModalTitle>Restablecer contraseña</h5>
+                <button (click)="resetMode = false" cButtonClose></button>
+              </c-modal-header>
+              <c-modal-body>
+                <form (ngSubmit)="resetPassword()">
+                  <input
+                    type="password"
+                    [(ngModel)]="newPassword"
+                    name="newPassword"
+                    placeholder="Nueva contraseña"
+                    required
+                    cFormControl
+                    class="form-control mb-2"
+                  />
+                  <button type="submit" class="btn btn-primary w-100">Cambiar contraseña</button>
+                </form>
+              </c-modal-body>
             </c-modal>
