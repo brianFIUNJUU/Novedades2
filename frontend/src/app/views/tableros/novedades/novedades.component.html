@@ -23,6 +23,7 @@
             {{ mensajeError }}
           </div>
         </div>
+              
         <div class="col-md-4">
           <div class="form-group row">
             <label for="fecha" class="col-sm-4 col-form-label">Fecha:</label>
@@ -40,7 +41,10 @@
             </div>
           </div>
         </div>
-     
+     <div *ngIf="isUpdating" class="mb-2">
+                <label class="form-label fw-bold">ID de novedad:</label>
+                <span>{{ nuevaNovedad.id }}</span>
+              </div>
       </div>
       <div class="row">
         <div class="col-md-12">

@@ -134,7 +134,6 @@ getOperativosPorLegajo(legajo: string): void {
       },
       error: (err) => {
         console.error('Error al cargar los operativos de los últimos 7 días:', err);
-        Swal.fire('Error', 'No se pudieron obtener los operativos de los últimos 7 días.', 'error');
       }
     });
   }

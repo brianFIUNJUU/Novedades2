@@ -17,13 +17,13 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        //  canActivate: [authGuard],
+         canActivate: [authGuard],
         loadChildren: () => import('./views/dashboard/routes').then((m) => m.routes)
       },
      
       {
         path: 'tableros',
-        // canActivate: [authGuard],
+        canActivate: [authGuard],
 
         loadChildren: () => import('./views/tableros/routes').then((m) => m.routes)
       },

@@ -225,5 +225,10 @@ export class RegisterComponent {
         });
       });
   }
-  
+     limpiarLegajo(event: any) {
+      // Solo permite números
+      const soloNumeros = event.target.value.replace(/[^0-9]/g, '');
+      this.legajo = soloNumeros;
+      event.target.value = soloNumeros; // fuerza el valor en el input
+    }
 }  

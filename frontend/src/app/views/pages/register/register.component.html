@@ -48,7 +48,18 @@
              
               <c-input-group class="mb-3">
                 <span cInputGroupText>&#35;</span>
-                <input cFormControl placeholder="Legajo" name="legajo" [(ngModel)]='legajo' />
+
+                <input
+                  cFormControl
+                  type="number"
+                  step="1"
+                  min="0"
+                  placeholder="Legajo"
+                  name="legajo"
+                  [(ngModel)]="legajo"
+                  (input)="limpiarLegajo($event)"
+                />
+
                 <button class="btn btn-primary" type="button" (click)="buscarUsuario()">
                   <i class="bi bi-search"></i> <!-- Icono de lupa -->
                 </button>
