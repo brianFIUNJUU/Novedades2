@@ -124,7 +124,6 @@ getOperativosPorLegajo(legajo: string): void {
       },
       error: (err) => {
         console.error('Error al cargar los operativos por legajo:', err);
-        Swal.fire('Error', 'No se pudieron obtener los operativos por legajo.', 'error');
       }
     });
   }

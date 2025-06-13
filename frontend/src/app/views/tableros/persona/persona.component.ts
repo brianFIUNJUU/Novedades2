@@ -154,7 +154,7 @@ export class PersonaComponent implements OnInit {
   
     guardarPersona(verificado: boolean = false): void {
       if (!verificado) {
-        this.verificarDuplicidadDNI(this.persona.dni);
+this.verificarDuplicidadDNI(this.persona.dni || '');
         return;
       }
   

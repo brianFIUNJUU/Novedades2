@@ -102,17 +102,23 @@
               </div>
             </div>
 
-            <div class="col-md-6">
+                   <div class="col-md-6">
               <div class="form-group d-flex align-items-center">
-              <label for="cuadrante">Cuadrante:</label>
-              <select id="cuadrante"
-                      name="cuadrante"
-                      [(ngModel)]="nuevaNovedad.cuadrante_id"
-                      class="form-select"
-                      (change)="onCuadranteChange($event)">
-                <option *ngFor="let cuadrante of cuadrantes" [value]="cuadrante.id">{{ cuadrante.nombre }}</option>
-              </select>
-            </div>
+                <label for="cuadrante">Cuadrante:</label>
+                <select id="cuadrante"
+                        name="cuadrante"
+                        [(ngModel)]="nuevaNovedad.cuadrante_id"
+                        class="form-select"
+                        required
+                        (change)="onCuadranteChange($event)">
+                  <option value="" disabled selected>Seleccione un cuadrante</option>
+                  <option *ngFor="let cuadrante of cuadrantes" [value]="cuadrante.id">{{ cuadrante.nombre }}</option>
+                </select>
+              </div>
+              <!-- Mensaje de error reutilizable -->
+              <div *ngIf="mostrarErrorCampo(nuevaNovedad.cuadrante_id)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
             </div>
       </div>
       <div class="row">
@@ -129,12 +135,20 @@
               <option value="no especifica">No Especifica</option>
             </select>
           </div>
+           <!-- Mensaje de error reutilizable -->
+              <div *ngIf="mostrarErrorCampo(nuevaNovedad.tipo_lugar)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
         </div>
         <div class="col-md-6">
           <div class="form-group d-flex align-items-center">
             <label for="lugar_hecho" class="mr-2">Lugar del Hecho</label>
             <input type="text" id="lugar_hecho" name="lugar_hecho" [(ngModel)]="nuevaNovedad.lugar_hecho" class="form-control">
           </div>
+            <!-- Mensaje de error reutilizable -->
+              <div *ngIf="mostrarErrorCampo(nuevaNovedad.lugar_hecho)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
         </div>
 
         <div class="col-md-3">
@@ -142,12 +156,20 @@
             <label for="latitud" class="mr-2">Latitud</label>
             <input type="text" id="latitud" name="latitud" [(ngModel)]="nuevaNovedad.latitud" class="form-control" [disabled]="isUpdating && !ubicacionEditable" (change)="actualizarMapaDesdeFormulario()">
           </div>
+            <!-- Mensaje de error reutilizable -->
+              <div *ngIf="mostrarErrorCampo(nuevaNovedad.latitud)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
         </div>
         <div class="col-md-3">
           <div class="form-group d-flex align-items-center">
             <label for="longitud" class="mr-2">Longitud</label>
             <input type="text" id="longitud" name="longitud" [(ngModel)]="nuevaNovedad.longitud" class="form-control" [disabled]="isUpdating && !ubicacionEditable" (change)="actualizarMapaDesdeFormulario()">
           </div>
+            <!-- Mensaje de error reutilizable -->
+              <div *ngIf="mostrarErrorCampo(nuevaNovedad.longitud)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
         </div> 
 
         <div class="col-md-3">
@@ -192,6 +214,10 @@
               <option value="MONITOREO">COMISARIA</option>
             </select>
           </div>
+            <!-- Mensaje de error reutilizable -->
+              <div *ngIf="mostrarErrorCampo(nuevaNovedad.origen_novedad)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
         </div>
               <div class="col-md-3" *ngIf="['BASE OPERACIONAL','BASE CONSOLA','TORRE 131','TORRE 911','TORRE 125','COMISARIA'].includes(nuevaNovedad.origen_novedad)">
           <div class="form-group row">
@@ -229,6 +255,10 @@
               <option value="BRIGADA DE INVESTIGACIONES">BRIGADA DE INVESTIGACIONES</option>
             </select>
           </div>
+           <!-- Mensaje de error reutilizable -->
+              <div *ngIf="mostrarErrorCampo(nuevaNovedad.unidad_interviniente)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
           <br />
         </div> 
              <div class="col-md-6">
@@ -264,6 +294,10 @@
                       <i class="bi bi-search ml-2" style="font-size: 1.2rem; color: #6c757d;"></i>
 
                     </div>
+                     <!-- Mensaje de error reutilizable -->
+              <div *ngIf="mostrarErrorCampo(nuevaNovedad.tipo_hecho)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
                   </div>
                 <div class="col-md-6"> 
                     <!-- Mostrar los datos obtenidos -->
@@ -290,8 +324,13 @@
                       </ng-select>
                       <i class="bi bi-search ml-2" style="font-size: 1.2rem; color: #6c757d;"></i>
 
-                  </div><br/>
+                  </div>
+                    <div *ngIf="mostrarErrorCampo(nuevaNovedad.modus_operandi_id)">
+                <small class="text-danger">Completar este campo</small>
+              </div><br/>
                 </div>
+                 <!-- Mensaje de error reutilizable -->
+            
               
               </div>
 <div class="container-fluid p-0">
@@ -550,8 +589,19 @@
           <div class="col-md-6">
             <label for="victima_dni">DNI:</label>
             <div class="input-group">
-              <input type="text" id="victima_dni" name="victima_dni" (click)="resetFormulario('victima')"[(ngModel)]="victima.dni" class="form-control" [readonly]="isEditing">
-              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(victima.dni, 'victima')" [disabled]="isEditing">
+              
+              <input
+                type="number"
+                id="victima_dni"
+                name="victima_dni"
+                [(ngModel)]="victima.dni"
+                class="form-control"
+                [readonly]="isEditing"
+                min="0"
+                step="1"
+                (input)="limpiarDni($event)"
+              />
+              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(victima.dni || '' , 'victima')" [disabled]="isEditing">
                 <i class="bi bi-search"></i>
               </button>
             </div>
@@ -662,8 +712,19 @@
           <div class="col-md-6">
             <label for="protagonista_dni">DNI:</label>
             <div class="input-group">
-              <input type="text" id="protagonista_dni" name="protagonista_dni" (click)="resetFormulario('protagonista')" [(ngModel)]="protagonista.dni" class="form-control" [readonly]="isEditing">
-              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(protagonista.dni, 'protagonista')" [disabled]="isEditing">
+
+              <input
+                type="number"
+                id="protagonista_dni"
+                name="protagonista_dni"
+                [(ngModel)]="protagonista.dni"
+                class="form-control"
+                [readonly]="isEditing"
+                min="0"
+                step="1"
+                (input)="limpiarDni($event)"
+              />              
+              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(protagonista.dni || '', 'protagonista')" [disabled]="isEditing">
                 <i class="bi bi-search"></i>
               </button>
             </div>
@@ -777,8 +838,19 @@
           <div class="col-md-6">
             <label for="victimario_dni">DNI:</label>
             <div class="input-group">
-              <input type="text" id="victimario_dni" name="victimario_dni" (click)="resetFormulario('victimario')"[(ngModel)]="victimario.dni" class="form-control" [readonly]="isEditing">
-              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(victimario.dni, 'victimario')" [disabled]="isEditing">
+
+              <input
+                type="number"
+                id="victimario_dni"
+                name="victimario_dni"
+                [(ngModel)]="victimario.dni"
+                class="form-control"
+                [readonly]="isEditing"
+                min="0"
+                step="1"
+                (input)="limpiarDni($event)"
+              />
+              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(victimario.dni || '', 'victimario')" [disabled]="isEditing">
                 <i class="bi bi-search"></i>
               </button>
             </div>
@@ -889,8 +961,19 @@
           <div class="col-md-6">
             <label for="testigo_dni">DNI:</label>
             <div class="input-group">
-              <input type="text" id="testigo_dni" name="testigo_dni" (click)="resetFormulario('testigo')"[(ngModel)]="testigo.dni" class="form-control" [readonly]="isEditing">
-              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(testigo.dni, 'testigo')" [disabled]="isEditing">
+
+              <input
+                type="number"
+                id="testigo_dni"
+                name="testigo_dni"
+                [(ngModel)]="testigo.dni"
+                class="form-control"
+                [readonly]="isEditing"
+                min="0"
+                step="1"
+                (input)="limpiarDni($event)"
+              />              
+              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(testigo.dni || '', 'testigo')" [disabled]="isEditing">
                 <i class="bi bi-search"></i>
               </button>
             </div>

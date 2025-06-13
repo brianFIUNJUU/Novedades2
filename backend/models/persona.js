@@ -17,14 +17,17 @@ const Persona = sequelize.define('Persona', {
         type: DataTypes.STRING,
         
     },
+    // ...existing code...
     dni: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+      type: DataTypes.STRING,
+      allowNull: true, // <-- Permite nulos
+      unique: false    // <-- No exige unicidad
     },
+    // ...existing code...
     sexo: {
         type: DataTypes.STRING,
     },
+   
     provincia: {
         type: DataTypes.STRING,
     },
@@ -34,53 +37,60 @@ const Persona = sequelize.define('Persona', {
             model: Departamento,
             key: 'id'
         },
-        allowNull: true
     },
+
     localidad_id: {
         type: DataTypes.INTEGER,
         references: {
             model: Localidad,
             key: 'id'
         },
-        allowNull: true
     },
+  
     domicilio: {
         type: DataTypes.STRING, 
     },
 // desde aqui agregue nuevos datos
-    // numero:{
-    //     type: DataTypes.STRING,
-    // },
-    // piso:{
-    //     type: DataTypes.STRING,
-    // },  
-    // n_departamento:{
-    //     type: DataTypes.STRING,
-    // },
-    // barrio:{
-    //     type: DataTypes.STRING,
-    // } ,
+        departamento_nombre: {
+        type: DataTypes.STRING,
+    },  
+    localidad_nombre: {
+        type: DataTypes.STRING,
+    },
+     genero:{    
+        type: DataTypes.STRING,
+    },
+    numero:{
+        type: DataTypes.STRING,
+    },
+    piso:{
+        type: DataTypes.STRING,
+    },  
+  
+    barrio:{
+        type: DataTypes.STRING,
+    } ,
 
-    // email:{
-    //     type: DataTypes.STRING,
-    // },
-    // telefono:{
-    //     type: DataTypes.STRING,
-    // },
-    // profesion:{
-    //     type: DataTypes.STRING,
-    // },
+    email:{
+        type: DataTypes.STRING,
+    },
+    telefono:{
+        type: DataTypes.STRING,
+    },
+    profesion:{
+        type: DataTypes.STRING,
+    },
 
-    // nacionalidad:{
-    //     type: DataTypes.STRING,
-    // },
+    nacionalidad:{
+        type: DataTypes.STRING,
+    },
 
-//
+
     fechaNacimiento: {
         type: DataTypes.STRING,
     },
     edad: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
     },
     comparendo: {
         type: DataTypes.BOOLEAN,

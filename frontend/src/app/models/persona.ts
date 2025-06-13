@@ -2,7 +2,7 @@ export class Persona {
   id!: number;
   nombre!: string;
   apellido!: string;
-  dni!: string;
+  dni!: string | null; ;
   sexo!: string;
   provincia!: string;
   departamento_id?:number | null; 
@@ -11,7 +11,7 @@ export class Persona {
   localidad_nombre!: string;
   domicilio!: string;
   fechaNacimiento!: string;
-  edad!: number;
+  edad!: string;
   comparendo!:boolean;
   demorado!: boolean;
   foto!: string;
@@ -25,11 +25,10 @@ export class Persona {
   foto_tipo2!: string;
   novedades!: number[];
   estado?: string
+  tempId?: number; // <--- Agrega esta línea
 
   constructor() {
-    this.nombre = '';
-    this.apellido = '';
-    this.dni = '';
+    
     this.provincia = '';
    
     this.departamento_nombre = '';
@@ -38,7 +37,7 @@ export class Persona {
     this.domicilio = '';
     this.fechaNacimiento = '';
     this.sexo = '';
-    this.edad = 0;
+    this.edad = '';
     this.comparendo = false;
     this.demorado = false;
     this.foto = '';

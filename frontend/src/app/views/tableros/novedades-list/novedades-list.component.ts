@@ -198,7 +198,7 @@ getNovedadesByUnidadRegionalUsuario(): void {
       },
       (error: HttpErrorResponse) => {
         console.error('Error al obtener novedades por unidad regional:', error.message);
-        Swal.fire('Error', 'Error al obtener novedades por unidad regional: ' + error.message, 'error');
+        // Swal.fire('Error', 'Error al obtener novedades por unidad regional: ' + error.message, 'error');
       }
     );
   }
@@ -215,7 +215,7 @@ getNovedadesByUnidadRegionalUsuarioTodas(): void {
       },
       (error: HttpErrorResponse) => {
         console.error('Error al obtener novedades por unidad regional:', error.message);
-        Swal.fire('Error', 'Error al obtener novedades por unidad regional: ' + error.message, 'error');
+        // Swal.fire('Error', 'Error al obtener novedades por unidad regional: ' + error.message, 'error');
       }
     );
   }
@@ -262,6 +262,14 @@ filtrarNovedadesUnidadPorFecha() {
     }
   }
     filtrarporUnidadAdmin() {
+       Swal.fire({
+    title: 'Cargando...',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
     if (this.unidadFiltro) {
       this.novedadesService.getNovedadesByUnidadRegional(this.unidadFiltro).subscribe(
         (data: Novedades[]) => {
@@ -270,6 +278,8 @@ filtrarNovedadesUnidadPorFecha() {
           this.novedades.forEach(novedad => {
             this.filtrarNovedadesC();
           });
+                Swal.close(); // También ciérralo si hay error
+
         }
       );
     }
@@ -295,6 +305,14 @@ filtrarNovedadesUnidadPorFecha() {
   }
   
   filtrarporLegajoAdmin() {
+    Swal.fire({
+    title: 'Cargando...',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
     if (this.legajoFiltro) {
       this.novedadesService.getNovedadesByPersonalAutorLegajo(this.legajoFiltro).subscribe(
         (data: Novedades[]) => {
@@ -303,12 +321,22 @@ filtrarNovedadesUnidadPorFecha() {
           this.novedades.forEach(novedad => {
             this.filtrarNovedadesC();
           });
+                Swal.close(); // También ciérralo si hay error
+
         }
       );
     }
   }
   
   filtrarNovedadesPorFechaAdmin() {
+     Swal.fire({
+    title: 'Cargando...',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
     if (this.fechaFiltroAdminInicio && this.fechaFiltroAdminFin) {
       this.novedadesService.getNovedadesByRangoFecha(this.fechaFiltroAdminInicio, this.fechaFiltroAdminFin).subscribe(
         (data: Novedades[]) => {
@@ -317,6 +345,8 @@ filtrarNovedadesUnidadPorFecha() {
           this.novedades.forEach(novedad => {
             this.filtrarNovedadesC();
           });
+                Swal.close(); // También ciérralo si hay error
+
         }
       );
     }
@@ -332,11 +362,20 @@ filtrarNovedadesUnidadPorFecha() {
     },
     (error: HttpErrorResponse) => {
       console.error('Error al obtener novedades del día:', error.message);
-      Swal.fire('Error', 'Error al obtener novedades del día: ' + error.message, 'error');
+      // Swal.fire('Error', 'Error al obtener novedades del día: ' + error.message, 'error');
     }
   );
 }
 getAllNovedades(): void {
+     Swal.fire({
+    title: 'Cargando...',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
     this.novedadesService.getAllNovedades().subscribe(
       (data: Novedades[]) => {
                 this.novedades = data;
@@ -345,10 +384,14 @@ getAllNovedades(): void {
           // this.cargarPersonas(novedad);
           this.filtrarNovedadesC()
         });
+              Swal.close(); // Cierra el Swal solo cuando termina correctamente
+
       },
       (error: HttpErrorResponse) => {
         console.error('Error al obtener novedades:', error.message);
-        Swal.fire('Error', 'Error al obtener novedades: ' + error.message, 'error');
+        // Swal.fire('Error', 'Error al obtener novedades: ' + error.message, 'error');
+              Swal.close(); // También ciérralo si hay error
+
       }
     );
   }
@@ -384,6 +427,14 @@ getAllNovedades(): void {
     }
   }
   getNovedadesByLegajo(): void {
+      Swal.fire({
+    title: 'Cargando...',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
     this.novedadesService.getNovedadesByPersonalAutorLegajo(this.usuarioLegajo).subscribe(
       (data: Novedades[]) => {
                 this.novedades = data;
@@ -392,10 +443,13 @@ getAllNovedades(): void {
           // this.cargarPersonas(novedad);
           this.filtrarNovedadesC();
         });
+              Swal.close(); // Cierra el Swal solo cuando termina correctamente
+
       },
       (error: HttpErrorResponse) => {
         console.error('Error al obtener novedades:', error.message);
-        Swal.fire('Error', 'Error al obtener novedades: ' + error.message, 'error');
+              Swal.close(); // También ciérralo si hay error
+
       }
     );
   }
@@ -411,7 +465,7 @@ getAllNovedades(): void {
     },
     (error: HttpErrorResponse) => {
       console.error('Error al obtener novedades del día por legajo:', error.message);
-      Swal.fire('Error', 'Error al obtener novedades del día por legajo: ' + error.message, 'error');
+     
     }
   );
 }
@@ -1252,7 +1306,7 @@ actualizarMapa(): void {
     this.novedadesService.deleteNovedad(id).subscribe(
       res => {
         console.log('Novedad eliminada', res);
-        this.getAllNovedades();
+this.getNovedadesByLegajoByToday();
         Swal.fire('Éxito', 'Novedad eliminada con éxito', 'success');
       },
       error => {

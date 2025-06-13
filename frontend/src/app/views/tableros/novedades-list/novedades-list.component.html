@@ -154,9 +154,12 @@
           <button (click)="openDocumentOptions(novedad)" class="btn btn-primary btn-sm">
             <i class="bi bi-file-earmark-text"></i> <!-- Icono de documento con líneas -->
           </button>
-          <button *ngIf="isEditable(novedad)" (click)="deleteNovedad(novedad.id.toString())" class="btn btn-danger btn-sm">
-            <span class="fs-6">X</span> <!-- "X" con tamaño estándar -->
-          </button>
+                           <button
+                    *ngIf="isEditable(novedad) && userInfo.perfil !== 'usuarioDOP'"
+                    (click)="deleteNovedad(novedad.id.toString())"
+                    class="btn btn-danger btn-sm">
+                    <span class="fs-6">X</span>
+                  </button>
         </td>
       </tr>
     </tbody>

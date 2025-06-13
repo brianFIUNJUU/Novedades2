@@ -372,72 +372,28 @@ getOperativosPorLegajo(legajo: string): void {
       }
     );
   }
-  
-
-  // editarElemento(index: number): void { 
-  //   const elemento = this.elementosAgregados[index];
-  //   this.editIndex = index;
-  
-  //   if (elemento.tipo === 'Elemento Secuestrado') {
-  //     this.nuevoElementoSecuestrado = { elemento: elemento.elemento, descripcion: elemento.descripcion };
-  //   } else if (elemento.tipo === 'Bien Recuperado' || elemento.tipo === 'Bien No Recuperado') {
-  //     // Determinar si es recuperado o no
-  //     this.elementoRecuperado = elemento.tipo === 'Bien Recuperado';
-  
-  //     // Asignar los valores al modelo correcto
-  //     if (this.elementoRecuperado) {
-  //       this.nuevoBienRecuperado = { elemento: elemento.elemento, descripcion: elemento.descripcion };
-  //     } else {
-  //       this.nuevoBienNoRecuperado = { elemento: elemento.elemento, descripcion: elemento.descripcion };
-  //     }
-  
-  //     // **Forzar la detección de cambios antes de mostrar el modal**
-  //     this.modalBienRecuperadoAbierto = false;  // Cerrar el modal si estaba abierto
-  //     setTimeout(() => {
-  //       this.modalBienRecuperadoAbierto = true; // Abrir el modal después de la actualización
-  //     }, 100);
-  //   }
-  // }
-     
-//  cargarDatosPersonalPorId(id: number): void {
-//     this.personalService.getPersonal(id.toString()).subscribe(
-//       (personal: Personal) => {
-//         this.personalAutor = personal; // Almacenar los datos del personal autor
-//         console.log('Personal autor encontrado:', personal);
-//       },
-//       (error: HttpErrorResponse) => {
-//         console.error('Error al obtener los datos del personal:', error.message);
-//       }
-//     );
-//      }
        cargarDatosPersonal(): void {
       if (!this.isUpdating) {
         this.buscarPersonalAutorPorLegajoUsuario();
       }
     }
 
-  buscarPersonalAutorPorLegajoUsuario(): void {
-    const legajo = this.usuarioLegajo; // Obtener el legajo del usuario registrado
-  
-    if (!legajo) {
-      this.mensajeError = 'No se encontró el legajo del usuario registrado.';
-      console.log('No se encontró el legajo del usuario registrado.', );
-      return;
-    }
-  
-    this.personalService.getPersonalByLegajo(legajo).subscribe(
-      (personal: Personal) => {
-        this.nuevaNovedad.personal_autor_id = personal.id;
-        this.nuevaNovedad.personal_autor_legajo = personal.legajo;
-        this.nuevaNovedad.personal_autor_nombre = `(${personal.legajo})${personal.jerarquia}:${personal.nombre} ${personal.apellido}`;
-        this.personalAutor = personal;
-        this.mensajeError = ''; // Limpiar el mensaje de error
-      },
-      (error) => {
-        console.log('Error al buscar personal autor por legajo:', error);
-        this.mensajeError = 'No se encontró un personal autor con el legajo del usuario registrado.';
-      }
-    );
+  buscarPersonalAutorPorLegajoUsuario(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const legajo = this.usuarioLegajo;
+      if (!legajo) { reject(); return; }
+      this.personalService.getPersonalByLegajo(legajo).subscribe(
+        (personal: Personal) => {
+          this.nuevaNovedad.personal_autor_id = personal.id;
+          this.nuevaNovedad.personal_autor_legajo = personal.legajo;
+          this.nuevaNovedad.personal_autor_nombre = `(${personal.legajo})${personal.jerarquia}:${personal.nombre} ${personal.apellido}`;
+          this.personalAutor = personal;
+          this.mensajeError = '';
+          resolve();
+        },
+        (error) => { reject(); }
+      );
+    });
   }
   buscarOficialCargoPorLegajo(legajo: string): void {
     if (!legajo) {
@@ -1202,8 +1158,23 @@ eliminarElemento(index: number): void {
       );
     }
     
-    addNovedad(): void {
-    if (!this.nuevaNovedad.unidad_regional_id) {
+    async addNovedad(){
+        try {
+       await this.buscarPersonalAutorPorLegajoUsuario();
+
+    if (
+    !this.nuevaNovedad.cuadrante_id ||
+    !this.nuevaNovedad.tipo_lugar ||
+    !this.nuevaNovedad.lugar_hecho ||
+    !this.nuevaNovedad.latitud ||
+    !this.nuevaNovedad.longitud ||
+    !this.nuevaNovedad.tipo_hecho_id ||
+    !this.nuevaNovedad.origen_novedad ||
+    !this.nuevaNovedad.unidad_interviniente ||
+    !this.nuevaNovedad.modus_operandi_id 
+      
+      
+  ) {
       Swal.fire('Formulario incompleto', 'Por favor, completa todos los campos requeridos.', 'warning');
       return;
     }
@@ -1278,6 +1249,9 @@ eliminarElemento(index: number): void {
         Swal.fire('Error', 'Error al crear la novedad', 'error');
       }
     );
+      } catch {
+    Swal.fire('Error', 'No se pudo obtener el personal autor.', 'error');
+  }
   }
   vincularPersonasANovedad(novedadId: number): void {
     this.personasTemporales.forEach((personaTemporal) => {
@@ -1315,7 +1289,9 @@ eliminarElemento(index: number): void {
   }
   
 
-updateNovedad(): void {
+updateNovedad(): void { 
+    this.buscarPersonalAutorPorLegajoUsuario();
+
   if (!this.nuevaNovedad.unidad_regional_id) {
     Swal.fire('Formulario incompleto', 'Por favor, completa todos los campos requeridos.', 'warning');
     return;
@@ -1885,7 +1861,9 @@ agregarPersonalTemporal(): void {
     });
   }
 }
-
+mostrarErrorCampo(valor: any): boolean {
+  return valor === null || valor === undefined || valor === '';
+}
 borrarPersonalTemporal(id: number): void {
   const indexTemporal = this.personalTemporales.findIndex(pt => pt.personal.id === id);
   if (indexTemporal !== -1) {
@@ -1967,6 +1945,10 @@ cargarPersonalRelacionado(novedadId: number): void {
       modal.show();
     }
   }
+    limpiarDni(event: any) {
+    // Solo números, y lo convierte a string para evitar problemas con el input type="number"
+    this.victima.dni = event.target.value.replace(/[^0-9]/g, '');
+  }
   buscarPersonaPorDNI(dni: string, contexto: 'victima' | 'victimario' | 'protagonista'| 'testigo'): void {
     if (!dni) {
       Swal.fire({
@@ -2022,75 +2004,80 @@ cargarPersonalRelacionado(novedadId: number): void {
       }
     );
   }
+agregarPersonaTemporal(estado: 'victima' | 'victimario' | 'protagonista' | 'testigo'): void {
+  const persona = estado === 'victima' ? this.victima : estado === 'victimario' ? this.victimario : estado === 'testigo' ? this.testigo : this.protagonista;
 
-          agregarPersonaTemporal(estado: 'victima' | 'victimario' | 'protagonista'| 'testigo'): void {
-            const persona = estado === 'victima' ? this.victima : estado === 'victimario' ? this.victimario : estado === 'testigo' ?  this.testigo: this.protagonista;
-            
-            if (persona.nombre && persona.apellido && persona.dni) {
-              if (persona && persona.id) { // Verifica que persona no sea undefined
-                // Si la persona ya tiene un ID, significa que está siendo editada
-                const index = this.personasTemporales.findIndex(pt => pt.persona.id === persona.id);
-                if (index !== -1) {
-                  this.personasTemporales[index] = { persona: { ...persona }, estado };
-                  console.log('Persona actualizada temporalmente:', { persona: { ...persona }, estado });
-                } else {
-                  this.personasTemporales.push({ persona: { ...persona }, estado });
-                  this.personasIds.push(persona.id); // Agregar el ID de la persona al array personasIds
-                  console.log('Persona agregada temporalmente:', { persona: { ...persona }, estado });
-                }
-                this.resetFormulario(estado);
-              } else {
-                // Si la persona no tiene un ID, buscarla por DNI y asignar el ID
-                this.personaService.getPersonaByDni(persona.dni).subscribe(
-                  (data: Persona) => {
-                    if (data) {
-                      persona.id = data.id; // Asignar el ID obtenido a la persona
-                      const index = this.personasTemporales.findIndex(pt => pt.persona.id === persona.id);
-                      if (index === -1) {
-                        this.personasTemporales.push({ persona: { ...persona }, estado });
-                        this.personasIds.push(persona.id); // Agregar el ID de la persona al array personasIds
-                        console.log('Persona agregada temporalmente:', { persona: { ...persona }, estado });
-                      } else {
-                        this.personasTemporales[index] = { persona: { ...persona }, estado };
-                        console.log('Persona actualizada temporalmente:', { persona: { ...persona }, estado });
-                      }
-                      this.resetFormulario(estado);
-                    } else {
-                      Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'No se encontró la persona con el DNI proporcionado.',
-                      });
-                    }
-                  },
-                  (error) => {
-                    console.error('Error al buscar persona por DNI:', error);
-                    Swal.fire({
-                      icon: 'error',
-                      title: 'Error',
-                      text: 'Ocurrió un error al buscar la persona por DNI.',
-                    });
-                  }
-                );
-              }
+  if (persona.nombre) {
+    // Si tiene DNI, buscar en la base antes de agregar
+    if (persona.dni) {
+      this.personaService.getPersonaByDni(persona.dni).subscribe(
+        (data: Persona) => {
+          if (data) {
+            persona.id = data.id;
+            // Buscar por id real
+            const index = this.personasTemporales.findIndex(pt => pt.persona.id === persona.id);
+            if (index === -1) {
+              this.personasTemporales.push({ persona: { ...persona }, estado });
+              this.personasIds.push(persona.id);
+              console.log('Persona agregada temporalmente:', { persona: { ...persona }, estado });
             } else {
-              Swal.fire({
-                icon: 'warning',
-                title: 'Datos incompletos',
-                text: 'Por favor, complete todos los campos requeridos.',
-              });
+              this.personasTemporales[index] = { persona: { ...persona }, estado };
+              console.log('Persona actualizada temporalmente:', { persona: { ...persona }, estado });
             }
+            this.resetFormulario(estado);
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'No se encontró la persona con el DNI proporcionado.',
+            });
           }
-          
+        },
+        (error) => {
+          console.error('Error al buscar persona por DNI:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al buscar la persona por DNI.',
+          });
+        }
+      );
+    } else {
+      // Si no tiene DNI ni ID, asigna un tempId único y agrega como temporal
+      if (!persona.id && !persona['tempId']) {
+        persona['tempId'] = Date.now() + Math.random();
+      }
+      // Buscar por tempId
+      const index = this.personasTemporales.findIndex(pt =>
+        persona['tempId'] ? pt.persona['tempId'] === persona['tempId'] : false
+      );
+      if (index !== -1) {
+        this.personasTemporales[index] = { persona: { ...persona }, estado };
+        console.log('Persona actualizada temporalmente (sin DNI):', { persona: { ...persona }, estado });
+      } else {
+        this.personasTemporales.push({ persona: { ...persona }, estado });
+        console.log('Persona agregada temporalmente (sin DNI):', { persona: { ...persona }, estado });
+      }
+      this.resetFormulario(estado);
+    }
+  } else {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Datos incompletos',
+      text: 'Por favor, complete al menos el nombre o alias',
+    });
+  }
+}
         
         guardarPersona(estado: 'victima' | 'victimario' | 'protagonista'| 'testigo', verificado: boolean = false): void {
         const persona = estado === 'victima' ? this.victima : estado === 'victimario' ? this.victimario : estado === 'testigo' ?  this.testigo: this.protagonista;
-        if (!verificado) {
-          this.verificarDuplicidadDNI(persona.dni, estado);
-          return;
-        }
+        // SOLO verifica duplicidad si hay DNI
+  if (!verificado && persona.dni) {
+    this.verificarDuplicidadDNI(persona.dni || '', estado);
+    return;
+  }
       
-        if (persona.nombre && persona.apellido && persona.dni) {
+        if (persona.nombre ) {
           // Asignar los archivos a la persona
           persona.foto = this.archivosPersonas[0]?.base64 || '';
           persona.foto1 = this.archivosPersonas[1]?.base64 || '';
@@ -2130,13 +2117,20 @@ cargarPersonalRelacionado(novedadId: number): void {
                 }    
   
               },
-              (error) => {
-                console.log('LA PERSONA YA EXISTE,BUSQUELA:', error);
-                Swal.fire({
-                  icon: 'success',
-                 
-                  text: 'LA PERSONA YA EXISTE,BUSQUELA. ' 
-                });
+                        (error) => {
+                if (persona.dni) {
+                  Swal.fire({
+                    icon: 'warning',
+                    title: 'La persona ya existe',
+                    text: 'Ya existe una persona con este DNI. Búsquela o actualice sus datos.',
+                  });
+                } else {
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo guardar la persona. Complete los datos correctamente.',
+                  });
+                }
               }
             );
           }
@@ -2144,14 +2138,14 @@ cargarPersonalRelacionado(novedadId: number): void {
           Swal.fire({
             icon: 'warning',
             title: 'Datos incompletos',
-            text: 'Por favor, complete todos los campos requeridos.',
+            text: 'Por favor, complete al menos el nombre o alias',
           });
         }
       }
 
    actualizarPersona(estado: 'victima' | 'victimario' | 'protagonista'| 'testigo'): void {
     const persona = estado === 'victima' ? this.victima : estado === 'victimario' ?  this.victimario : estado === 'testigo' ?  this.testigo : this.protagonista;
-    if (persona.nombre && persona.apellido && persona.dni) {
+    if (persona.nombre ) {
       // Asignar los archivos a la persona
       persona.foto = this.archivosPersonas[0]?.base64 || '';
       persona.foto1 = this.archivosPersonas[1]?.base64 || '';
@@ -2189,7 +2183,7 @@ cargarPersonalRelacionado(novedadId: number): void {
       Swal.fire({
         icon: 'warning',
         title: 'Datos incompletos',
-        text: 'Por favor, complete todos los campos requeridos.',
+        text: 'Por favor, complete al menos el nombre o alias',
       });
     }
   }
@@ -2279,34 +2273,34 @@ cargarPersonasRelacionadas(novedadId: number): void {
     }
   );
 }
-    borrarPersona(id: number): void {
-    // Eliminar de la lista temporal
-    const indexTemporal = this.personasTemporales.findIndex(pt => +pt.persona.id === id);
-    if (indexTemporal !== -1) {
-      this.personasTemporales.splice(indexTemporal, 1);
-      console.log('Persona borrada temporalmente:', id);
+      borrarPersona(id: number): void {
+      // Eliminar de la lista temporal
+      const indexTemporal = this.personasTemporales.findIndex(pt => +pt.persona.id === id);
+      if (indexTemporal !== -1) {
+        this.personasTemporales.splice(indexTemporal, 1);
+        console.log('Persona borrada temporalmente:', id);
+      }
+    
+      // Eliminar el ID de la persona del array personasIds
+      const idIndex = this.personasIds.indexOf(id);
+      if (idIndex !== -1) {
+        this.personasIds.splice(idIndex, 1);
+        console.log('ID de persona borrado del array personasIds:', id);
+      }
+    
+      // Solo si la novedad ya fue guardada y la persona está asociada en la base de datos
+      if (this.novedadId !== null && idIndex !== -1) {
+        this.novedadesService.deletePersonaFromNovedad(this.novedadId, id).subscribe(
+          () => {
+            console.log('Persona borrada permanentemente:', id);
+            this.cargarPersonas(); // Actualizar la lista de personas cargadas
+          },
+          (error) => {
+            console.error('Error al borrar persona permanentemente:', error);
+          }
+        );
+      }
     }
-  
-    // Eliminar el ID de la persona del array personasIds
-    const idIndex = this.personasIds.indexOf(id);
-    if (idIndex !== -1) {
-      this.personasIds.splice(idIndex, 1);
-      console.log('ID de persona borrado del array personasIds:', id);
-    }
-  
-    // Si la novedad ha sido guardada, eliminar de la lista permanente
-    if (this.novedadId !== null) {
-      this.novedadesService.deletePersonaFromNovedad(this.novedadId, id).subscribe(
-        () => {
-          console.log('Persona borrada permanentemente:', id);
-          this.cargarPersonas(); // Actualizar la lista de personas cargadas
-        },
-        (error) => {
-          console.error('Error al borrar persona permanentemente:', error);
-        }
-      );
-    }
-  }
 
   verificarDuplicidadDNI(dni: string, contexto: 'victima' | 'victimario' | 'protagonista'| 'testigo'): void {
     this.personaService.getPersonaByDni(dni).subscribe(
