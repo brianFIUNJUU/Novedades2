@@ -205,7 +205,11 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     this.inicializarArchivos();
     this.configurarFiltradoModusOperandi();
     const today = new Date();
+
+if (!this.isUpdating) {
+    const today = new Date();
     this.nuevaNovedad.fecha = today.toISOString().split('T')[0];
+  }    
     this.authService.getUserInfo().subscribe(userInfo => {
       this.usuarioNombre = userInfo.nombre;
       this.usuarioLegajo = userInfo.legajo;
@@ -465,6 +469,9 @@ getOperativosPorLegajo(legajo: string): void {
           this.cargarArchivosNovedad();
           this.actualizarMapaDesdeFormulario();
           this.actualizarElementosAgregados(); // Llamar a actualizarElementosAgregados
+          if (this.nuevaNovedad.fecha) {
+        this.nuevaNovedad.fecha = this.nuevaNovedad.fecha.split('T')[0];
+      }
           if (this.nuevaNovedad.cuadrante_id) {
             this.cargarCuadrantePorId(+this.nuevaNovedad.cuadrante_id); // Cargar los cuadrantes por ID
           }

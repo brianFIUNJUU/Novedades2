@@ -1,6 +1,6 @@
 import {
   FirebaseApp
-} from "./chunk-4DS6QWBH.js";
+} from "./chunk-BOFTALHR.js";
 import {
   FIREBASE_APP_NAME,
   FIREBASE_OPTIONS,
@@ -8,7 +8,7 @@ import {
   ɵcacheInstance,
   ɵfirebaseAppFactory,
   ɵlazySDKProxy
-} from "./chunk-B5FIUDIT.js";
+} from "./chunk-MHEWUCHU.js";
 import {
   firebase
 } from "./chunk-V33TBWGW.js";
@@ -21,7 +21,7 @@ import {
   ɵgetAllInstancesOf,
   ɵgetDefaultInstanceOf,
   ɵzoneWrap
-} from "./chunk-U74B7CAG.js";
+} from "./chunk-UAGISRM3.js";
 import {
   Component,
   Deferred,
@@ -39,7 +39,7 @@ import {
 } from "./chunk-LP6NKFWL.js";
 import {
   isPlatformServer
-} from "./chunk-WHBAGXEO.js";
+} from "./chunk-QH5W3VI2.js";
 import {
   Inject,
   Injectable,
@@ -53,10 +53,10 @@ import {
   ɵɵdefineInjector,
   ɵɵdefineNgModule,
   ɵɵinject
-} from "./chunk-CFCCY2HH.js";
+} from "./chunk-6L4HWLVT.js";
 import {
   merge
-} from "./chunk-TQO6VFQJ.js";
+} from "./chunk-ORNLS2RR.js";
 import {
   Observable,
   Subject,
@@ -73,7 +73,7 @@ import {
   switchMap,
   switchMapTo,
   timer
-} from "./chunk-ODTHBFDQ.js";
+} from "./chunk-D4JAG7AO.js";
 import {
   __async
 } from "./chunk-SIIEUOVM.js";
@@ -1003,7 +1003,7 @@ var AngularFireAuth = class _AngularFireAuth {
   credential;
   constructor(options, name2, platformId, zone, schedulers, useEmulator, settings, tenantId, languageCode, useDeviceLanguage, persistence, _appCheckInstances) {
     const logins = new Subject();
-    const auth = of(void 0).pipe(observeOn(schedulers.outsideAngular), switchMap(() => zone.runOutsideAngular(() => import("./index.esm-MEJO6OKL.js"))), map(() => ɵfirebaseAppFactory(options, zone, name2)), map((app) => ɵauthFactory(app, zone, useEmulator, tenantId, languageCode, useDeviceLanguage, settings, persistence)), shareReplay({
+    const auth = of(void 0).pipe(observeOn(schedulers.outsideAngular), switchMap(() => zone.runOutsideAngular(() => import("./index.esm-CTYOH23Q.js"))), map(() => ɵfirebaseAppFactory(options, zone, name2)), map((app) => ɵauthFactory(app, zone, useEmulator, tenantId, languageCode, useDeviceLanguage, settings, persistence)), shareReplay({
       bufferSize: 1,
       refCount: false
     }));
@@ -1288,4 +1288,4 @@ export {
    * limitations under the License.
    *)
 */
-//# sourceMappingURL=chunk-7VZUZ5XC.js.map
+//# sourceMappingURL=chunk-LFIP5RPF.js.map

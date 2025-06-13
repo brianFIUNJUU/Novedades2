@@ -5,118 +5,108 @@
   </div>
 </div>
 <br/>
-<div class="row"> 
-    <!-- admin y dop -->
-                 <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP' " class="col-3 d-flex align-items-center gap-2">
-                <label for="filtroAdmin" class="form-label mb-0">Novedades:</label>
-                <select id="filtroAdmin" class="form-select form-select-sm" (change)="onFiltroAdminChange($event)">
-                  <option value="hoy">Del Día</option>
-                  <option value="todas">Todas</option>
-                  <option value="fecha">Por Fecha</option>
-                  <option value="porLegajo">Por legajo</option>
-                  <option value="porId">Por N° ID</option>
-                  <option value="porUnidad">Por U.R.</option>
-
-
-                </select>
-              </div>
-               <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP' " class="col-3 d-flex align-items-center gap-2">
-                <!-- byfecha -->
-                <div *ngIf="mostrarFiltroFechaAdmin" class="d-flex flex-column w-100">
-                  <div class="d-flex gap-2">
-                    <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroAdminInicio" placeholder="Desde" />
-                    <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroAdminFin" placeholder="Hasta" />
-                  </div>
-                  <button class="btn btn-primary btn-sm mt-1" (click)="filtrarNovedadesPorFechaAdmin()">Filtrar</button>
-                </div>
-                <!-- bylegajo -->
-                <div *ngIf="mostrarFiltroLegajoAdmin" class=" d-flex align-items-center gap-2">
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="legajoFiltro" placeholder="Ingrese legajo" />
-                <button class="btn btn-primary btn-sm" (click)="filtrarporLegajoAdmin()">
-                  <i class="bi bi-search"></i>
-                </button>
-              </div>
-              <!-- byid -->
-                <div *ngIf="mostrarFiltroIdAdmin" class=" d-flex align-items-center gap-2">
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="idFiltro" placeholder="Ingrese N° ID" />
-                <button class="btn btn-primary btn-sm" (click)="filtrarporIdAdmin()">
-                  <i class="bi bi-search"></i>
-                </button>
-              </div>
-              <!-- by unidad regional -->
-              <div *ngIf="mostrarFiltroUnidadAdmin" class=" d-flex align-items-center gap-2">
-                <select class="form-select form-select-sm"  [(ngModel)]="unidadFiltro" (change)="filtrarporUnidadAdmin()">
-                 <option value="" disabled selected>Seleccione Unid..</option>
-                  <option value="1">Unidad Regional 1</option>
-                  <option value="2">Unidad Regional 2</option>
-                  <option value="3">Unidad Regional 3</option>
-                  <option value="4">Unidad Regional 4</option>
-                  <option value="5">Unidad Regional 5</option>
-                  <option value="6">Unidad Regional 6</option>
-                  <option value="7">Unidad Regional 7</option>
-                  <option value="8">Unidad Regional 8</option>
-                </select>
-              </div>  
-              </div>
-      <!--usuario Unidad  -->
-              <div *ngIf="userInfo.perfil && userInfo.perfil.startsWith('EncargadoUnidad')" class="col-3 d-flex align-items-center gap-2">
-          <label class="form-label mb-0">Novedades:</label>
-          <select class="form-select form-select-sm" (change)="onFiltroUnidadChange($event)">
-            <option value="hoy">Del Día</option>
-            <option value="todas">Todas</option>
-            <option value="fecha">Por Fecha</option>
-          </select>
-        </div>
-              <div *ngIf="mostrarFiltroFechaUnid" class="col-3">
-          <div class="d-flex flex-column gap-2">
-            <div class="d-flex gap-2">
-              <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUnidadInicio" placeholder="Desde" />
-              <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUnidadFin" placeholder="Hasta" />
-            </div>
-            <button class="btn btn-primary btn-sm" (click)="filtrarNovedadesUnidadPorFecha()">Filtrar</button>
-          </div>
-        </div>
-       <!-- usuario -->
-            <div *ngIf="userInfo.perfil === 'usuario'" class="col-3 d-flex align-items-center gap-2">
-            <label for="filtroUsuario" class="form-label mb-0">Novedades:</label>
-            <select id="filtroUsuario" class="form-select form-select-sm" (change)="onFiltroUsuarioChange($event)">
-              <option value="hoy">Del Día</option>
-              <option value="todas">Todas</option>
-              <option value="fecha">Por Fecha</option>
-            </select>
-          </div>
-          <div *ngIf="userInfo.perfil === 'usuario' && mostrarFiltroFechaUsuario"  class="col-4 d-flex align-items-center gap-2">
-            <div class="d-flex gap-2">
-              <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUsuarioInicio" placeholder="Desde" />
-              <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUsuarioFin" placeholder="Hasta" />
-            </div>
-            <button class="btn btn-primary btn-sm mt-1" (click)="filtrarMisNovedadesPorFecha()">Filtrar</button>
-          </div>
-      <!-- bycoloro -->
-      <div  class="row col-2 d-flex align-items-center">
-      <div class="col-auto">
-        <label for="colorFilter ">Filtrar color:</label>
-      </div>
-      <div class="col-auto">
-        <select id="colorFilter" class="form-select form-select-sm" (change)="setColorFilter($event)">
-          <option value="">Todos</option>
-          <option value="R">Rojo</option>
-          <option value="A">Amarillo</option>
-          <option value="V">Verde</option>
-        </select>
-      </div>
-    </div>
-    <!-- btnExcel -->
-    <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP' || userInfo.perfil === 'EncargadoUnidad'" class="col-2">
-      <button (click)="exportToExcel()" class="btn btn-success btn-sm">Exportar a Excel</button>
-    </div>
-  
-  <div class="col-2 ">
-    <button class="btn btn-primary btn-sm text-small" (click)="abrirModalMapa()">Ver Mapa </button>
+<div class="row g-2">
+  <!-- admin y dop -->
+  <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP'" class="col-12 col-md-3 d-flex align-items-center gap-2">
+    <label for="filtroAdmin" class="form-label mb-0">Novedades:</label>
+    <select id="filtroAdmin" class="form-select form-select-sm" (change)="onFiltroAdminChange($event)">
+      <option value="hoy">Del Día</option>
+      <option value="todas">Todas</option>
+      <option value="fecha">Por Fecha</option>
+      <option value="porLegajo">Por legajo</option>
+      <option value="porId">Por N° ID</option>
+      <option value="porUnidad">Por U.R.</option>
+    </select>
   </div>
-
-  
-  
+  <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP'" class="col-12 col-md-3 d-flex align-items-center gap-2">
+    <!-- byfecha -->
+    <div *ngIf="mostrarFiltroFechaAdmin" class="d-flex flex-column w-100">
+      <div class="d-flex gap-2">
+        <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroAdminInicio" placeholder="Desde" />
+        <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroAdminFin" placeholder="Hasta" />
+      </div>
+      <button class="btn btn-primary btn-sm mt-1" (click)="filtrarNovedadesPorFechaAdmin()">Filtrar</button>
+    </div>
+    <!-- bylegajo -->
+    <div *ngIf="mostrarFiltroLegajoAdmin" class="d-flex align-items-center gap-2 w-100">
+      <input type="text" class="form-control form-control-sm" [(ngModel)]="legajoFiltro" placeholder="Ingrese legajo" />
+      <button class="btn btn-primary btn-sm" (click)="filtrarporLegajoAdmin()">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+    <!-- byid -->
+    <div *ngIf="mostrarFiltroIdAdmin" class="d-flex align-items-center gap-2 w-100">
+      <input type="text" class="form-control form-control-sm" [(ngModel)]="idFiltro" placeholder="Ingrese N° ID" />
+      <button class="btn btn-primary btn-sm" (click)="filtrarporIdAdmin()">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+    <!-- by unidad regional -->
+    <div *ngIf="mostrarFiltroUnidadAdmin" class="d-flex align-items-center gap-2 w-100">
+      <select class="form-select form-select-sm" [(ngModel)]="unidadFiltro" (change)="filtrarporUnidadAdmin()">
+        <option value="" disabled selected>Seleccione Unid..</option>
+        <option value="1">Unidad Regional 1</option>
+        <option value="2">Unidad Regional 2</option>
+        <option value="3">Unidad Regional 3</option>
+        <option value="4">Unidad Regional 4</option>
+        <option value="5">Unidad Regional 5</option>
+        <option value="6">Unidad Regional 6</option>
+        <option value="7">Unidad Regional 7</option>
+        <option value="8">Unidad Regional 8</option>
+      </select>
+    </div>
+  </div>
+  <!--usuario Unidad  -->
+  <div *ngIf="userInfo.perfil && userInfo.perfil.startsWith('EncargadoUnidad')" class="col-12 col-md-3 d-flex align-items-center gap-2">
+    <label class="form-label mb-0">Novedades:</label>
+    <select class="form-select form-select-sm" (change)="onFiltroUnidadChange($event)">
+      <option value="hoy">Del Día</option>
+      <option value="todas">Todas</option>
+      <option value="fecha">Por Fecha</option>
+    </select>
+  </div>
+  <div *ngIf="mostrarFiltroFechaUnid" class="col-12 col-md-3">
+    <div class="d-flex flex-column gap-2">
+      <div class="d-flex gap-2">
+        <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUnidadInicio" placeholder="Desde" />
+        <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUnidadFin" placeholder="Hasta" />
+      </div>
+      <button class="btn btn-primary btn-sm" (click)="filtrarNovedadesUnidadPorFecha()">Filtrar</button>
+    </div>
+  </div>
+  <!-- usuario -->
+  <div *ngIf="userInfo.perfil === 'usuario'" class="col-12 col-md-3 d-flex align-items-center gap-2">
+    <label for="filtroUsuario" class="form-label mb-0">Novedades:</label>
+    <select id="filtroUsuario" class="form-select form-select-sm" (change)="onFiltroUsuarioChange($event)">
+      <option value="hoy">Del Día</option>
+      <option value="todas">Todas</option>
+      <option value="fecha">Por Fecha</option>
+    </select>
+  </div>
+  <div *ngIf="userInfo.perfil === 'usuario' && mostrarFiltroFechaUsuario" class="col-12 col-md-4 d-flex align-items-center gap-2">
+    <div class="d-flex gap-2 w-100">
+      <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUsuarioInicio" placeholder="Desde" />
+      <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUsuarioFin" placeholder="Hasta" />
+    </div>
+    <button class="btn btn-primary btn-sm mt-1" (click)="filtrarMisNovedadesPorFecha()">Filtrar</button>
+  </div>
+  <!-- bycoloro -->
+  <div class="col-12 col-md-2 d-flex align-items-center">
+    <label for="colorFilter" class="me-2">Filtrar color:</label>
+    <select id="colorFilter" class="form-select form-select-sm w-100" (change)="setColorFilter($event)">
+      <option value="">Todos</option>
+      <option value="R">Rojo</option>
+      <option value="A">Amarillo</option>
+      <option value="V">Verde</option>
+    </select>
+  </div>
+  <!-- btnExcel -->
+  <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP' || userInfo.perfil === 'EncargadoUnidad'" class="col-12 col-md-2">
+    <button (click)="exportToExcel()" class="btn btn-success btn-sm w-100">Exportar a Excel</button>
+  </div>
+  <div class="col-12 col-md-2">
+    <button class="btn btn-primary btn-sm w-100 text-small" (click)="abrirModalMapa()">Ver Mapa</button>
+  </div>
 </div>
 
 

@@ -452,31 +452,30 @@
     <div class="row">
  
       <div class="col-md-12">
+      <label for="descripcion" class="mr-2 titulo">RELATO:</label>
+
           <div class="form-group d-flex align-items-center mb-2">
-            <label for="descripcion" class="mr-2 titulo">RELATO:</label>
-            <textarea id="descripcion" name="descripcion" [(ngModel)]="nuevaNovedad.descripcion" class="form-control" ></textarea>
+            <textarea id="descripcion" name="descripcion" [(ngModel)]="nuevaNovedad.descripcion" class="form-control w-100"  rows="8" cols="60"></textarea>
           </div>
           <br />
-        </div>
+      </div>
     
-      </div> 
+    </div> 
    
     <hr />
         
           <!-- Mostrar la lista de archivos cargados -->
 <div class="md-12">
   <h5 class="titulo">Archivos vinculados al hecho:</h5>
-  <ul *ngIf="archivos.length > 0">
+  <ul *ngIf="archivos.length > 0" class="list-unstyled">
     <li *ngFor="let archivo of archivos; let i = index">
       <div *ngIf="archivo.base64 && archivo.fileName" class="file-info">
         <p class="mb-1">
           <a [href]="getFileUrlNovedad(archivo.base64, archivo.mimeType)" [download]="archivo.fileName" target="_blank">{{ archivo.fileName }}</a>
         </p>
-        <!-- Mostrar vista previa si el archivo es una imagen -->
         <div *ngIf="archivo.mimeType.startsWith('image/')">
           <img [src]="getFileUrlNovedad(archivo.base64, archivo.mimeType)" alt="{{ archivo.fileName }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
         </div>
-        <!-- Botón para eliminar la imagen -->
         <button type="button" class="btn btn-danger btn-sm mt-2" (click)="eliminarArchivoCargadoN(i)">Eliminar</button>
       </div>
     </li>
@@ -516,7 +515,7 @@
 </div>
 </div>
         <!-- AQUI COMIENZA DATOS DEL HECHO -->
-        <div class="container-fluid p-0">
+        <!-- <div class="container-fluid p-0">
           <div class="card text-white  custom-card2">
             <div class="card-body text-center p-2">
               <h6 class="card-title font-weight-bold mb-0">Unidad Actuante</h6>
@@ -545,7 +544,6 @@
                 </div>
               </div>
               <div class="col-md-6">
-                <!-- Mostrar los datos del oficial encontrado -->
                 <div *ngIf="oficialCargo">
                   <p>{{oficialCargo.jerarquia}}: {{ oficialCargo.nombre }} {{ oficialCargo.apellido }} ({{ oficialCargo.legajo }})</p>
                 </div>
@@ -560,7 +558,7 @@
             </div>
           </div>
           <hr>
-      </form>
+      </form> -->
 
   </form>
                     <div class="d-flex justify-content-between">
