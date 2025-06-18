@@ -36,10 +36,8 @@ personaCtrl.createPersona = async (req, res) => {
             await persona.setNovedades(novedades);
         }
 
-        res.json({
-            'status': '1',
-            'msg': 'Persona guardada.'
-        });
+       res.json(persona); // ✅ Devuelve la persona completa, con id incluido
+
     } catch (error) {
         res.status(400).json({
             'status': '0',

@@ -67,21 +67,15 @@ export class NovedadesService {
     );
   }
 
-  // Obtener una novedad por ID (con cache)
+   // Obtener una novedad por ID (sin cache)
   getNovedadById(id: string): Observable<Novedades> {
-    if (this.novedadByIdCache[id]) {
-      return of(this.novedadByIdCache[id]);
-    }
     const token = this.getAuthToken();
     let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.get<Novedades>(`${this.apiUrl}/${id}`, { headers }).pipe(
-      tap(data => this.novedadByIdCache[id] = data)
-    );
+    return this.http.get<Novedades>(`${this.apiUrl}/${id}`, { headers });
   }
-
   // Crear una nueva novedad
   createNovedad(novedad: Novedades): Observable<Novedades> {
     const token = this.getAuthToken();

@@ -85,7 +85,7 @@ const Persona = sequelize.define('Persona', {
         type: DataTypes.STRING,
     },
 
-
+// 
     fechaNacimiento: {
         type: DataTypes.STRING,
     },

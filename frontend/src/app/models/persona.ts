@@ -10,6 +10,16 @@ export class Persona {
   localidad_id?: number | null; 
   localidad_nombre!: string;
   domicilio!: string;
+
+  genero?: string;
+  numero?: string;
+  piso?: string;
+  barrio?: string;
+  email?: string;
+  telefono?: string;
+  profesion?: string;
+  nacionalidad?: string;
+
   fechaNacimiento!: string;
   edad!: string;
   comparendo!:boolean;
@@ -32,9 +42,9 @@ export class Persona {
     this.provincia = '';
    
     this.departamento_nombre = '';
-  
     this.localidad_nombre = '';
     this.domicilio = '';
+
     this.fechaNacimiento = '';
     this.sexo = '';
     this.edad = '';

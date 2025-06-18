@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { Elemento } from '../models/elemento';
 import { environment } from '../environments/environment';
 
@@ -10,10 +9,7 @@ import { environment } from '../environments/environment';
 })
 export class ElementoService {
   private apiUrl = environment.apiUrl + '/elemento'; // URL base del backend
-private elementosCache: Elemento[] | null = null;
-private elementoByIdCache: { [id: string]: Elemento } = {};
-private elementosByCategoriaCache: { [categoria: string]: Elemento[] } = {};
-private categoriaByElementoCache: { [elemento: string]: any } = {};
+
   constructor(private http: HttpClient) {}
 
   // Obtener el token de localStorage
@@ -22,77 +18,48 @@ private categoriaByElementoCache: { [elemento: string]: any } = {};
     return token;
   }
 
+  // Obtener todos los elementos (sin cache)
+  getElementos(): Observable<Elemento[]> {
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<Elemento[]>(this.apiUrl, { headers });
+  }
 
-// Obtener todos los elementos (con cache)
-getElementos(): Observable<Elemento[]> {
-  if (this.elementosCache) {
-    return of(this.elementosCache);
+  // Obtener un elemento por ID (sin cache)
+  getElementoById(elementoId: string): Observable<Elemento> {
+    const url = `${this.apiUrl}/${elementoId}`;
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<Elemento>(url, { headers });
   }
-  const token = this.getAuthToken();
-  let headers = new HttpHeaders();
-  if (token) {
-    headers = headers.set('Authorization', `Bearer ${token}`);
-  }
-  return this.http.get<Elemento[]>(this.apiUrl, { headers }).pipe(
-    tap(data => this.elementosCache = data)
-  );
-}
 
-// Obtener un elemento por ID (con cache)
-getElementoById(elementoId: string): Observable<Elemento> {
-  if (this.elementoByIdCache[elementoId]) {
-    return of(this.elementoByIdCache[elementoId]);
+  // Obtener elementos por nombre de categoría (sin cache)
+  getElementosByCategoria(categoriaNombre: string): Observable<Elemento[]> {
+    const url = `${this.apiUrl}/categoria/${categoriaNombre}`;
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<Elemento[]>(url, { headers });
   }
-  const url = `${this.apiUrl}/${elementoId}`;
-  const token = this.getAuthToken();
-  let headers = new HttpHeaders();
-  if (token) {
-    headers = headers.set('Authorization', `Bearer ${token}`);
-  }
-  return this.http.get<Elemento>(url, { headers }).pipe(
-    tap(data => this.elementoByIdCache[elementoId] = data)
-  );
-}
 
-// Obtener elementos por nombre de categoría (con cache)
-getElementosByCategoria(categoriaNombre: string): Observable<Elemento[]> {
-  if (this.elementosByCategoriaCache[categoriaNombre]) {
-    return of(this.elementosByCategoriaCache[categoriaNombre]);
+  // Obtener la categoría por nombre de elemento (sin cache)
+  getCategoriaByElemento(elementoNombre: string): Observable<any> {
+    const url = `${this.apiUrl}/categoria-por-elemento/${elementoNombre}`;
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<any>(url, { headers });
   }
-  const url = `${this.apiUrl}/categoria/${categoriaNombre}`;
-  const token = this.getAuthToken();
-  let headers = new HttpHeaders();
-  if (token) {
-    headers = headers.set('Authorization', `Bearer ${token}`);
-  }
-  return this.http.get<Elemento[]>(url, { headers }).pipe(
-    tap(data => this.elementosByCategoriaCache[categoriaNombre] = data)
-  );
-}
-
-// Obtener la categoría por nombre de elemento (con cache)
-getCategoriaByElemento(elementoNombre: string): Observable<any> {
-  if (this.categoriaByElementoCache[elementoNombre]) {
-    return of(this.categoriaByElementoCache[elementoNombre]);
-  }
-  const url = `${this.apiUrl}/categoria-por-elemento/${elementoNombre}`;
-  const token = this.getAuthToken();
-  let headers = new HttpHeaders();
-  if (token) {
-    headers = headers.set('Authorization', `Bearer ${token}`);
-  }
-  return this.http.get<any>(url, { headers }).pipe(
-    tap(data => this.categoriaByElementoCache[elementoNombre] = data)
-  );
-}
-
-// Limpiar cache (llama esto después de crear, actualizar o eliminar un elemento)
-clearCache() {
-  this.elementosCache = null;
-  this.elementoByIdCache = {};
-  this.elementosByCategoriaCache = {};
-  this.categoriaByElementoCache = {};
-}
 
   // Crear un nuevo elemento
   createElemento(elemento: Elemento): Observable<any> {
@@ -125,5 +92,4 @@ clearCache() {
     }
     return this.http.delete(url, { headers });
   }
-
 }

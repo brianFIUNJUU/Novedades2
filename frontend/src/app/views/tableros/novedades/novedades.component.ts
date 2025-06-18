@@ -111,6 +111,7 @@ export class NovedadesComponent implements OnInit {
   elementosAgregados: { elemento: string, descripcion: string, caracteristicas:string, tipo: string }[] = [];
   modalBienRecuperadoAbierto: boolean = false;
   elementoRecuperado: boolean = false;
+  elementoRecuperadoAnterior: boolean = false; // Añadido para controlar el estado anterior
   modalElementoSecuestradoAbierto: boolean = false;
 
   tiposHecho: TipoHecho[] = [];
@@ -268,10 +269,18 @@ getOperativosPorLegajo(legajo: string): void {
       this.nuevaNovedad.operativo_nombre = '';
     }
   }
-    abrirModal() {
-    this.modalBienRecuperadoAbierto = true;
-    this.bloquearScroll(); // Bloquear el scroll al abrir el modal
-  }
+  
+        abrirModal() {
+      this.modalBienRecuperadoAbierto = true;
+      this.elementoRecuperadoAnterior = this.elementoRecuperado;
+      // Sincroniza la descripción actual con el estado actual
+      if (this.elementoRecuperado) {
+        this.descripcionActual = this.nuevoBienRecuperado.caracteristicas || '';
+      } else {
+        this.descripcionActual = this.nuevoBienNoRecuperado.caracteristicas || '';
+      }
+      this.bloquearScroll();
+    }
 
 
   cerrarModal(): void {
@@ -992,22 +1001,29 @@ eliminarElemento(index: number): void {
     }
   }
   
-  guardarDescripcion(event: any) {
-    // Guardar en el objeto correspondiente cuando el usuario escribe en el textarea
+
+  
+  cambiarDescripcion() {
+    // Guarda SIEMPRE el valor actual en ambos objetos
+    this.nuevoBienRecuperado.caracteristicas = this.descripcionActual;
+    this.nuevoBienNoRecuperado.caracteristicas = this.descripcionActual;
+  
+    // Ahora muestra el valor correspondiente al nuevo estado
     if (this.elementoRecuperado) {
-      this.nuevoBienRecuperado.caracteristicas = event.target.value;
+      this.descripcionActual = this.nuevoBienRecuperado.caracteristicas;
     } else {
-      this.nuevoBienNoRecuperado.caracteristicas = event.target.value;
+      this.descripcionActual = this.nuevoBienNoRecuperado.caracteristicas;
     }
   }
   
-  
-  cambiarDescripcion() {
-    this.descripcionActual = this.elementoRecuperado
-      ? this.nuevoBienRecuperado.caracteristicas
-      : this.nuevoBienNoRecuperado.caracteristicas;
+  guardarDescripcion(event: any) {
+    this.descripcionActual = event.target.value;
+    if (this.elementoRecuperado) {
+      this.nuevoBienRecuperado.caracteristicas = this.descripcionActual;
+    } else {
+      this.nuevoBienNoRecuperado.caracteristicas = this.descripcionActual;
+    }
   }
-  
  
   cerrarModalElementoSecuestrado() {
     this.modalElementoSecuestradoAbierto = false;
@@ -1272,9 +1288,9 @@ eliminarElemento(index: number): void {
         () => {
           console.log(`Persona con ID ${personaId} agregada a la novedad`);
         },
-        error => {
-          console.error('Error al agregar persona a la novedad:', error);
-        }
+        // error => {
+        //   console.error('Error al agregar persona a la novedad:', error);
+        // }
       );
     });
   }
@@ -1347,56 +1363,6 @@ updateNovedad(): void {
     }
   );
 }
-actualizarRelacionesPersonal(): void {
-  const novedadId = this.novedadGuardadaId || this.nuevaNovedad.id; // Usar el ID de la novedad guardada o la nueva novedad
-  if (!novedadId) {
-    console.log('Error: El ID de la novedad no está definido.');
-    return;
-  }
-
-  // Obtener el personal actualmente asociado a la novedad
-  this.novedadesPersonalService.getPersonalByNovedadId(novedadId).subscribe(
-    (personalActual: Personal[]) => {
-      const personalActualIds = personalActual.map(persona => persona.id);
-
-      // Eliminar las relaciones que ya no existen
-      personalActualIds.forEach(personalId => {
-        if (!this.policiasIds.includes(personalId)) {
-          this.novedadesPersonalService.removePersonalFromNovedad(novedadId, personalId).subscribe(
-            () => {
-              console.log(`Personal con ID ${personalId} eliminado de la novedad`);
-            },
-            error => {
-              console.error('Error al eliminar personal de la novedad:', error);
-            }
-          );
-        }
-      });
- 
-      this.policiasIds.forEach(personalId => {
-        if (!personalActualIds.includes(personalId)) {
-          if (!personalId || personalId === 0) {
-            console.error('Error: Intentando agregar un personal con un ID no válido:', personalId);
-            return;
-          }
-          console.log('Agregando personal a la novedad:', { novedad_id: novedadId, personal_id: personalId });
-          this.novedadesPersonalService.addPersonalToNovedad(novedadId, personalId).subscribe(
-            () => {
-              console.log(`Personal con ID ${personalId} agregado a la novedad`);
-            },
-            error => {
-              console.error('Error al agregar personal a la novedad:', error);
-            }
-          );
-        }
-      });
-    },
-    error => {
-      console.error('Error al obtener personal actual de la novedad:', error);
-    }
-  );
-}
-
 actualizarRelacionesPersonas(): void {
   const novedadId = this.novedadGuardadaId || this.nuevaNovedad.id; // Usar el ID de la novedad guardada o el ID de la nueva novedad
   if (!novedadId) {
@@ -1461,6 +1427,57 @@ actualizarRelacionesPersonas(): void {
     }
   );
 }
+actualizarRelacionesPersonal(): void {
+  const novedadId = this.novedadGuardadaId || this.nuevaNovedad.id; // Usar el ID de la novedad guardada o la nueva novedad
+  if (!novedadId) {
+    console.log('Error: El ID de la novedad no está definido.');
+    return;
+  }
+
+  // Obtener el personal actualmente asociado a la novedad
+  this.novedadesPersonalService.getPersonalByNovedadId(novedadId).subscribe(
+    (personalActual: Personal[]) => {
+      const personalActualIds = personalActual.map(persona => persona.id);
+
+      // Eliminar las relaciones que ya no existen
+      personalActualIds.forEach(personalId => {
+        if (!this.policiasIds.includes(personalId)) {
+          this.novedadesPersonalService.removePersonalFromNovedad(novedadId, personalId).subscribe(
+            () => {
+              console.log(`Personal con ID ${personalId} eliminado de la novedad`);
+            },
+            error => {
+              console.error('Error al eliminar personal de la novedad:', error);
+            }
+          );
+        }
+      });
+ 
+      this.policiasIds.forEach(personalId => {
+        if (!personalActualIds.includes(personalId)) {
+          if (!personalId || personalId === 0) {
+            console.error('Error: Intentando agregar un personal con un ID no válido:', personalId);
+            return;
+          }
+          console.log('Agregando personal a la novedad:', { novedad_id: novedadId, personal_id: personalId });
+          this.novedadesPersonalService.addPersonalToNovedad(novedadId, personalId).subscribe(
+            () => {
+              console.log(`Personal con ID ${personalId} agregado a la novedad`);
+            },
+            error => {
+              console.error('Error al agregar personal a la novedad:', error);
+            }
+          );
+        }
+      });
+    },
+    error => {
+      console.error('Error al obtener personal actual de la novedad:', error);
+    }
+  );
+}
+
+
   deleteNovedad(id: string): void {
     this.novedadesService.deleteNovedad(id).subscribe(
       res => {
@@ -1991,6 +2008,7 @@ cargarPersonalRelacionado(novedadId: number): void {
         }
 
         this.cargarArchivosPersona(data); // Cargar los archivos de la persona
+        this.guardarPersona(contexto, true)
       },
       (error) => {
         if (error.status === 404) {
@@ -2012,25 +2030,32 @@ cargarPersonalRelacionado(novedadId: number): void {
     );
   }
 agregarPersonaTemporal(estado: 'victima' | 'victimario' | 'protagonista' | 'testigo'): void {
-  const persona = estado === 'victima' ? this.victima : estado === 'victimario' ? this.victimario : estado === 'testigo' ? this.testigo : this.protagonista;
+  const personaBase = estado === 'victima' ? this.victima
+    : estado === 'victimario' ? this.victimario
+    : estado === 'testigo' ? this.testigo
+    : this.protagonista;
+
+  const persona = { ...personaBase };
 
   if (persona.nombre) {
-    // Si tiene DNI, buscar en la base antes de agregar
     if (persona.dni) {
       this.personaService.getPersonaByDni(persona.dni).subscribe(
         (data: Persona) => {
           if (data) {
             persona.id = data.id;
-            // Buscar por id real
+
             const index = this.personasTemporales.findIndex(pt => pt.persona.id === persona.id);
             if (index === -1) {
-              this.personasTemporales.push({ persona: { ...persona }, estado });
-              this.personasIds.push(persona.id);
-              console.log('Persona agregada temporalmente:', { persona: { ...persona }, estado });
+              this.personasTemporales.push({ persona, estado });
+              if (!this.personasIds.includes(persona.id)) {
+                this.personasIds.push(persona.id); // ✅ Asegurarse de guardar el ID
+              }
+              console.log('Persona agregada temporalmente:', { persona, estado });
             } else {
-              this.personasTemporales[index] = { persona: { ...persona }, estado };
-              console.log('Persona actualizada temporalmente:', { persona: { ...persona }, estado });
+              this.personasTemporales[index] = { persona, estado };
+              console.log('Persona actualizada temporalmente:', { persona, estado });
             }
+
             this.resetFormulario(estado);
           } else {
             Swal.fire({
@@ -2050,20 +2075,17 @@ agregarPersonaTemporal(estado: 'victima' | 'victimario' | 'protagonista' | 'test
         }
       );
     } else {
-      // Si no tiene DNI ni ID, asigna un tempId único y agrega como temporal
-      if (!persona.id && !persona['tempId']) {
-        persona['tempId'] = Date.now() + Math.random();
-      }
-      // Buscar por tempId
-      const index = this.personasTemporales.findIndex(pt =>
-        persona['tempId'] ? pt.persona['tempId'] === persona['tempId'] : false
-      );
-      if (index !== -1) {
-        this.personasTemporales[index] = { persona: { ...persona }, estado };
-        console.log('Persona actualizada temporalmente (sin DNI):', { persona: { ...persona }, estado });
+    const index = this.personasTemporales.findIndex(pt => pt.persona.id === persona.id);
+
+      if (index === -1) {
+        this.personasTemporales.push({ persona, estado });
+         if (!this.personasIds.includes(persona.id)) {
+                this.personasIds.push(persona.id); // ✅ Asegurarse de guardar el ID
+              }
+        console.log('Persona agregada temporalmente (sin DNI):', { persona, estado });
       } else {
-        this.personasTemporales.push({ persona: { ...persona }, estado });
-        console.log('Persona agregada temporalmente (sin DNI):', { persona: { ...persona }, estado });
+        this.personasTemporales[index] = { persona, estado };
+        console.log('Persona actualizada temporalmente (sin DNI):', { persona, estado });
       }
       this.resetFormulario(estado);
     }
@@ -2075,80 +2097,118 @@ agregarPersonaTemporal(estado: 'victima' | 'victimario' | 'protagonista' | 'test
     });
   }
 }
-        
-        guardarPersona(estado: 'victima' | 'victimario' | 'protagonista'| 'testigo', verificado: boolean = false): void {
-        const persona = estado === 'victima' ? this.victima : estado === 'victimario' ? this.victimario : estado === 'testigo' ?  this.testigo: this.protagonista;
-        // SOLO verifica duplicidad si hay DNI
-  if (!verificado && persona.dni) {
-    this.verificarDuplicidadDNI(persona.dni || '', estado);
-    return;
-  }
-      
-        if (persona.nombre ) {
-          // Asignar los archivos a la persona
-          persona.foto = this.archivosPersonas[0]?.base64 || '';
-          persona.foto1 = this.archivosPersonas[1]?.base64 || '';
-          persona.foto2 = this.archivosPersonas[2]?.base64 || '';
-          persona.foto_tipo = this.archivosPersonas[0]?.mimeType || '';
-          persona.foto_tipo1 = this.archivosPersonas[1]?.mimeType || '';
-          persona.foto_tipo2 = this.archivosPersonas[2]?.mimeType || '';
-          persona.foto_nombre = this.archivosPersonas[0]?.fileName || '';
-          persona.foto_nombre1 = this.archivosPersonas[1]?.fileName || '';
-          persona.foto_nombre2 = this.archivosPersonas[2]?.fileName || '';
-      
-          if (persona.id) {
-            console.log('Datos enviados para actualizar persona:', JSON.stringify(persona, null, 2)); // Agregar un log para ver los datos enviados
-            this.actualizarPersona(estado);
-            this.agregarPersonaTemporal(estado)
-            
-                this.actualizarRelacionesPersonas(); // Actualizar las relaciones en la base de datos
-               // Cerrar el modal después de mostrar el mensaje de éxito
-              const modalElement = document.getElementById(estado === 'victima' ? 'modalVictima' : estado === 'victimario' ? 'modalVictimario'  : estado === 'testigo' ? 'modalTestigo' : 'modalProtagonista');
-              if (modalElement) {
-                const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
-                modal.hide();
-              }    
 
-          } else {
-            console.log('Datos enviados para crear persona:', JSON.stringify(persona, null, 2)); // Agregar un log para ver los datos enviados
-            this.personaService.createPersona(persona).subscribe(
-              (response) => {
-               
-                this.actualizarPersonaTemporal(persona, estado); // Actualizar la persona en la lista temporal
-                this.actualizarRelacionesPersonas(); // Actualizar las relaciones en la base de datos
-                this.agregarPersonaTemporal(estado)
-                const modalElement = document.getElementById(estado === 'victima' ? 'modalVictima' : estado === 'victimario' ? 'modalVictimario'  : estado === 'testigo' ? 'modalTestigo' : 'modalProtagonista');
-                if (modalElement) {
-                  const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
-                  modal.hide();
-                }    
-  
-              },
-                        (error) => {
-                if (persona.dni) {
-                  Swal.fire({
-                    icon: 'warning',
-                    title: 'La persona ya existe',
-                    text: 'Ya existe una persona con este DNI. Búsquela o actualice sus datos.',
-                  });
-                } else {
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'No se pudo guardar la persona. Complete los datos correctamente.',
-                  });
-                }
-              }
-            );
+        
+        guardarPersona(estado: 'victima' | 'victimario' | 'protagonista' | 'testigo', verificado: boolean = false): void {
+  console.log('Entrando a guardarPersona', { verificado });
+
+  const persona = estado === 'victima' ? this.victima
+                : estado === 'victimario' ? this.victimario
+                : estado === 'testigo' ? this.testigo
+                : this.protagonista;
+
+  // 🚨 Verificar duplicidad de DNI antes de continuar
+  if (!verificado && persona.dni) {
+    this.verificarDuplicidadDNI(persona.dni, estado);
+    return; // 👉 IMPORTANTE: corta aquí hasta que verificación termine
+  }
+
+  if (persona.nombre) {
+    // Asignar fotos si hay archivos cargados
+    persona.foto = this.archivosPersonas[0]?.base64 || '';
+    persona.foto1 = this.archivosPersonas[1]?.base64 || '';
+    persona.foto2 = this.archivosPersonas[2]?.base64 || '';
+    persona.foto_tipo = this.archivosPersonas[0]?.mimeType || '';
+    persona.foto_tipo1 = this.archivosPersonas[1]?.mimeType || '';
+    persona.foto_tipo2 = this.archivosPersonas[2]?.mimeType || '';
+    persona.foto_nombre = this.archivosPersonas[0]?.fileName || '';
+    persona.foto_nombre1 = this.archivosPersonas[1]?.fileName || '';
+    persona.foto_nombre2 = this.archivosPersonas[2]?.fileName || '';
+
+    if (persona.id) {
+      // 👉 Si ya tiene ID, actualizar
+      console.log('Actualizando persona:', persona);
+      this.actualizarPersona(estado);
+      this.agregarPersonaTemporal(estado);
+      this.cerrarModal2(estado);
+
+    } else {
+      // 👉 Crear persona nueva
+      console.log('Creando nueva persona:', persona);
+      this.personaService.createPersona(persona).subscribe(
+        (response: Persona) => {
+          const personaConId = { ...persona, id: response.id };
+          this.actualizarPersonaTemporal(personaConId, estado);
+          persona.id = response.id;
+
+          if (!this.personasIds.includes(response.id)) {
+            this.personasIds.push(response.id);
           }
-        } else {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Datos incompletos',
-            text: 'Por favor, complete al menos el nombre o alias',
-          });
+
+          this.agregarPersonaTemporal(estado);
+          this.cerrarModal2(estado);
+        },
+        (error) => {
+          if (persona.dni) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'La persona ya existe',
+              text: 'Ya existe una persona con este DNI. Búsquela o actualice sus datos.',
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'No se pudo guardar la persona. Complete los datos correctamente.',
+            });
+          }
         }
+      );
+    }
+  } else {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Datos incompletos',
+      text: 'Por favor, complete al menos el nombre o alias',
+    });
+  }
+}
+verificarDuplicidadDNI(dni: string, contexto: 'victima' | 'victimario' | 'protagonista' | 'testigo'): void {
+  this.personaService.getPersonaByDni(dni).subscribe(
+    (data: Persona | null) => {
+      if (data && data.id) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'La persona ya existe',
+          text: 'Ya existe una persona con este DNI. Búsquela y selecciónela para continuar.',
+        });
+      } else {
+        // Si no existe, proceder a guardar
+        this.guardarPersona(contexto, true);
       }
+    },
+    (error) => {
+      console.error('Error al verificar duplicidad de DNI:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Ocurrió un error al verificar el DNI.',
+      });
+    }
+  );
+}
+      cerrarModal2(estado: string): void {
+  const modalId = estado === 'victima' ? 'modalVictima'
+                : estado === 'victimario' ? 'modalVictimario'
+                : estado === 'testigo' ? 'modalTestigo'
+                : 'modalProtagonista';
+
+  const modalElement = document.getElementById(modalId);
+  if (modalElement) {
+    const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+    modal.hide();
+  }
+}
 
    actualizarPersona(estado: 'victima' | 'victimario' | 'protagonista'| 'testigo'): void {
     const persona = estado === 'victima' ? this.victima : estado === 'victimario' ?  this.victimario : estado === 'testigo' ?  this.testigo : this.protagonista;
@@ -2309,41 +2369,7 @@ cargarPersonasRelacionadas(novedadId: number): void {
       }
     }
 
-  verificarDuplicidadDNI(dni: string, contexto: 'victima' | 'victimario' | 'protagonista'| 'testigo'): void {
-    this.personaService.getPersonaByDni(dni).subscribe(
-      (data: Persona | null) => { // Asegurar que data puede ser null
-        if (data && data.id) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Persona ya existe',
-            text: 'Ya existe una persona con este DNI. ¿Deseas actualizar sus datos?',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, actualizar',
-            cancelButtonText: 'No, buscar',
-          }).then((result) => {
-            if (result.isConfirmed) {
-              this.asignarPersonaPorContexto(data, contexto);
-              this.guardarPersona(contexto, true); // Guardar directamente con el flag verificado
-            } else {
-              this.buscarPersonaPorDNI(dni, contexto);
-            }
-          });
-        } else {
-          // Si no se encuentra, proceder a guardar
-          console.log('No se encontró duplicado, procediendo a guardar.');
-          this.guardarPersona(contexto, true);
-        }
-      },
-      (error) => {
-        console.error('Error al verificar duplicidad de DNI:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Ocurrió un error al verificar el DNI.',
-        });
-      }
-    );
-  }
+ 
   private asignarPersonaPorContexto(persona: Persona, contexto: 'victima' | 'victimario' | 'protagonista' | 'testigo'): void {
     if (contexto === 'victima') {
         this.victima = persona;
