@@ -2173,7 +2173,10 @@ agregarPersonaTemporal(estado: 'victima' | 'victimario' | 'protagonista' | 'test
     });
   }
 }
-verificarDuplicidadDNI(dni: string, contexto: 'victima' | 'victimario' | 'protagonista' | 'testigo'): void {
+verificarDuplicidadDNI(
+  dni: string,
+  contexto: 'victima' | 'victimario' | 'protagonista' | 'testigo'
+): void {
   this.personaService.getPersonaByDni(dni).subscribe(
     (data: Persona | null) => {
       if (data && data.id) {
@@ -2183,17 +2186,15 @@ verificarDuplicidadDNI(dni: string, contexto: 'victima' | 'victimario' | 'protag
           text: 'Ya existe una persona con este DNI. Búsquela y selecciónela para continuar.',
         });
       } else {
-        // Si no existe, proceder a guardar
         this.guardarPersona(contexto, true);
       }
     },
     (error) => {
-      console.error('Error al verificar duplicidad de DNI:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Ocurrió un error al verificar el DNI.',
-      });
+      if (error.status === 404) {
+        // Si no existe, proceder a guardar (NO mostrar error)
+        this.guardarPersona(contexto, true);
+      }
+      // No mostrar ningún mensaje ni hacer nada más
     }
   );
 }
