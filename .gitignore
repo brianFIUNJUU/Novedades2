@@ -9,6 +9,7 @@ backend/ssl
 .idea/
 *.log
 *.env
+*.zip
 # Ignorar archivos de configuración de Google Cloud
 *.json
 *.key
