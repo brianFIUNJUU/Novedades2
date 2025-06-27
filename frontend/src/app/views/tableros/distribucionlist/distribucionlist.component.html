@@ -55,43 +55,44 @@
  
     <br>
     <div class="table-responsive">
-      <table class="table table-bordered border-primary">
+          <table class="table table-bordered border-primary table-sm table-custom">
+
         <thead>
           <tr>
-            <th class="text-small">Id</th>
-            <th class="text-small">Jurisdicción</th>
-            <th class="text-small">Operativo</th>
-            <th class="text-small">Desde/Hasta</th>
-            <th class="text-small">Turno</th> 
-            <th class="text-small">Afectados</th>
-            <th class="text-small">Mapa</th>
-            <th class="text-small">Novedades</th>  <!-- Agregar este campo para mostrar el botón de visualizar mapa -->
-            <th class="text-small " *ngIf="mostrarFiltrosAvanzados">Acciones</th>
+            <th class="text-center text-small">Id</th>
+            <th class="text-center text-small">Jurisdicción</th>
+            <th class="text-center text-small">Operativo</th>
+            <th class="text-center text-small">Desde/Hasta</th>
+            <th class="text-center text-small">Turno</th> 
+            <th class="text-center text-small">Afectados</th>
+            <th class="text-center text-small">Mapa</th>
+            <th class="text-center text-small">Novedades</th>  <!-- Agregar este campo para mostrar el botón de visualizar mapa -->
+            <th class="text-center text-small" *ngIf="mostrarFiltrosAvanzados">Acciones</th>
            
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let operativo of operativosFiltrados">
-            <td class="text-small">{{ operativo.id }}</td>
-            <td class="text-small">U.R.n°:{{ operativo.unidades_regionales }}</td>
-            <td class="text-small">{{ operativo.nombre_operativo }}</td>
-            <td class="text-small">{{ operativo.fecha_desde }}/{{ operativo.fecha_hasta }}</td>
-            <td class="text-small">{{ operativo.turno }}</td>  
-            <td class="text-small">{{ operativo.cant_total_personal }} efectivos</td>
+            <td class="text-center text-small">{{ operativo.id }}</td>
+            <td class="text-center text-small">U.R.n°:{{ operativo.unidades_regionales }}</td>
+            <td class="text-center text-small">{{ operativo.nombre_operativo }}</td>
+            <td class="text-center text-small">{{ operativo.fecha_desde }}/{{ operativo.fecha_hasta }}</td>
+            <td class="text-center text-small">{{ operativo.turno }}</td>  
+            <td class="text-center text-small">{{ operativo.cant_total_personal }} efectivos</td>
                <!-- <td class="text-small">{{ operativo.jefeSupervisor }}</td>
               <td class="text-small">{{ operativo.fuerzaEfectiva }}</td> -->
               
-              <td class="text-small">
+              <td class="text-center text-small">
                 <button class="btn btn-secondary btn-sm text-small" (click)="abrirModalMapa(operativo)">Visualizar</button>
               </td>
-              <td class="text-small">
+              <td class="text-center text-small">
                   <button type="button" class="btn btn-primary btn-sm" title="Agregar Novedad" (click)="navegarAFormularioNovedades()" ><i class="bi bi-plus"></i></button>
                   <!-- boton para agregar novedades -->
               <button type="button" class="btn btn-primary btn-sm" title="Ver listado de novedades" (click)="openModalNovedades(operativo)">
                     <i class="bi bi-list"></i>
               </button>
               </td>
-            <td class="text-small"*ngIf="mostrarFiltrosAvanzados">
+            <td class="text-center text-small"*ngIf="mostrarFiltrosAvanzados">
               <button class="btn btn-warning btn-sm" (click)="editarOperativo(operativo.id)" title="Editar">
                 <i class="bi bi-pencil"></i>
               </button>
@@ -137,11 +138,21 @@
                     <td>{{ novedad.descripcion_hecho }}</td>
                     <td>{{ novedad.personal_autor_nombre }}</td>
                     <td class="text-small">
-                      <button *ngIf="isEditable(novedad)" (click)="navigateToUpdateForm(novedad.id.toString())" class="btn btn-warning btn-sm" title="Editar">
+                      <button 
+                        *ngIf="isEditable(novedad) && userInfo.perfil !== 'usuarioDOP'" 
+                        (click)="navigateToUpdateForm(novedad.id.toString())" 
+                        class="btn btn-warning btn-sm">
                         <i class="bi bi-pencil"></i>
                       </button>
-                      <button *ngIf="isEditable(novedad)" (click)="deleteNovedad(novedad.id.toString())" class="btn btn-danger btn-sm" title="Eliminar">
-                        <span class="fs-6">X</span>
+
+                      <button
+                        *ngIf="isEditable(novedad) && userInfo.perfil !== 'usuarioDOP'"
+                        (click)="deleteNovedad(novedad.id.toString())"
+                        class="btn btn-danger btn-sm align-middle">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                      <button  (click)="verNovedad(novedad.id.toString())" class="btn btn-success btn-sm">
+                        <i class="bi bi-check2">ver</i> <!-- Icono de verificación -->
                       </button>
                       <!-- Otros botones que no dependan de isEditable pueden ir aquí -->
                     </td>

@@ -242,9 +242,10 @@
 
       <div class="modal-body">
         <form >
+          <div class="row col-12">
+            <!-- legajo -->
           <div class="row">
-            <div class="form-group col-md-6 col-sm-12">
-              <div class="d-flex align-items-center mb-3">
+            <div class=" col-6">
                 <label for="legajo" class="mr-2">Legajo:</label>
                 <div class="input-group">
                   <input id="legajo" name="legajo" type="text" class="form-control" aria-label="Legajo" placeholder="Buscar" [(ngModel)]="legajoPersonalModal">
@@ -252,48 +253,46 @@
                     <span class="input-group-text" (click)="buscarPersonalPorLegajoModal()"><i class="bi bi-search"></i></span>
                   </div>
                 </div>
-              </div>
+              
               <div *ngIf="mensajeErrorPersonalModal" class="text-danger">{{ mensajeErrorPersonalModal }}</div>
             </div>   
-            <div class="form-group col-md-6 col-sm-12" *ngIf="personalEncontradoModal">
-              <div class="mt-2 p-2 border bg-light">
+            <div class="form-group col-6" *ngIf="personalEncontradoModal">
                 <p><strong>{{ personalEncontradoModal.jerarquia }}</strong> {{ personalEncontradoModal.nombre }} {{ personalEncontradoModal.apellido }} (DNI: {{ personalEncontradoModal.dni }})</p>
-              </div>
             </div>
-            <div class="form-group col-md-6 col-sm-12">
-            <div class="d-flex align-items-center mb-3">
-              <label for="asitencia">Asistencia:</label>
+          </div> 
+           <!-- asistencia -->
+            <div class="form-group col-6">
+            <label for="asitencia">Asistencia:</label>
             <select class="form-select" [(ngModel)]="asistenciaPersonalModal" name="asistenciaPersonalModal">
-            <option value="" disabled selected>Seleccione una opción</option>
-            <option value="Presente">Presente</option>
-            <option value="Ausente">Ausente</option>
-            <option value="Justificado">Justificado</option>
-          </select>
+              <option value="" disabled selected>Seleccione una opción</option>
+              <option value="Presente">Presente</option>
+              <option value="Ausente">Ausente</option>
+              <option value="Justificado">Justificado</option>
+            </select>
 
             </div>
-            </div>
-               <div class="form-group col-md-6 col-sm-12">
-            <div class="d-flex align-items-center mb-3">
+            <div class="form-group col-6">
               <label for="observaciones">Observaciones:</label>
-                   <input id="observaciones" name="observacionesPersonalModal" type="text" class="form-control"
-              placeholder="Ingrese observaciones" [(ngModel)]="observacionesPersonalModal">          
-              </div>
+              <input id="observaciones" name="observacionesPersonalModal" type="text" class="form-control"
+              placeholder="Ingrese observaciones" [(ngModel)]="observacionesPersonalModal">    
+                          <br>
+      
             </div>
-            
-             <div class="row">
-         <div class=" col-md-6 col-sm-12">
-          <div class="d-flex align-items-center mb-3">
-            <label>Latitud:</label>
-            <input class="form-control" [value]="selectedLat || ''" readonly>
-         </div>  
-          </div>
-          <div class=" col-md-6 col-sm-12">
+    
+        <div class="row">  
+          <div class=" col-6">
             <div class="d-flex align-items-center mb-3">
-            <label>Longitud:</label>
-            <input class="form-control" [value]="selectedLng || ''" readonly>
-          </div> 
-          </div>
-             </div>
+              <label>Latitud:</label>
+              <input class="form-control" [value]="selectedLat || ''" readonly>
+          </div>  
+            </div>
+            <div class=" col-6">
+              <div class="d-flex align-items-center mb-3">
+              <label>Longitud:</label>
+              <input class="form-control" [value]="selectedLng || ''" readonly>
+            </div> 
+            </div>
+        </div>
               <div class="mb-3">
                 <label><strong>Ubicación del Personal :</strong></label>
                 <div id="mapPersonalModal" #mapContainer style="height: 250px; width: 100%;"></div>
@@ -308,24 +307,25 @@
         </form>
 
         <!-- Listado de personal agregado a este cuadrante y grupo -->
-        <div class="table-responsive mt-3" *ngIf="personalExistente.length > 0 || getPersonalPendienteActual().length > 0">          <table class="table table-bordered border-primary">
+        <div class="table-responsive mt-3" *ngIf="personalExistente.length > 0 || getPersonalPendienteActual().length >0">         
+          <table class="table table-bordered border-primary table-sm table-custom">
             <thead>
               <tr>
-                <th class="text-small">Legajo</th>
-                <th class="text-small">N y A</th>
-                <th class="text-small">Jerarquía</th>
-                <th class="text-small">Asistencia</th>
-                <th class="text-small">Acciones</th>
+                <th class="text-center text-small">Legajo</th>
+                <th class="text-center text-small">N y A</th>
+                <th class="text-center text-small">Jerarquía</th>
+                <th class="text-center text-small">Asistencia</th>
+                <th class="text-center text-small">Acciones</th>
                 
               </tr>
             </thead>
                         <tbody>
               <!-- Personal existente (ya guardado en backend) -->
               <tr *ngFor="let p of personalExistenteModal">               
-                <td class="text-small">{{ p.personal_legajo }}</td>
-                <td class="text-small">{{ p.personal_nombre }}</td>
-                <td class="text-small">{{ p.personal_jerarquia }}</td>
-                <td class="text-small">{{ p.asistencia }}</td>
+                <td class="text-center text-small">{{ p.personal_legajo }}</td>
+                <td class="text-center text-small">{{ p.personal_nombre }}</td>
+                <td class="text-center text-small">{{ p.personal_jerarquia }}</td>
+                <td class="text-center text-small">{{ p.asistencia }}</td>
                 <td>
                 <button class="btn btn-danger btn-sm" (click)="eliminarPersonalExistente(p.id)"><i class="bi bi-x"></i></button>           
                 <button class="btn btn-warning btn-sm" (click)="editarPersonalExistente(p)"><i class="bi bi-pencil"></i></button>
@@ -334,10 +334,10 @@
               </tr>
               <!-- Personal pendiente (nuevo, aún no guardado) -->
                          <tr *ngFor="let p of getPersonalPendienteActual(); let i = index">
-                <td class="text-small">{{ p.personal_legajo }}</td>
-                <td class="text-small">{{ p.personal_nombre }}</td>
-                <td class="text-small">{{ p.personal_jerarquia }}</td>
-                <td class="text-small">{{ p.asistencia }}</td>
+                <td class="text-center text-small">{{ p.personal_legajo }}</td>
+                <td class="text-center text-small">{{ p.personal_nombre }}</td>
+                <td class="text-center text-small">{{ p.personal_jerarquia }}</td>
+                <td class="text-center text-small">{{ p.asistencia }}</td>
                 <td>
                   <button class="btn btn-warning btn-sm" (click)="editarPersonalPendiente(i)">
                     <i class="bi bi-pencil"></i>

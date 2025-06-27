@@ -4,7 +4,7 @@
       <h6 class="card-title font-weight-bold mb-0">FORMULARIO DE INTERVENCION POLICIAL</h6>
     </div>
   </div>
-<div>
+  <div>
   <br>
   <div class="container-fluid p-0">
     <form>
@@ -28,7 +28,7 @@
           <div class="form-group row">
             <label for="fecha" class="col-sm-4 col-form-label">Fecha:</label>
             <div class="col-sm-8">
-              <input type="date" id="fecha" name="fecha" [(ngModel)]="nuevaNovedad.fecha" class="form-control">
+              <input type="date" id="fecha" name="fecha" [(ngModel)]="nuevaNovedad.fecha" class="form-control" [disabled]="readonlyMode">
             </div>
           </div>
         </div>
@@ -36,7 +36,7 @@
           <div class="form-group row">
             <label for="horario" class="col-sm-4 col-form-label">Horario de llegada:</label>
             <div class="col-sm-8">
-              <input type="time" id="horario" name="horario" [(ngModel)]="nuevaNovedad.horario" class="form-control">
+              <input type="time" id="horario" name="horario" [(ngModel)]="nuevaNovedad.horario" class="form-control" [disabled]="readonlyMode">
               
             </div>
           </div>
@@ -49,7 +49,8 @@
       <div class="row">
         <div class="col-md-12">
            <div class="form-group">
-            <h5 class="titulo">Personal Interviniente: <button  *ngIf="nuevaNovedad.personal_autor_id"  type="button" class="btn btn-primary btn-sm" (click)="OpenModalPolicia()" >
+            <h5 class="titulo">Personal Interviniente: 
+              <button  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode"  type="button" class="btn btn-primary btn-sm" (click)="OpenModalPolicia()" >
               <i class="bi bi-plus"></i>
             </button></h5>
             
@@ -57,13 +58,15 @@
         </div>
       </div>
       <div class="table-responsive">
-        <table class="table table-bordered border-primary">
+        
+        <table class="table table-bordered border-primary table-sm table-custom">
+
           <thead>
             <tr>
               <th class="text-center text-small">Legajo</th>
               <th class="text-center text-small">Nombre y Apellido</th>
               <th class="text-center text-small">Jerarquía</th>
-              <th class="text-center text-small">Acciones</th>
+              <th  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode"class="text-center text-small">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -71,9 +74,9 @@
               <td class="text-small">{{ pt.personal.legajo }}</td>
               <td class="text-small">{{ pt.personal.nombre }} {{ pt.personal.apellido }}</td>
               <td class="text-small">{{ pt.personal.jerarquia }}</td>
-              <td class="text-small text-center">
+              <td  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode" class="text-small text-center">
                 
-                <button class="btn btn-danger btn-sm" (click)="borrarPersonalTemporal(pt.personal.id)">
+                <button  class="btn btn-danger btn-sm" (click)="borrarPersonalTemporal(pt.personal.id)">
                   <i class="bi bi-trash"></i>
                 </button>
               </td>
@@ -100,7 +103,7 @@
               <div class="col-md-6">
                     <div class="form-group d-flex align-items-center">
               <label for="unidad_regional">Unidad Regional:</label>
-              <select id="unidad_regional" name="unidad_regional" [(ngModel)]="nuevaNovedad.unidad_regional_id" class="form-select" (change)="cargarCuadrantes(+nuevaNovedad.unidad_regional_id)" (change)="onUnidadRegionalChange($event)">
+              <select [disabled]="readonlyMode" id="unidad_regional" name="unidad_regional" [(ngModel)]="nuevaNovedad.unidad_regional_id" class="form-select" (change)="cargarCuadrantes(+nuevaNovedad.unidad_regional_id)" (change)="onUnidadRegionalChange($event)">
                 <option *ngFor="let unidad_regional of unidadesRegionales" [value]="unidad_regional.id">{{ unidad_regional.unidad_regional}}</option>
               </select>
               </div>
@@ -109,7 +112,7 @@
                    <div class="col-md-6">
               <div class="form-group d-flex align-items-center">
                 <label for="cuadrante">Cuadrante:</label>
-                <select id="cuadrante"
+                <select [disabled]="readonlyMode" id="cuadrante"
                         name="cuadrante"
                         [(ngModel)]="nuevaNovedad.cuadrante_id"
                         class="form-select"
@@ -129,7 +132,7 @@
         <div class="col-md-6">
           <div class="form-group d-flex align-items-center">
             <label for="tipo_lugar_hecho" class="mr-2">Tipo de Lugar del Hecho</label>
-            <select id="tipo_lugar_hecho" name="tipo_lugar_hecho" [(ngModel)]="nuevaNovedad.tipo_lugar" class="form-select">
+            <select [disabled]="readonlyMode"id="tipo_lugar_hecho" name="tipo_lugar_hecho" [(ngModel)]="nuevaNovedad.tipo_lugar" class="form-select">
               <option value="comercio">Comercio</option>
               <option value="domicilio particular">Domicilio Particular</option>
               <option value="via publica">Vía Pública</option>
@@ -147,7 +150,7 @@
         <div class="col-md-6">
           <div class="form-group d-flex align-items-center">
             <label for="lugar_hecho" class="mr-2">Lugar del Hecho</label>
-            <input type="text" id="lugar_hecho" name="lugar_hecho" [(ngModel)]="nuevaNovedad.lugar_hecho" class="form-control">
+            <input [disabled]="readonlyMode"type="text" id="lugar_hecho" name="lugar_hecho" [(ngModel)]="nuevaNovedad.lugar_hecho" class="form-control">
           </div>
             <!-- Mensaje de error reutilizable -->
               <div *ngIf="mostrarErrorCampo(nuevaNovedad.lugar_hecho)">
@@ -177,13 +180,13 @@
         </div> 
 
         <div class="col-md-3">
-          <button type="button" class="btn btn-primary" (click)="obtenerUbicacionActual()">Usar ubicación actual</button>
+          <button type="button" *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode" class="btn btn-primary" (click)="obtenerUbicacionActual()">Usar ubicación actual</button>
         </div>
         <div class="col-md-3" *ngIf="isUpdating && !ubicacionEditable">
-          <button type="button" class="btn btn-warning" (click)="preguntarDesbloquearUbicacion()">¿Desea modificar la ubicación?</button>
+          <button type="button" *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode" class="btn btn-warning" (click)="preguntarDesbloquearUbicacion()">¿Desea modificar la ubicación?</button>
         </div>
         <div class="col-md-3" *ngIf="isUpdating">
-        <button type="button" class="btn btn-secondary"(click)=" actualizarMapaDesdeFormulario()">Encontrar ubicacion</button>
+        <button type="button" *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode" class="btn btn-secondary"(click)=" actualizarMapaDesdeFormulario()">Encontrar ubicacion</button>
         </div>
        
        
@@ -207,7 +210,7 @@
         <div class="col-md-6">
           <div class="form-group d-flex align-items-center">
             <label for="origen_novedad" class="mr-2">Origen de la Novedad</label>
-            <select id="origen_novedad" name="origen_novedad" [(ngModel)]="nuevaNovedad.origen_novedad" class="form-select">
+            <select [disabled]="readonlyMode"id="origen_novedad" name="origen_novedad" [(ngModel)]="nuevaNovedad.origen_novedad" class="form-select">
               <option value="BASE OPERACIONAL">BASE OPERACIONAL</option>
               <option value="BASE CONSOLA">BASE CONSOLA</option>
               <option value="SEGURIDAD INTERNA">SEGURIDAD PRIVADA</option>
@@ -227,7 +230,7 @@
           <div class="form-group row">
             <label for="horario" class="col-sm-4 col-form-label">Hora de aviso:</label>
             <div class="col-sm-8">
-              <input type="time" id="horario" name="horario" [(ngModel)]="nuevaNovedad.horaIncidencia" class="form-control">
+              <input [disabled]="readonlyMode" type="time" id="horario" name="horario" [(ngModel)]="nuevaNovedad.horaIncidencia" class="form-control">
             </div>
           </div>
         </div>
@@ -235,7 +238,7 @@
           <div class="form-group row">
             <label for="n_incidencia" class="col-sm-4 col-form-label">N°Incidencia:</label>
             <div class="col-sm-8">
-              <input id="n_incidencia" name="n_incidencia" [(ngModel)]="nuevaNovedad.n_incidencia" class="form-control">
+              <input [disabled]="readonlyMode"id="n_incidencia" name="n_incidencia" [(ngModel)]="nuevaNovedad.n_incidencia" class="form-control">
             </div>
           </div>
         </div>
@@ -243,7 +246,7 @@
         <div class="col-md-6">
           <div class="form-group d-flex align-items-center">
             <label for="unidad_interviniente" class="mr-2">Unidad Interviniente</label>
-            <select id="unidad_interviniente" name="unidad_interviniente" [(ngModel)]="nuevaNovedad.unidad_interviniente" class="form-select">
+            <select [disabled]="readonlyMode"id="unidad_interviniente" name="unidad_interviniente" [(ngModel)]="nuevaNovedad.unidad_interviniente" class="form-select">
                             <option value="GUARDIA URBANA">GUARDIA URBANA(PARADA EN CALLE)</option>
               <option value="CSPC">CSPC</option>
               <option value="GRUPO DINAMICO DE PREVENCION DEL DELITO">GRUPO DINAMICO DE PREVENCION DEL DELITO</option>
@@ -268,7 +271,7 @@
              <div class="col-md-6">
                     <div class="form-group d-flex align-items-center">
               <label for="operativo">Operativo:</label>
-                     <select id="operativo" name="operativo" [(ngModel)]="nuevaNovedad.operativo_id" class="form-select" (change)="onOperativoChange($event)">
+                     <select [disabled]="readonlyMode"id="operativo" name="operativo" [(ngModel)]="nuevaNovedad.operativo_id" class="form-select" (change)="onOperativoChange($event)">
                 <option *ngFor="let operativo of operativosFiltrados" [value]="operativo.id">{{ operativo.nombre_operativo }} ({{operativo.fecha_desde}}/{{operativo.fecha_hasta}})</option>
               </select>
               </div>
@@ -293,13 +296,15 @@
                         (ngModelChange)="asignarDescripcionHecho($event)"
                         dropdownPosition="bottom"
                         appendTo="body"
-                        class="form-control flex-grow-1">
+                        class="form-control flex-grow-1"
+                          [disabled]="readonlyMode">
+
                       </ng-select>
                       <i class="bi bi-search ml-2" style="font-size: 1.2rem; color: #6c757d;"></i>
 
                     </div>
                      <!-- Mensaje de error reutilizable -->
-              <div *ngIf="mostrarErrorCampo(nuevaNovedad.tipo_hecho)">
+                    <div *ngIf="mostrarErrorCampo(nuevaNovedad.tipo_hecho)">
                 <small class="text-danger">Completar este campo</small>
               </div>
                   </div>
@@ -324,7 +329,7 @@
                         dropdownPosition="bottom"
                         appendTo="body"
                         class="form-control flex-grow-1"
-                        >
+                         [disabled]="readonlyMode">
                       </ng-select>
                       <i class="bi bi-search ml-2" style="font-size: 1.2rem; color: #6c757d;"></i>
 
@@ -349,26 +354,28 @@
       </div>
     </div>
     <br/>
-    <form>
+    <form  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode">
     <div class="row">
       <div class="col-md-12">
-         <div class="form-group">
+         <div  class="form-group">
           <label for="victima" class="mr-2">Agregar Involucrados:  </label>
-          <button  *ngIf="nuevaNovedad.personal_autor_id"  type="button" class="btn btn-primary btn-sm" (click)="showSwal()" >
+          <button  type="button" class="btn btn-primary btn-sm" (click)="abrirModalInvolucrado()" >
             <i class="bi bi-plus"></i>
           </button>
         </div> 
       </div>
     </div>
+       <br/>
    </form>
-   <br/>
+
       <!-- Tabla para mostrar los inculpados cargados -->
       <div class="table-responsive">
         <h5 class="titulo">Personas Involucradas al hecho:</h5>
-                <table class="table table-bordered border-primary">
+                       <table class="table table-bordered border-primary table-sm table-custom">
+
             <thead>
               <tr>
-                <th class="text-center text-small">N y A</th>
+                <th class="text-center text-small">NyA</th>
                 <th class="text-center text-small">DNI</th>
                 <th class="text-center text-small">Edad</th>
                 <th class="text-center text-small">Sexo</th>
@@ -378,18 +385,19 @@
                 <th class="text-center text-small">Demorado</th>
                 <th class="text-center text-small">Comparendo</th> -->
                 <th class="text-center text-small">Estado</th>
-                <th class="text-center text-small">Editar/Borrar</th>
+                <th  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode" class="text-center text-small"></th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let pt of personasTemporales">
-                <td class="text-small">{{ pt.persona.nombre }} {{ pt.persona.apellido }}</td>
-                <td class="text-small">{{ pt.persona.dni }}</td>
-                <td class="text-small">{{ pt.persona.edad }}</td>
-                <td class="text-small">{{ pt.persona.sexo }}</td>
-                <td class="text-small">{{ pt.persona.domicilio }}</td>
-                <td class="text-small">{{ pt.estado }}</td>
-                <td class="text-small">
+                <td class="text-center text-small">{{ pt.persona.nombre }} {{ pt.persona.apellido }}</td>
+                <td class="text-center text-small">{{ pt.persona.dni }}</td>
+                <td class="text-center text-small">{{ pt.persona.edad }}</td>
+                <td class="text-center text-small">{{ pt.persona.sexo }}</td>
+                <td class="text-center text-small">{{ pt.persona.domicilio }}</td>
+                <td class="text-center text-small">{{ pt.estado }}</td>
+
+                <td  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode"class="text-center text-small">
                   <!-- Botones de editar y borrar -->
                   <button class="btn btn-danger btn-sm" (click)="borrarPersona(pt.persona.id)"><i class="bi bi-x"></i></button>
                   <button class="btn btn-warning btn-sm" (click)="editarPersona(pt.persona.id, pt.estado)"><i class="bi bi-pencil"></i></button>
@@ -411,7 +419,7 @@
 <br/>
 <form>
   <div class="row">
-    <div class="col-md-12">
+    <div  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode"class="col-md-12">
       <div class="form-group ">
        <label for="victima" class="">Agregar Elementos:  </label>
        <button type="button" class="btn btn-primary btn-sm" (click)="showSwalElemento()" >
@@ -422,22 +430,22 @@
    <!-- Tabla para mostrar los elementos agregados -->
 <div class="table-responsive ">
   <h5 class="titulo">Elementos Agregados:</h5>
-  <table class="table table-bordered border-primary">
+        <table class="table table-bordered border-primary table-sm table-custom">
     <thead>
       <tr>
-        <th>Elemento</th>
-        <th>Descripción</th>
-        <th>Tipo</th>
-        <th>Acciones</th>
+        <th  class="text-center text-small">Elemento</th>
+        <th  class="text-center text-small">Descripción</th>
+        <th  class="text-center text-small">Tipo</th>
+        <th   *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode"class="text-center text-small">Acciones</th>
 
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let item of elementosAgregados; let i = index">
-        <td>{{ item.descripcion }}</td>
-        <td>{{ item.caracteristicas}}</td>
-        <td>{{ item.tipo }}</td>
-        <td>
+        <td class="text-center text-small">{{ item.descripcion }}</td>
+        <td class="text-center text-small">{{ item.caracteristicas}}</td>
+        <td class="text-center text-small">{{ item.tipo }}</td>
+        <td  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode"class="text-center text-small">
           <button class="btn btn-warning btn-sm" (click)="editarElemento(i)"><i class="bi bi-pencil"></i></button>
           <button class="btn btn-danger btn-sm" (click)="eliminarElemento(i)"><i class="bi bi-x"></i></button>
         </td>
@@ -459,7 +467,7 @@
       <label for="descripcion" class="mr-2 titulo">RELATO:</label>
 
           <div class="form-group d-flex align-items-center mb-2">
-            <textarea id="descripcion" name="descripcion" [(ngModel)]="nuevaNovedad.descripcion" class="form-control w-100"  rows="8" cols="60"></textarea>
+            <textarea   [disabled]="readonlyMode"id="descripcion" name="descripcion" [(ngModel)]="nuevaNovedad.descripcion" class="form-control w-100"  rows="8" cols="60"></textarea>
           </div>
           <br />
       </div>
@@ -480,7 +488,7 @@
         <div *ngIf="archivo.mimeType.startsWith('image/')">
           <img [src]="getFileUrlNovedad(archivo.base64, archivo.mimeType)" alt="{{ archivo.fileName }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
         </div>
-        <button type="button" class="btn btn-danger btn-sm mt-2" (click)="eliminarArchivoCargadoN(i)">Eliminar</button>
+        <button   [disabled]="readonlyMode" type="button" class="btn btn-danger btn-sm mt-2" (click)="eliminarArchivoCargadoN(i)">Eliminar</button>
       </div>
     </li>
   </ul>
@@ -491,9 +499,13 @@
   <input type="file" id="archivoNovedad" style="display: none;" (change)="onFileSelectedNovedad($event, obtenerIndiceDisponibleN())">
 </div>
 
-<div class="form-group d-flex align-items-center">
-  <button type="button" class="btn btn-primary" (click)="abrirCamaraN()">Usar la cámara</button>
-  <button type="button" class="btn btn-primary" (click)="abrirSistemaArchivosNovedad()">Cargar desde la memoria</button>
+<div  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode"class="form-group d-flex align-items-center">
+  <button type="button" class="btn btn-success me-3" (click)="abrirCamaraN()">
+    <i class="bi bi-camera"></i> Cámara
+  </button>
+  <button type="button" class="btn btn-warning text-dark" (click)="abrirSistemaArchivosNovedad()">
+    <i class="bi bi-folder2-open"></i> Archivos
+  </button>
 </div>
 <!-- Modal de Novedad -->
 <!-- Modal de Novedad -->
@@ -565,30 +577,31 @@
       </form> -->
 
   </form>
-                    <div class="d-flex justify-content-between">
-              <button (click)="isUpdating ? cancelUpdate() : resetFormNov()" class="btn btn-secondary">
-                {{ isUpdating ? 'Cancelar Actualización' : 'Cancelar Carga' }}
-              </button>
-              <button *ngIf="nuevaNovedad.personal_autor_id" (click)="isUpdating ? updateNovedad() : addNovedad()" class="btn btn-primary">
-                {{ isUpdating ? 'Actualizar Novedad' : 'Crear Novedad' }}
-              </button>
-            </div>
+  <hr>
+            <div class="d-flex justify-content-end">
+                      <button (click)="isUpdating ? cancelUpdate() : resetFormNov()" class="btn btn-secondary">
+                        {{ isUpdating ? 'Cancelar Actualización' : 'Cancelar Carga' }}
+                      </button>
+                                           <button *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode" (click)="isUpdating ? updateNovedad() : addNovedad()" class="btn btn-primary ms-2">
+                        {{ isUpdating ? 'Actualizar Novedad' : 'Crear Novedad' }}
+                      </button>
+                   
             <br>
-  </div>   
+           </div>   
 </div>     
 
 
     <!-- Modal para Víctima -->
 <div class="modal fade" id="modalVictima" tabindex="-1" aria-labelledby="modalVictimaLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header custom-modal-header p-2">
         <h5 class="modal-title mb-0" id="modalVictimaLabel">Datos de la Víctima:</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button"  class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-3">
             <label for="victima_dni">DNI:</label>
             <div class="input-group">
               
@@ -598,50 +611,83 @@
                 name="victima_dni"
                 [(ngModel)]="victima.dni"
                 class="form-control"
-                [readonly]="isEditing"
                 min="0"
                 step="1"
                 (input)="limpiarDni($event)"
               />
-              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(victima.dni || '' , 'victima')" [disabled]="isEditing">
+              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(victima.dni || '' , 'victima')" >
                 <i class="bi bi-search"></i>
               </button>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
             <label for="victima_nombre">Nombre:</label>
             <input type="text" id="victima_nombre" name="victima_nombre" [(ngModel)]="victima.nombre" class="form-control">
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
             <label for="victima_apellido">Apellido:</label>
             <input type="text" id="victima_apellido" name="victima_apellido" [(ngModel)]="victima.apellido" class="form-control">
           </div>
-          <div class="col-md-6">
+          <!-- logica de edad para input de numeros+cadena de caracteres -->
+          <div class="col-6 col-md-3">
             <label for="victima_edad">Edad:</label>
-            <input type="text" id="victima_edad" name="victima_edad" [(ngModel)]="victima.edad" class="form-control">
+            <div class="input-group">
+                                                                                                  <!-- Ejemplo para víctima -->
+                                                      <input type="number" min="0" [(ngModel)]="victima_edad_valor" class="form-control" placeholder="Edad" id="victima_edad">
+                                                      <select [(ngModel)]="victima_edad_unidad" class="form-select" style="max-width: 100px;">
+                                                        <option value="años">Años</option>
+                                                        <option value="meses">Meses</option>
+                                                        <option value="días">Días</option>
+                                                      </select>
+            </div>
           </div>
-          <div class="col-md-6">
-            <label for="victima_sexo">Sexo de la Víctima</label>
+          <!-- telefono -->
+            <div class="col-6 col-md-3">
+            <label for="victima_telefono">Teléfono:</label>
+            <input
+              type="number"
+              id="victima_telefono"
+              name="victima_telefono"
+              [(ngModel)]="victima.telefono"
+              class="form-control"
+              step="1"
+              min="0"
+              pattern="[0-9]*"
+              inputmode="numeric"
+            >
+          </div>     
+
+          <div class="col-6 col-md-3">
+            <label for="victima_sexo">Sexo</label>
             <select id="victima_sexo" name="victima_sexo" [(ngModel)]="victima.sexo" class="form-select">
               <option value="masculino">Masculino</option>
               <option value="femenino">Femenino</option>
             </select>
           </div>
-          <div class="col-md-6">
-            <label for="victima_provincia">Provincia:</label>
-            <input type="text" id="victima_provincia" name="victima_provincia" [(ngModel)]="victima.provincia" class="form-control">
+          <div class="col-6 col-md-3">
+            <label for="victima_genero">Género:</label>
+            <select id="victima_genero" name="victimario_genero" [(ngModel)]="victima.genero" class="form-select">
+              <option value="Heterosexual">Heterosexual</option>
+              <option value="Transexual">Transexual</option>
+              <option value="Homossexual">Homosexual</option>
+              <option value="Indefinido">Otro</option>
+
+            </select>  
           </div>
-          <div class="col-md-6">
+           <h5 class="titulo">Lugar de residencia:</h5>
+
+          <div class="col-6 col-md-3">
             <label for="victima_departamento">Departamento:</label>
             <select id="victima_departamento" name="victima_departamento" [(ngModel)]="victima.departamento_id" class="form-select"
-            (change)="victima.departamento_id ? cargarLocalidades(victima.departamento_id) : null">
+  (change)="onDepartamentoChange('victima')">
               <option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</option>
             </select>
           </div>
           
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
             <label for="victima_localidad">Localidad:</label>
-            <select id="victima_localidad" name="victima_localidad" [(ngModel)]="victima.localidad_id" class="form-select">
+            <select id="victima_localidad" name="victima_localidad" [(ngModel)]="victima.localidad_id" class="form-select"   (change)="onLocalidadChange('victima')">
+
               <option *ngFor="let localidad of localidades" [value]="localidad.id">{{ localidad.nombre }}</option>
             </select>
           </div>
@@ -649,6 +695,39 @@
             <label for="victima_direccion">Domicilio:</label>
             <input type="text" id="victima_direccion" name="victima_direccion" [(ngModel)]="victima.domicilio" class="form-control">
           </div>
+                                                        <div class="col-md-12">
+                                                          <div class="form-check mt-2 victima-extranjero-box"> 
+                                                            <label class="form-check-label ms-2" for="victima_extranjero">
+                                                              ¿Es extranjero?(Marcar el tilde en caso que sea procedente de otro país o provincia)
+                                                            </label>
+                                                                                                                       <input
+                                                              type="checkbox"
+                                                              id="victima_extranjero"
+                                                              name="victima_extranjero"
+                                                              [(ngModel)]="victima.extranjero"
+                                                              class="form-check-input"
+                                                              (ngModelChange)="onExtranjeroChange($event)"
+                                                            />
+                                                          </div>
+                                                        </div>
+          <!-- procednecia -->
+           
+   <!-- Solo se muestra si el checkbox está marcado -->
+<div class="row extranjero" *ngIf="victima.extranjero">
+  <hr>
+  <h5 class="titulo">Lugar de procedencia:</h5>
+  <div class="col-6 col-md-3">
+    <label for="victima_nacionalidad">Nacionalidad:</label>
+       <select id="victima_nacionalidad" name="victima_nacionalidad"
+      [(ngModel)]="victima.nacionalidad" class="form-select">
+      <option *ngFor="let pais of paises" [value]="pais.valor">{{ pais.nombre }}</option>
+    </select>
+  </div>
+  <div class="col-6 col-md-3">
+    <label for="victima_provincia">Provincia:</label>
+    <input type="text" id="victima_provincia" name="victima_provincia" [(ngModel)]="victima.provincia" class="form-control">
+  </div>
+</div>
           <!-- <div class="col-md-6">
             <label for="victima_comparendo">Comparendo:</label>
             <select id="victima_comparendo" name="victima_comparendo" [(ngModel)]="victima.comparendo" class="form-select">
@@ -665,9 +744,10 @@
             </select>
           </div>  -->
           <div>
-            <div class="form-group md-12 d-flex align-items-center">
-              <h5 class="titulo">Fotos de la persona:</h5>
-              <ul *ngIf="archivosPersonas.length > 0">
+
+            <h5 class="titulo">Fotos de la persona:</h5>
+             <div class="form-group md-12 d-flex align-items-center">
+              <ul *ngIf="archivosPersonas.length > 0"  class="list-unstyled">
                 <li *ngFor="let archivo of archivosPersonas; let i = index">
                   <div *ngIf="archivo.base64 && archivo.fileName" class="file-info">
                     <p class="mb-1">
@@ -681,14 +761,20 @@
                 </li>
               </ul>
             </div>
+
+
             <div>
               <input type="file" id="archivoPersona" style="display: none;" (change)="onFileSelectedPersona($event, obtenerIndiceDisponible())">
              </div>
        
-        <div class="form-group d-flex align-items-center">
-        <button type="button" class="btn btn-primary" (click)="abrirCamara()">Usar la camara</button>
-        <button type="button" class="btn btn-primary" (click)="abrirSistemaArchivos()">Cargar desde la memoria</button>
-      </div>
+               <div class="form-group d-flex align-items-center">
+          <button type="button" class="btn btn-success me-3" (click)="abrirCamara()">
+            <i class="bi bi-camera"></i> Camara
+          </button>
+          <button type="button" class="btn btn-warning text-dark" (click)="abrirSistemaArchivos()">
+            <i class="bi bi-folder2-open"></i> Archivos
+          </button>
+        </div>
     </div>
     </div>
   </div>
@@ -703,15 +789,15 @@
 
 <!-- Modal para Protagonista -->
 <div class="modal fade" id="modalProtagonista" tabindex="-1" aria-labelledby="modalProtagonistaLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header custom-modal-header p-2">
         <h5 class="modal-title mb-0" id="modalProtagonistaLabel">Datos del Protagonista:</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button"  class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-3">
             <label for="protagonista_dni">DNI:</label>
             <div class="input-group">
 
@@ -721,7 +807,6 @@
                 name="protagonista_dni"
                 [(ngModel)]="protagonista.dni"
                 class="form-control"
-                [readonly]="isEditing"
                 min="0"
                 step="1"
                 (input)="limpiarDni($event)"
@@ -731,48 +816,61 @@
               </button>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
             <label for="protagonista_nombre">Nombre:</label>
             <input type="text" id="protagonista_nombre" name="protagonista_nombre" [(ngModel)]="protagonista.nombre" class="form-control">
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
             <label for="protagonista_apellido">Apellido:</label>
             <input type="text" id="protagonista_apellido" name="protagonista_apellido" [(ngModel)]="protagonista.apellido" class="form-control">
           </div>
-          <div class="col-md-6">
+          <!-- edad logica oara oider sunar los ebteri ci ka caea de carceers -->
+         <div class="col-6 col-md-3">
             <label for="protagonista_edad">Edad:</label>
-            <input type="text" id="protagonista_edad" name="protagonista_edad" [(ngModel)]="protagonista.edad" class="form-control">
+          <div class="input-group">
+                                                                                                  <!-- Ejemplo para protagonista -->
+                                    <input type="number" min="0" [(ngModel)]=" protagonista_edad_valor" class="form-control" placeholder="Edad" id="protagonista_edad">
+                                      <select [(ngModel)]="protagonista_edad_unidad" class="form-select" style="max-width: 100px;">
+                                       <option value="años">Años</option>
+                                       <option value="meses">Meses</option>
+                                       <option value="días">Días</option>
+                                    </select>
+            </div>
           </div>
-          <div class="col-md-6">
-            <label for="protagonista_sexo">Sexo del Protagonista</label>
+    <div class="col-6 col-md-3">
+  <label for="protagonista_telefono">Teléfono:</label>
+  <input
+    type="number"
+    id="protagonista_telefono"
+    name="protagonista_telefono"
+    [(ngModel)]="protagonista.telefono"
+    class="form-control"
+    step="1"
+    min="0"
+    pattern="[0-9]*"
+    inputmode="numeric"
+  >
+</div>
+
+          <div class="col-6 col-md-2">
+            <label for="protagonista_sexo">Sexo </label>
             <select id="protagonista_sexo" name="protagonista_sexo" [(ngModel)]="protagonista.sexo" class="form-select">
               <option value="masculino">Masculino</option>
               <option value="femenino">Femenino</option>
             </select>
           </div>
-          <div class="col-md-6">
-            <label for="protagonista_provincia">Provincia:</label>
-            <input type="text" id="protagonista_provincia" name="protagonista_provincia" [(ngModel)]="protagonista.provincia" class="form-control">
+          <div class="col-6 col-md-3">
+            <label for="protagonista_genero">Género:</label>
+
+            <select id="protagonista_genero" name="protagonista_genero" [(ngModel)]="protagonista.genero" class="form-select">
+              <option value="Heterosexual">Heterosexual</option>
+              <option value="Transexual">Transexual</option>
+              <option value="Homossexual">Homosexual</option>
+                            <option value="Indefinido">Otro</option>
+
+            </select>  
           </div>
-          <div class="col-md-6">
-            <label for="protagonista_departamento">Departamento:</label>
-            <select id="protagonista_departamento" name="protagonista_departamento" [(ngModel)]="protagonista.departamento_id" class="form-select"
-            (change)="protagonista.departamento_id ? cargarLocalidades(protagonista.departamento_id) : null">
-              <option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</option>
-            </select>
-          </div>
-          
-          <div class="col-md-6">
-            <label for="protagonista_localidad">Localidad:</label>
-            <select id="protagonista_localidad" name="protagonista_localidad" [(ngModel)]="protagonista.localidad_id" class="form-select">
-              <option *ngFor="let localidad of localidades" [value]="localidad.id">{{ localidad.nombre }}</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label for="protagonista_direccion">Domicilio:</label>
-            <input type="text" id="protagonista_direccion" name="protagonista_direccion" [(ngModel)]="protagonista.domicilio" class="form-control">
-          </div>
-          <div class="col-md-6">
+               <div class="col-6 col-md-2">
             <label for="protagonista_comparendo">Comparendo:</label>
             <select id="protagonista_comparendo" name="protagonista_comparendo" [(ngModel)]="protagonista.comparendo" class="form-select">
               <option [value]="true">Sí</option>
@@ -780,17 +878,70 @@
               <option [value]="false">Desconocido</option>
             </select>
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-2">
             <label for="protagonista_demorado">Demorado:</label>
             <select id="protagonista_demorado" name="protagonista_demorado" [(ngModel)]="protagonista.demorado" class="form-select">
               <option [value]="true">Sí</option>
               <option [value]="false">No</option>
             </select>
           </div>
+          <!-- lugar de residencia domicilio real -->
+         <h5 class="titulo">Lugar de residencia:</h5>
+          <div class="col-6 col-md-3">
+            <label for="protagonista_departamento">Departamento:</label>
+            <select id="protagonista_departamento" name="protagonista_departamento" [(ngModel)]="protagonista.departamento_id" class="form-select"
+              (change)="onDepartamentoChange('protagonista')">
+
+              <option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</option>
+            </select>
+          </div>
+          
+          <div class="col-6 col-md-3">
+            <label for="protagonista_localidad">Localidad:</label>
+            <select id="protagonista_localidad" name="protagonista_localidad" [(ngModel)]="protagonista.localidad_id" class="form-select" (change)="onLocalidadChange('protagonista')">
+              <option *ngFor="let localidad of localidades" [value]="localidad.id">{{ localidad.nombre }}</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="protagonista_direccion">Domicilio:</label>
+            <input type="text" id="protagonista_direccion" name="protagonista_direccion" [(ngModel)]="protagonista.domicilio" class="form-control">
+          </div>
+                                                <div class="col-md-12">
+                                                          <div class="form-check mt-2 victima-extranjero-box"> 
+                                                            <label class="form-check-label ms-2" for="protagonista_extranjero">
+                                                              ¿Es extranjero?(Marcar el tilde en caso que sea procedente de otro país o provincia)
+                                                            </label>
+                                                                                                                       <input
+                                                              type="checkbox"
+                                                              id="protagonista_extranjero"
+                                                              name="protagonista_extranjero"
+                                                              [(ngModel)]="protagonista.extranjero"
+                                                              class="form-check-input"
+                                                              (ngModelChange)="onExtranjeroChange($event)"
+                                                            />
+                                                          </div>
+                                                        </div>
+        <!-- lugar de procedencia domicilio de la persona proveniente -->
+          <div class="row extranjero" *ngIf="protagonista.extranjero">
+          <hr>                   
+          <h5 class="titulo">Lugar de procedencia:</h5>
+          <div class="col-6 col-md-3">
+            <label for="protagonista_nacionalidad">Nacionalidad:</label>
+            <select id="protagonista_nacionalidad" name="protagonista_nacionalidad" [(ngModel)]="protagonista.nacionalidad" class="form-select">
+              <option *ngFor="let pais of paises" [value]="pais.valor">{{ pais.nombre }}</option>
+            </select>
+          </div> 
+          <div class="col-6 col-md-3">
+            <label for="protagonista_provincia">Provincia:</label>
+            <input type="text" id="protagonista_provincia" name="protagonista_provincia" [(ngModel)]="protagonista.provincia" class="form-control">
+          </div>
+          </div>
+
+     
           <div>
-            <div class="form-group md-12 d-flex align-items-center">
-              <h5 class="titulo">Fotos de la persona:</h5>
-              <ul *ngIf="archivosPersonas.length > 0">
+           <h5 class="titulo">Fotos de la persona:</h5>
+             <div class="form-group md-12 d-flex align-items-center">
+              <ul *ngIf="archivosPersonas.length > 0"  class="list-unstyled">
                 <li *ngFor="let archivo of archivosPersonas; let i = index">
                   <div *ngIf="archivo.base64 && archivo.fileName" class="file-info">
                     <p class="mb-1">
@@ -809,8 +960,12 @@
              </div>
        
             <div class="form-group d-flex align-items-center">
-              <button type="button" class="btn btn-primary" (click)="abrirCamara()">Usar la cámara</button>
-              <button type="button" class="btn btn-primary" (click)="abrirSistemaArchivos()">Cargar desde la memoria</button>
+                <button type="button" class="btn btn-success me-3" (click)="abrirCamara()">
+            <i class="bi bi-camera"></i> Cámara
+          </button>
+          <button type="button" class="btn btn-warning text-dark" (click)="abrirSistemaArchivos()">
+            <i class="bi bi-folder2-open"></i> Archivos
+          </button>
             </div>
           </div>
           </div>
@@ -829,15 +984,15 @@
 
 <!-- Modal para Victimario -->
 <div class="modal fade" id="modalVictimario" tabindex="-1" aria-labelledby="modalVictimarioLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header custom-modal-header p-2">
         <h5 class="modal-title mb-0" id="modalVictimarioLabel">Datos del Victimario:</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button"  class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-3">
             <label for="victimario_dni">DNI:</label>
             <div class="input-group">
 
@@ -847,7 +1002,6 @@
                 name="victimario_dni"
                 [(ngModel)]="victimario.dni"
                 class="form-control"
-                [readonly]="isEditing"
                 min="0"
                 step="1"
                 (input)="limpiarDni($event)"
@@ -857,47 +1011,59 @@
               </button>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
             <label for="victimario_nombre">Nombre:</label>
             <input type="text" id="victimario_nombre" name="victimario_nombre" [(ngModel)]="victimario.nombre" class="form-control">
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
             <label for="victimario_apellido">Apellido:</label>
             <input type="text" id="victimario_apellido" name="victimario_apellido" [(ngModel)]="victimario.apellido" class="form-control">
           </div>
-          <div class="col-md-6">
+          <!-- logica de edad para input de numeros+cadena de caracteres -->
+          <div class="col-6  col-md-3">
             <label for="victimario_edad">Edad:</label>
-            <input type="text" id="victimario_edad" name="victimario_edad" [(ngModel)]="victimario.edad" class="form-control">
+            <div class="input-group">
+                                                                                                  <!-- Ejemplo para víctimario -->
+                                          <input type="number" min="0" [(ngModel)]="victimario_edad_valor" class="form-control" placeholder="Edad" id="victimario_edad">
+                                             <select [(ngModel)]="victimario_edad_unidad" class="form-select" style="max-width: 100px;">
+                                              <option value="años">Años</option>
+                                              <option value="meses">Meses</option>
+                                            <option value="días">Días</option>
+                                           </select>
+            </div>
           </div>
-          <div class="col-md-6">
-            <label for="victimario_sexo">Sexo del Victimario</label>
+                                        <div class=" col-6 col-md-3">
+                      <label for="victimario_telefono">Teléfono:</label>
+                      <input
+                        type="number"
+                        id="victimario_telefono"
+                        name="victimario_telefono"
+                        [(ngModel)]="victimario.telefono"
+                        class="form-control"
+                        step="1"
+                        min="0"
+                        pattern="[0-9]*"
+                        inputmode="numeric"
+                      >
+                    </div>
+          <div class="col-6 col-md-2">
+            <label for="victimario_sexo">Sexo</label>
             <select id="victimario_sexo" name="victimario_sexo" [(ngModel)]="victimario.sexo" class="form-select">
               <option value="masculino">Masculino</option>
               <option value="femenino">Femenino</option>
             </select>
           </div>
-          <div class="col-md-6">
-            <label for="victimario_provincia">Provincia:</label>
-            <input type="text" id="victimario_provincia" name="victimario_provincia" [(ngModel)]="victimario.provincia" class="form-control">
+          <div class="col-6 col-md-3">
+            <label for="victimario_genero">Género:</label>
+            <select id="victimario_genero" name="victimario_genero" [(ngModel)]="victimario.genero" class="form-select">
+              <option value="Heterosexual">Heterosexual</option>
+              <option value="Transexual">Transexual</option>
+              <option value="Homossexual">Homosexual</option>
+                            <option value="Indefinido">Otro</option>
+
+            </select>  
           </div>
-          <div class="col-md-6">
-            <label for="victimario_departamento">Departamento:</label>
-            <select id="victimario_departamento" name="victimario_departamento" [(ngModel)]="victimario.departamento_id" class="form-select"
-            (change)="victimario.departamento_id ? cargarLocalidades(victimario.departamento_id) : null">
-              <option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label for="victimario_localidad">Localidad:</label>
-            <select id="victimario_localidad" name="victimario_localidad" [(ngModel)]="victimario.localidad_id" class="form-select">
-              <option *ngFor="let localidad of localidades" [value]="localidad.id">{{ localidad.nombre }}</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label for="victimario_direccion">Domicilio:</label>
-            <input type="text" id="victimario_direccion" name="victimario_direccion" [(ngModel)]="victimario.domicilio" class="form-control">
-          </div>
-                    <div class="col-md-6">
+                     <div class="col-6 col-md-2">
             <label for="victimario_comparendo">Comparendo:</label>
             <select id="victimario_comparendo" name="victimario_comparendo" [(ngModel)]="victimario.comparendo" class="form-select">
               <option [value]="true">Sí</option>
@@ -905,17 +1071,68 @@
               <option [value]="false">Desconocido</option>
             </select>
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-2">
             <label for="victimario_demorado">Demorado:</label>
             <select id="victimario_demorado" name="victimario_demorado" [(ngModel)]="victimario.demorado" class="form-select">
               <option [value]="true">Sí</option>
               <option [value]="false">No</option>
             </select>
           </div> 
+          <!-- datos del domicilio de la persona -->
+              <h5 class="titulo">Lugar de residencia:</h5>
+          <div class="col-6 col-md-3">
+            <label for="victimario_departamento">Departamento:</label>
+            <select id="victimario_departamento" name="victimario_departamento" [(ngModel)]="victimario.departamento_id" class="form-select"
+  (change)="onDepartamentoChange('victimario')">            
+              <option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="victimario_localidad">Localidad:</label>
+            <select id="victimario_localidad" name="victimario_localidad" [(ngModel)]="victimario.localidad_id" class="form-select" (change)="onLocalidadChange('victimario')">
+              <option *ngFor="let localidad of localidades" [value]="localidad.id">{{ localidad.nombre }}</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="victimario_direccion">Domicilio:</label>
+            <input type="text" id="victimario_direccion" name="victimario_direccion" [(ngModel)]="victimario.domicilio" class="form-control">
+          </div>
+           
+                                                        <div class="col-md-12">
+                                                          <div class="form-check mt-2 victimario-extranjero-box"> 
+                                                            <label class="form-check-label ms-2" for="victimario_extranjero">
+                                                              ¿Es extranjero?(Marcar el tilde en caso que sea procedente de otro país o provincia)
+                                                            </label>
+                                                                                                                       <input
+                                                              type="checkbox"
+                                                              id="victimario_extranjero"
+                                                              name="victimario_extranjero"
+                                                              [(ngModel)]="victimario.extranjero"
+                                                              class="form-check-input"
+                                                              (ngModelChange)="onExtranjeroChange($event)"
+                                                            />
+                                                          </div>
+                                                        </div>
+          <!-- lugar de procedencia -->
+           <div class="row extranjero" *ngIf="victimario.extranjero">
+           <hr>
+          <h5 class="titulo">Lugar de procedencia:</h5>
+          <div class="col-6 col-md-3">
+            <label for="victimario_nacionalidad">Nacionalidad:</label>
+            <select id="victimario_nacionalidad" name="victimario_nacionalidad"
+              [(ngModel)]="victimario.nacionalidad" class="form-select">
+              <option *ngFor="let pais of paises" [value]="pais.valor">{{ pais.nombre }}</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="victimario_provincia">Provincia:</label>
+            <input type="text" id="victimario_provincia" name="victimario_provincia" [(ngModel)]="victimario.provincia" class="form-control">
+          </div>
+         </div>
           <div>
-            <div class="form-group md-12 d-flex align-items-center">
-              <h5 class="titulo">Fotos de la persona:</h5>
-              <ul *ngIf="archivosPersonas.length > 0">
+            <h5 class="titulo">Fotos de la persona:</h5>
+             <div class="form-group md-12 d-flex align-items-center">
+              <ul *ngIf="archivosPersonas.length > 0"  class="list-unstyled">
                 <li *ngFor="let archivo of archivosPersonas; let i = index">
                   <div *ngIf="archivo.base64 && archivo.fileName" class="file-info">
                     <p class="mb-1">
@@ -933,8 +1150,12 @@
             <input type="file" id="archivoPersona" style="display: none;" (change)="onFileSelectedPersona($event, obtenerIndiceDisponible())">
            </div>
             <div class="form-group d-flex align-items-center">
-              <button type="button" class="btn btn-primary" (click)="abrirCamara()">Usar la camara</button>
-              <button type="button" class="btn btn-primary" (click)="abrirSistemaArchivos()">Cargar desde la memoria</button>
+                <button type="button" class="btn btn-success me-3" (click)="abrirCamara()">
+            <i class="bi bi-camera"></i> Cámara
+          </button>
+          <button type="button" class="btn btn-warning text-dark" (click)="abrirSistemaArchivos()">
+            <i class="bi bi-folder2-open"></i> Archivos
+          </button>
             </div>
           </div>
           </div>
@@ -950,17 +1171,18 @@
     
 
   </div>
-  <!-- Modal para Victimario -->
+
+
 <div class="modal fade" id="modalTestigo" tabindex="-1" aria-labelledby="modalTestigoLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header custom-modal-header p-2">
-        <h5 class="modal-title mb-0" id="modalTestigoLabel">Datos del Testigo:</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title mb-0" id="modalTestigoLabel">DATOS DEL TESTIGO:</h5>
+        <button type="button"  class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-3">
             <label for="testigo_dni">DNI:</label>
             <div class="input-group">
 
@@ -970,7 +1192,6 @@
                 name="testigo_dni"
                 [(ngModel)]="testigo.dni"
                 class="form-control"
-                [readonly]="isEditing"
                 min="0"
                 step="1"
                 (input)="limpiarDni($event)"
@@ -980,19 +1201,42 @@
               </button>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
             <label for="testigo_nombre">Nombre:</label>
             <input type="text" id="testigo_nombre" name="testigo_nombre" [(ngModel)]="testigo.nombre" class="form-control">
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
             <label for="testigo_apellido">Apellido:</label>
             <input type="text" id="testigo_apellido" name="testigo_apellido" [(ngModel)]="testigo.apellido" class="form-control">
           </div>
-          <div class="col-md-6">
+         <!-- logica de edad para input de numeros+cadena de caracteres -->
+          <div class="col-6 col-md-3">
             <label for="testigo_edad">Edad:</label>
-            <input type="text" id="testigo_edad" name="testigo_edad" [(ngModel)]="testigo.edad" class="form-control">
+             <div class="input-group">
+                                                                                                  <!-- Ejemplo para víctima -->
+                                         <input type="number" min="0" [(ngModel)]="testigo_edad_valor" class="form-control" placeholder="Edad" id="testigo_edad">
+                                          <select [(ngModel)]="testigo_edad_unidad" class="form-select" style="max-width: 100px;">
+                                          <option value="años">Años</option>
+                                          <option value="meses">Meses</option>
+                                          <option value="días">Días</option>
+                                          </select>
+            </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
+            <label for="testigo_telefono">Teléfono:</label>
+            <input
+              type="number"
+              id="testigo_telefono"
+              name="testigo_telefono"
+              [(ngModel)]="testigo.telefono"
+              class="form-control"
+              step="1"
+              min="0"
+              pattern="[0-9]*"
+              inputmode="numeric"
+            >
+          </div>
+          <div class="col-6 col-md-2">
             <label for="testigo_sexo">Sexo </label>
             <select id="testigo_sexo" name="testigo_sexo" [(ngModel)]="testigo.sexo" class="form-select">
               <option value="masculino">Masculino</option>
@@ -1000,43 +1244,71 @@
             </select>
           </div>
           <!-- nueov -->
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
             <label for="testigo_genero">Género:</label>
             <select id="testigo_genero" name="testigo_genero" [(ngModel)]="testigo.genero" class="form-select">
-              <option value="Indefinido">Indefinido</option>
-              <option value="Transexual">Transexual</option>
               <option value="Heterosexual">Heterosexual</option>
-              <option value="Homossexual">Homossexual</option>
-              <option value="Gay">  gay</option>
+              <option value="Transexual">Transexual</option>
+              <option value="Homossexual">Homosexual</option>
+                            <option value="Indefinido">Otro</option>
+
             </select>  
           </div>
           <!--  -->
-          <div class="col-md-6">
-            <label for="testigo_provincia">Provincia:</label>
-            <input type="text" id="testigo_provincia" name="testigo_provincia" [(ngModel)]="testigo.provincia" class="form-control">
-          </div>
-          <div class="col-md-6">
+         <h5 class="titulo">Lugar de residencia:</h5>
+          <div class="col-6 col-md-3">
             <label for="testigo_departamento">Departamento:</label>
             <select id="testigo_departamento" name="testigo_departamento" [(ngModel)]="testigo.departamento_id" class="form-select"
-            (change)="testigo.departamento_id ? cargarLocalidades(testigo.departamento_id) : null">
+  (change)="onDepartamentoChange('testigo')">            
               <option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</option>
             </select>
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
             <label for="testigo_localidad">Localidad:</label>
-            <select id="testigo_localidad" name="testigo_localidad" [(ngModel)]="testigo.localidad_id" class="form-select">
+            <select id="testigo_localidad" name="testigo_localidad" [(ngModel)]="testigo.localidad_id" class="form-select" (change)="onLocalidadChange('testigo')">
               <option *ngFor="let localidad of localidades" [value]="localidad.id">{{ localidad.nombre }}</option>
             </select>
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-6">
             <label for="testigo_direccion">Domicilio:</label>
             <input type="text" id="testigo_direccion" name="testigo_direccion" [(ngModel)]="testigo.domicilio" class="form-control">
           </div>
-                   
+          <div class="col-md-12">
+                                                          <div class="form-check mt-2 testigo-extranjero-box"> 
+                                                            <label class="form-check-label ms-2" for="testigo_extranjero">
+                                                              ¿Es extranjero?(Marcar el tilde en caso que sea procedente de otro país o provincia)
+                                                            </label>
+                                                                                                                       <input
+                                                              type="checkbox"
+                                                              id="testigo_extranjero"
+                                                              name="testigo_extranjero"
+                                                              [(ngModel)]="testigo.extranjero"
+                                                              class="form-check-input"
+                                                              (ngModelChange)="onExtranjeroChange($event)"
+                                                            />
+                                                          </div>
+                                                        </div>
+          <!--  -->
+         <div class="row extranjero" *ngIf="testigo.extranjero">                                
+          <hr>
+          <h5 class="titulo">Lugar de procedencia:</h5>
+          <div class="col-6 col-md-3">
+            <label for="testigo_nacionalidad">Nacionalidad:</label>
+            <select id="testigo_nacionalidad" name="testigo_nacionalidad" [(ngModel)]="testigo.nacionalidad" class="form-select">
+              <option *ngFor="let pais of paises" [value]="pais.valor">{{ pais.nombre }}</option>
+            </select>
+          </div>
+
+            <div class="col-6 col-md-3">
+            <label for="testigo_provincia">Provincia:</label>
+            <input type="text" id="testigo_provincia" name="testigo_provincia" [(ngModel)]="testigo.provincia" class="form-control">
+          </div>   
+          </div>
+               <!--  -->
           <div>
-            <div class="form-group md-12 d-flex align-items-center">
-              <h5 class="titulo">Fotos de la persona:</h5>
-              <ul *ngIf="archivosPersonas.length > 0">
+            <h5 class="titulo">Fotos de la persona:</h5>
+             <div class="form-group md-12 d-flex align-items-center">
+              <ul *ngIf="archivosPersonas.length > 0"  class="list-unstyled">
                 <li *ngFor="let archivo of archivosPersonas; let i = index">
                   <div *ngIf="archivo.base64 && archivo.fileName" class="file-info">
                     <p class="mb-1">
@@ -1054,8 +1326,12 @@
             <input type="file" id="archivoPersona" style="display: none;" (change)="onFileSelectedPersona($event, obtenerIndiceDisponible())">
            </div>
             <div class="form-group d-flex align-items-center">
-              <button type="button" class="btn btn-primary" (click)="abrirCamara()">Usar la camara</button>
-              <button type="button" class="btn btn-primary" (click)="abrirSistemaArchivos()">Cargar desde la memoria</button>
+                <button type="button" class="btn btn-success me-3" (click)="abrirCamara()">
+            <i class="bi bi-camera"></i> Cámara
+          </button>
+          <button type="button" class="btn btn-warning text-dark" (click)="abrirSistemaArchivos()">
+            <i class="bi bi-folder2-open"></i> Archivos
+          </button>
             </div>
           </div>
           </div>
@@ -1068,8 +1344,6 @@
        </div>
       </div>
     </div>
-    
-
   </div>
   
      
@@ -1104,13 +1378,13 @@
     <!-- Encabezado del modal -->
     <div class="modal-encabezado">
       <h5 class="text-white">Agregar Elemento Secuestrado</h5>
-      <button (click)="cerrarModalElementoSecuestrado()" class="btn-cerrar">×</button>
+      <button (click)="cerrarModalElementoSecuestrado()"  class="btn-close btn-close-red position-absolute end-0 me-2">×</button>
     </div>
 
     <!-- Cuerpo del modal -->
     <div class="modal-cuerpo">
       <div class="form-group">
-        <label for="elementoBienNoRecuperado">Elemento:</label>
+        <label class="titulo" for="elementoBienNoRecuperado">Elemento:</label>
         <select id="elementoBienNoRecuperado" [(ngModel)]="nuevoElementoSecuestrado.descripcion" class="form-control" (change)="onElementoSecuestradoChange()">
           <option value="ARMA BLANCA">ARMA BLANCA</option>
           <option value="ARMA DE FUEGO">ARMA DE FUEGO</option>
@@ -1168,7 +1442,7 @@
     <!-- Encabezado del modal -->
     <div class="modal-encabezado">
       <h5 class="text-white">{{ elementoRecuperado ? 'Agregar Bien Recuperado' : 'Agregar Bien No Recuperado' }}</h5>
-      <button (click)="cerrarModal()" class="btn-cerrar">×</button>
+      <button (click)="cerrarModal()"  class="btn-close btn-close-red position-absolute end-0 me-2">×</button>
     </div>
 
     <!-- Cuerpo del modal -->
@@ -1178,7 +1452,7 @@
         <input type="checkbox" id="miCheckbox" [(ngModel)]="elementoRecuperado" (ngModelChange)="cambiarDescripcion()" (ngModelChange)="cambiarDescripcion()" (ngModelChange)="cargarCategoriaPorElemento(descripcionSeleccionada)">
       </div>
       <div class="form-group">
-        <h5 class="titulo" for="elemento">Elemento:</h5>
+        <label class="titulo" for="elemento">Elemento:</label>
         <div class="row">
           <div class="col-md-12">
             <div class="form-group d-flex align-items-center">
@@ -1235,50 +1509,87 @@
     <div class="modal-content">
       <div class="modal-header custom-modal-header p-2">
         <h5 class="modal-title" id="modalPoliciaLabel">Gestión de Personal</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        <button type="button" class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
         <form>
-          <div class="row">
-            <!-- Primera columna -->
-            <div class="col-md-6">
-              <div class="mb-3 d-flex">
-                <input type="text" class="form-control me-2" id="legajo" name="legajo" placeholder="Buscar legajo" (click)="resetFormularioPersonal()"[(ngModel)]="nuevaPersonal.legajo">
-                <button class="btn btn-primary" type="button" (click)="buscarPersonalPorLegajo(nuevaPersonal.legajo)" [disabled]="isEditing">
-                  <i class="bi bi-search"></i>
-                </button>
-              </div>
-          
-              <div class="mb-3">
-                <label for="nombre" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="nombre" name="nombre" [(ngModel)]="nuevaPersonal.nombre" disabled>
-              </div>
-          
-              <div class="mb-3">
-                <label for="apellido" class="form-label">Apellido</label>
-                <input type="text" class="form-control" id="apellido" name="apellido" [(ngModel)]="nuevaPersonal.apellido" disabled>
-              </div>
-            </div>
-          
-            <!-- Segunda columna -->
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label for="dni" class="form-label">DNI</label>
+      
+           
+              <div class="row">
+                             <div class="col-6 col-md-6"> 
+                              <label for="legajo" class="form-label">Busque el efectivo a agregar:</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="legajo" name="legajo" placeholder="Buscar por legajo"
+                      (click)="resetFormularioPersonal()" [(ngModel)]="nuevaPersonal.legajo">
+                    <button class="btn btn-primary" type="button" (click)="buscarPersonalPorLegajo(nuevaPersonal.legajo)" [disabled]="isEditing">
+                      <i class="bi bi-search"></i>
+                    </button>
+                  </div>
+                </div>
+                 <div class="col-6 mb-3">
+                <label for="dni" class="form-label">DNI:</label>
                 <input type="text" class="form-control" id="dni" name="dni" [(ngModel)]="nuevaPersonal.dni" disabled>
               </div>
-          
-              <div class="mb-3">
-                <label for="jerarquia" class="form-label">Jerarquía</label>
+              
+              <div class="col-6 mb-3">
+                <label for="jerarquia" class="form-label">Jerarquía:</label>
                 <input type="text" class="form-control" id="jerarquia" name="jerarquia" [(ngModel)]="nuevaPersonal.jerarquia" disabled>
               </div>
+                <div class="col-6 ">
+                  <label for="nombre" class="form-label">Nombre:</label>
+                  <input type="text" class="form-control" id="nombre" name="nombre" [(ngModel)]="nuevaPersonal.nombre" disabled>
+                </div>
+            
+                <div class="col-6 ">
+                  <label for="apellido" class="form-label">Apellido:</label>
+                  <input type="text" class="form-control" id="apellido" name="apellido" [(ngModel)]="nuevaPersonal.apellido" disabled>
+                </div>
+
             </div>
-          </div>
+
           
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"(click)="resetFormularioPersonal()">Cancelar</button>
         <button type="button" class="btn btn-primary"(click)="agregarPersonalTemporal()">Agregar a efectivo</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="involucradoModal" tabindex="-1" aria-labelledby="involucradoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title titulo" id="involucradoModalLabel">SELECCIONA EL TIPO DE INVOLUCRADO:</h5>
+        <button type="button" class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+ <div class="modal-body text-center">
+  <p><strong>Recordatorio:</strong></p>
+  <ul class="text-start">
+    <li>
+      <strong><u>Protagonista</u></strong>: Persona que denuncia o informa sobre un hecho delictivo. 
+      Este rol también debe asignarse a los involucrados en <strong>accidentes de tránsito</strong>, 
+      ya que en estos casos no siempre se pueden identificar claramente a una víctima o un victimario.
+    </li>
+    <li>
+      <strong><u>Victimario</u></strong>: Presunto autor del delito.
+    </li>
+    <li>
+      <strong><u>Víctima</u></strong>: Persona que ha resultado afectada por el hecho delictivo.
+    </li>
+    <li>
+      <strong><u>Testigo</u></strong>: Persona que presencia el hecho y puede aportar información relevante sobre lo ocurrido.
+    </li>
+  </ul>
+</div>
+
+        <div class="modal-footer d-flex justify-content-between flex-nowrap">
+        <button type="button" class="btn btn-warning flex-fill mx-1" (click)="onElegir('victimario')" data-bs-dismiss="modal">VICTIMARIO</button>
+        <button type="button" class="btn btn-danger flex-fill mx-1" (click)="onElegir('victima')" data-bs-dismiss="modal">VICTIMA</button>
+        <button type="button" class="btn btn-secondary flex-fill mx-1" (click)="onElegir('protagonista')" data-bs-dismiss="modal">PROTAGONISTA</button>
+        <button type="button" class="btn btn-primary flex-fill mx-1" (click)="onElegir('testigo')" data-bs-dismiss="modal">TESTIGO</button>
       </div>
     </div>
   </div>

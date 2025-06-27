@@ -1,15 +1,18 @@
-<div class="container mt-4">
-  <!-- Tabla para mostrar la lista de Personas -->
-  <div class="mt-4">
-    <div class="card text-white custom-card">
-      <div class="card-body text-center p-2">
-        <h6 class="card-title font-weight-bold mb-0">LISTA DE PERSONAS</h6>
-      </div>
+<div class="container-fluid p-0">
+  <div class="card text-white custom-card">
+    <div class="card-body text-center p-2">
+      <h6 class="card-title font-weight-bold mb-0">VICTIMARIOS ASOCIADOS A REPORTES RECIENTES:</h6>
     </div>
-    <br/>
+  </div>
+   
     <div>
       <div class="col-md-12">
         <div class="row">
+               <div class="mb-2">
+                <button (click)="getPersonasResidentes()"class="badge bg-success">Jujuy</button>
+                <button (click)="getPersonasExtranjeras()"class="badge bg-danger">Extranjero</button>
+                <button (click)="getVictimarios()" class="badge bg-primary">Todos</button>
+              </div>
           <div class="col-md-4 d-flex align-items-center">
             <!-- Botón para abrir el modal de Persona -->
             <!-- <div class="form-group d-flex align-items-center mb-2">
@@ -19,170 +22,364 @@
               </button>
             </div> -->
           </div>
+
         </div>
       </div>
     </div>
-    <br/>
     <div *ngIf="userType === 'administrador'" class="table-responsive ">
-      <table class="table table-bordered border-primary table-sm">
-        <thead>
-          <tr>
-            <th class="text-small">ID</th>
-            <th class="text-small">Nombre</th>
-            <th class="text-small">Apellido</th>
-            <th class="text-small">DNI</th>
-            <th class="text-small">Sexo</th>
-            <th class="text-small">Provincia</th>
-            <th class="text-small">Departamento</th>
-            <th class="text-small">Localidad</th>
-            <th class="text-small">Domicilio</th>
-            <th class="text-small">Fecha de Nacimiento</th>
-            <th class="text-small">Edad</th>
-            <th class="text-small">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let persona of personas">
-            <td class="text-small">{{ persona.id }}</td>
-            <td class="text-small">{{ persona.nombre }}</td>
-            <td class="text-small">{{ persona.apellido }}</td>
-            <td class="text-small">{{ persona.dni }}</td>
-            <td class="text-small">{{ persona.sexo }}</td>
-            <td class="text-small">{{ persona.provincia }}</td>
-            <td>{{ persona.departamento_nombre }}</td> <!-- Mostrar nombre del departamento -->
-      <td>{{ persona.localidad_nombre }}</td> <!-- Mostrar nombre de la localidad -->
-            <td class="text-small">{{ persona.domicilio }}</td>
-            <td class="text-small">{{ persona.fechaNacimiento }}</td>
-            <td class="text-small">{{ persona.edad }}</td>
-            <td>
-              <button class="btn btn-warning btn-sm" (click)="editarPersona(persona)">Editar</button>
-              <button  *ngIf="userType === 'administrador'" class="btn btn-danger btn-sm" (click)="eliminarPersona(persona.id.toString())">Eliminar</button>
-              <button class="btn btn-info btn-sm" (click)="verPersona(persona)">Ver</button>
-              <!-- este boton es solo para el usuario userInfo= usuario -->
-            </td>
-          </tr>
-        </tbody>
-      </table>
+ 
+    <div class="table-responsive" style="overflow: auto; max-height: 56vh;"> <!-- Menos altura -->
+        <table class="table table-bordered border-primary table-sm table-custom">
+      <thead>
+        <tr>
+          <th class="text-small text-center">DNI</th>
+          <th class="text-small text-center">NyA</th>
+          <th class="text-small text-center">Edad</th>
+          <th class="text-small text-center ">Sexo</th>
+          <th class="text-small text-center ">Genero</th>
+          <th class="text-small text-center">Departamento</th>
+          <th class="text-center text-small">Localidad</th>
+          <th class="text-center text-small">Domicilio</th>
+         <th class="text-center text-small">¿Extranjero?</th>
+          <th class="text-center text-small">Reportes</th>
+          <th class="text-center text-small">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let victimario of victimarios">
+          <td class="text-center text-small">{{ victimario.persona?.dni }}</td>
+          <td class="text-center text-small">{{ victimario.persona?.nombre }} {{ victimario.persona?.apellido }}</td>
+          <td class="text-center text-small">{{ victimario.persona?.edad }}</td>
+          <td class="text-center text-small">{{ victimario.persona?.sexo }}</td>
+          <td class="text-center text-small">{{ victimario.persona?.genero }}</td>
+          <td class="text-center text-small">{{ victimario.persona?.departamento_nombre }}</td>
+          <td class="text-center text-small">{{ victimario.persona?.localidad_nombre }}</td>
+          <td class="text-center text-small">{{ victimario.persona?.domicilio }}</td>
+          <td class="text-center text-small">
+            <span 
+              *ngIf="victimario.persona?.extranjero === true"
+              class="badge bg-danger">Extranjero</span>
+            <span 
+              *ngIf="victimario.persona?.extranjero === false"
+              class="badge bg-success">Residente</span>
+           
+          </td>
+                    <td class="text-center text-small"> <span class="badge bg-primary">{{ victimario.cantidad || 0 }}</span> </td>
+
+          <td class="text-center text-small">
+           
+            <button class="btn btn-info btn-sm" (click)="verVictimario(victimario)">Ver ficha</button>
+            <button *ngIf="userInfo.perfil !== 'usuario'" class="btn btn-warning btn-sm" (click)="verPersona(victimario.persona)"><i class="bi-pencil"></i></button>
+
+            <!-- este botón es solo para el usuario userInfo= usuario -->
+          </td>
+        </tr>
+      </tbody>
+    </table>
     </div>
-  </div>
+    </div>
 </div>
 <!-- Modal para Persona -->
 <div class="modal fade" id="modalPersona" tabindex="-1" aria-labelledby="modalPersonaLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header custom-modal-header p-2">
         <h5 class="modal-title mb-0" id="modalPersonaLabel">Datos de la Persona:</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-3">
             <label for="persona_dni">DNI:</label>
             <div class="input-group">
-              <input type="text" id="persona_dni" name="persona_dni" (click)="resetFormulario()" [(ngModel)]="persona.dni" class="form-control" [readonly]="isUpdating">
-              <button class="btn btn-outline-secondary" type="button" (click)="buscarPersonaPorDNI(persona.dni|| '' )" [disabled]="isUpdating">
-                <i class="bi bi-search"></i>
-              </button>
+              <input
+                type="number"
+                id="persona_dni"
+                name="persona_dni"
+                [(ngModel)]="persona.dni"
+                class="form-control"
+                min="0"
+                step="1"
+                (input)="limpiarDni($event)"
+                [readonly]="isUpdating"
+              />
+             
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
             <label for="persona_nombre">Nombre:</label>
             <input type="text" id="persona_nombre" name="persona_nombre" [(ngModel)]="persona.nombre" class="form-control">
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
             <label for="persona_apellido">Apellido:</label>
             <input type="text" id="persona_apellido" name="persona_apellido" [(ngModel)]="persona.apellido" class="form-control">
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
             <label for="persona_edad">Edad:</label>
-            <input type="text" id="persona_edad" name="persona_edad" [(ngModel)]="persona.edad" class="form-control">
+            <div class="input-group">
+              <input type="number" min="0" [(ngModel)]="persona_edad_valor" class="form-control" placeholder="Edad" id="persona_edad">
+              <select [(ngModel)]="persona_edad_unidad" class="form-select" style="max-width: 100px;">
+                <option value="años">Años</option>
+                <option value="meses">Meses</option>
+                <option value="días">Días</option>
+              </select>
+            </div>
           </div>
-          <div class="col-md-6">
-            <label for="persona_sexo">Sexo:</label>
+          <div class="col-6 col-md-3">
+            <label for="persona_telefono">Teléfono:</label>
+            <input
+              type="number"
+              id="persona_telefono"
+              name="persona_telefono"
+              [(ngModel)]="persona.telefono"
+              class="form-control"
+              step="1"
+              min="0"
+              pattern="[0-9]*"
+              inputmode="numeric"
+            >
+          </div>
+          <div class="col-6 col-md-2">
+            <label for="persona_sexo">Sexo</label>
             <select id="persona_sexo" name="persona_sexo" [(ngModel)]="persona.sexo" class="form-select">
               <option value="masculino">Masculino</option>
               <option value="femenino">Femenino</option>
             </select>
           </div>
-          <div class="col-md-6">
-            <label for="persona_provincia">Provincia:</label>
-            <input type="text" id="persona_provincia" name="persona_provincia" [(ngModel)]="persona.provincia" class="form-control">
+          <div class="col-6 col-md-3">
+            <label for="persona_genero">Género:</label>
+            <select id="persona_genero" name="persona_genero" [(ngModel)]="persona.genero" class="form-select">
+              <option value="Heterosexual">Heterosexual</option>
+              <option value="Transexual">Transexual</option>
+              <option value="Homosexual">Homosexual</option>
+              <option value="Indefinido">Otro</option>
+            </select>
           </div>
-          <div class="col-md-6">
+          <div class="col-6 col-md-2">
+            <label for="persona_comparendo">Comparendo:</label>
+            <select id="persona_comparendo" name="persona_comparendo" [(ngModel)]="persona.comparendo" class="form-select">
+              <option [value]="true">Sí</option>
+              <option [value]="false">No</option>
+              <option [value]="false">Desconocido</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-2">
+            <label for="persona_demorado">Demorado:</label>
+            <select id="persona_demorado" name="persona_demorado" [(ngModel)]="persona.demorado" class="form-select">
+              <option [value]="true">Sí</option>
+              <option [value]="false">No</option>
+            </select>
+          </div>
+          <h5 class="titulo">Lugar de residencia:</h5>
+          <div class="col-6 col-md-3">
             <label for="persona_departamento">Departamento:</label>
-            <select id="persona_departamento" name="persona_departamento" [(ngModel)]="persona.departamento_id" class="form-select" (change)="cargarLocalidades(persona.departamento_id ? +persona.departamento_id : null)">
-              <option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</option>
-            </select>
+            <select id="persona_departamento" name="persona_departamento"
+            [(ngModel)]="persona.departamento_id"
+            class="form-select"
+            (change)="onDepartamentoChange()">
+            <option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</option>
+          </select>
           </div>
-          
-          <div class="col-md-6">
+          <div class="col-6 col-md-3">
             <label for="persona_localidad">Localidad:</label>
-            <select id="persona_localidad" name="persona_localidad" [(ngModel)]="persona.localidad_id" class="form-select">
-              <option *ngFor="let localidad of localidades" [value]="localidad.id">{{ localidad.nombre }}</option>
-            </select>
+           <select id="persona_localidad" name="persona_localidad"
+  [(ngModel)]="persona.localidad_id"
+  class="form-select"
+  (change)="onLocalidadChange()">
+  <option *ngFor="let localidad of localidades" [value]="localidad.id">{{ localidad.nombre }}</option>
+</select>
           </div>
           <div class="col-md-6">
             <label for="persona_direccion">Domicilio:</label>
             <input type="text" id="persona_direccion" name="persona_direccion" [(ngModel)]="persona.domicilio" class="form-control">
           </div>
-          <div class="col-md-6">
-            <label for="persona_fechaNacimiento">Fecha de Nacimiento:</label>
-            <input type="date" id="persona_fechaNacimiento" name="persona_fechaNacimiento" [(ngModel)]="persona.fechaNacimiento" class="form-control">  
+          <div class="col-md-12">
+            <div class="form-check mt-2 persona-extranjero-box">
+              <label class="form-check-label ms-2" for="persona_extranjero">
+                ¿Es extranjero? (Marcar el tilde en caso que sea procedente de otro país o provincia)
+              </label>
+              <input
+                type="checkbox"
+                id="persona_extranjero"
+                name="persona_extranjero"
+                [(ngModel)]="persona.extranjero"
+                class="form-check-input"
+                (ngModelChange)="onExtranjeroChange($event)"
+              />
+            </div>
           </div>
-          
-          <div class="form-group d-flex align-items-center">
-            <!-- Mostrar la lista de archivos cargados para personas -->
-            <ul *ngIf="archivosPersonas.length > 0">
-              <li *ngFor="let archivo of archivosPersonas; let i = index">
-                <div *ngIf="archivo.base64 && archivo.fileName" class="file-info">
-                  <p class="mb-1">
-                    <a [href]="getFileUrlPersona(archivo.base64, archivo.mimeType)" [download]="archivo.fileName" target="_blank">{{ archivo.fileName }}</a>
-                  </p>
-                  <!-- Mostrar vista previa si el archivo es una imagen -->
-                  <div *ngIf="archivo.mimeType.startsWith('image/')">
-                    <img [src]="getFileUrlPersona(archivo.base64, archivo.mimeType)" alt="{{ archivo.fileName }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" >
+          <!-- lugar de procedencia -->
+          <div class="row extranjero" *ngIf="persona.extranjero">
+            <hr>
+            <h5 class="titulo">Lugar de procedencia:</h5>
+            <div class="col-6 col-md-3">
+              <label for="persona_nacionalidad">Nacionalidad:</label>
+              <select id="persona_nacionalidad" name="persona_nacionalidad"
+                [(ngModel)]="persona.nacionalidad" class="form-select">
+                <option *ngFor="let pais of paises" [value]="pais.valor">{{ pais.nombre }}</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <label for="persona_provincia">Provincia:</label>
+              <input type="text" id="persona_provincia" name="persona_provincia" [(ngModel)]="persona.provincia" class="form-control">
+            </div>
+          </div>
+                            <div>
+                  <h5 class="titulo">Fotos de la persona:</h5>
+                  <div class="form-group md-12 d-flex align-items-center">
+                    <ul *ngIf="archivosPersonas.length > 0" class="list-unstyled">
+                      <li *ngFor="let archivo of archivosPersonas; let i = index">
+                        <div *ngIf="archivo.url && archivo.fileName" class="file-info">
+                          <p class="mb-1">
+                            <a [href]="archivo.url" [download]="archivo.fileName" target="_blank">{{ archivo.fileName }}</a>
+                          </p>
+                          <div *ngIf="archivo.mimeType.startsWith('image/')">
+                            <img [src]="archivo.url" alt="{{ archivo.fileName }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
+                          </div>
+                          <button type="button" class="btn btn-danger btn-sm mt-2" (click)="eliminarArchivoCargadoP(i)">Eliminar</button>
+                        </div>
+                        <!-- Si el archivo aún no tiene url (recién cargado, antes de guardar), muestra la vista previa local -->
+                                                                    <div *ngIf="!archivo.url && archivo.file && archivo.fileName" class="file-info">
+                                                <p class="mb-1">{{ archivo.fileName }}</p>
+                                                <div *ngIf="archivo.mimeType.startsWith('image/')">
+                                                  <img *ngIf="archivo.previewUrl" [src]="archivo.previewUrl" alt="{{ archivo.fileName }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
+                                                </div>
+                                                <button type="button" class="btn btn-danger btn-sm mt-2" (click)="eliminarArchivoCargadoP(i)">Eliminar</button>
+                                              </div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <input type="file" id="archivoPersona" style="display: none;" (change)="onFileSelectedPersona($event, obtenerIndiceDisponible())">
+                  </div>
+                  <div class="form-group d-flex align-items-center">
+                    <button type="button" class="btn btn-success me-3" (click)="abrirCamara()">
+                      <i class="bi bi-camera"></i> Cámara
+                    </button>
+                    <button type="button" class="btn btn-warning text-dark" (click)="abrirSistemaArchivos()">
+                      <i class="bi bi-folder2-open"></i> Archivos
+                    </button>
                   </div>
                 </div>
-              </li>
-            </ul>
-            
-            <div *ngIf="!archivosPersonas[0].base64" class="form-group">
-              <label for="archivoPersona" class="mr-2">Foto</label>
-              <div class="input-group">
-                <input type="file" id="archivoPersona" name="archivoPersona" (change)="onFileSelectedPersona($event, 0)" class="form-control">
-              </div>
-            </div>
-            
-            <div *ngIf="archivosPersonas[1] && !archivosPersonas[1].base64" class="form-group">
-              <label for="archivoPersona1" class="mr-2">Foto 1</label>
-              <div class="input-group">
-                <input type="file" id="archivoPersona1" name="archivoPersona1" (change)="onFileSelectedPersona($event, 1)" class="form-control">
-                <div class="input-group-append">
-                  <button type="button" class="btn btn-danger" (click)="eliminarArchivoPersona(1)">X</button>
-                </div>
-              </div>
-            </div>
-            
-            <div *ngIf="archivosPersonas[2] && !archivosPersonas[2].base64" class="form-group">
-              <label for="archivoPersona2" class="mr-2">Foto 2</label>
-              <div class="input-group">
-                <input type="file" id="archivoPersona2" name="archivoPersona2" (change)="onFileSelectedPersona($event, 2)" class="form-control">
-                <div class="input-group-append">
-                  <button type="button" class="btn btn-danger" (click)="eliminarArchivoPersona(2)">X</button>
-                </div>
-              </div>
-            </div>
-        
-            <button type="button" class="btn btn-secondary" (click)="agregarArchivoPersona()">
-              <i class="bi bi-plus"></i>
-            </button>
-          </div>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="resetFormulario()">Cerrar</button>
-        <button *ngIf="!isUpdating" type="button" class="btn btn-primary" (click)="guardarPersona(true)">Guardar</button>
-        <button *ngIf="isUpdating" type="button" class="btn btn-primary" (click)="actualizarPersona()">Actualizar Datos</button>
+        <button type="button" class="btn btn-primary" (click)="guardarPersona(false)">Guardar</button>     
+           <!-- <button *ngIf="isEditing" type="button" class="btn btn-primary" (click)="actualizarPersona('persona')">Actualizar Datos</button> -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Modal de Presentación de Persona -->
+<div class="modal fade" id="modalPresentacionPersona" tabindex="-1" aria-labelledby="modalPresentacionPersonaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header custom-modal-header p-2">
+        <h5 class="modal-title mb-0" id="modalPresentacionPersonaLabel">Ficha de la Persona</h5>
+        <button type="button" class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="card border-primary shadow-sm">
+          <div class="card-body p-3">
+            <div class="row g-2">
+              <!-- FOTOS -->
+              <div [ngClass]="persona.extranjero ? 'col-3' : 'col-4'" class="d-flex flex-column align-items-center justify-content-center">
+                          <div class="form-group md-12 d-flex align-items-center">
+                <ul *ngIf="archivosPersonas.length > 0; else sinFoto" class="list-unstyled">
+                  <li *ngFor="let archivo of archivosPersonas">
+                    <div *ngIf="archivo.url && archivo.mimeType && archivo.mimeType.startsWith('image/')" class="file-info">
+                      <img [src]="archivo.url"
+                           alt="{{ archivo.fileName }}"
+                           class="img-thumbnail mb-2"
+                           style="max-width: 100px; max-height: 100px;">
+                    </div>
+                  </li>
+                </ul>
+                <ng-template #sinFoto>
+                  <img src="https://via.placeholder.com/100x100?text=Sin+Foto"
+                       class="img-thumbnail mb-2"
+                       style="max-width: 100px; max-height: 100px;"
+                       alt="Sin foto">
+                </ng-template>
+              </div>
+              </div>
+              <!-- DATOS PERSONALES -->
+              <div [ngClass]="persona.extranjero ? 'col-3' : 'col-4'" class="label-compact">
+                <h5 class="mb-1 titulo"><u>Datos personales</u></h5>
+                <div><label>DNI:</label> <strong>{{ persona.dni }}</strong></div>
+                <div><label>Nombre:</label> <strong>{{ persona.nombre }} {{ persona.apellido }}</strong></div>
+                <div><label>Edad:</label> <strong>{{ persona.edad }}</strong></div>
+                <div><label>Sexo:</label> <strong>{{ persona.sexo }}</strong></div>
+                <div><label>Género:</label> <strong>{{ persona.genero }}</strong></div>
+                <div><label>Teléfono:</label> <strong>{{ persona.telefono }}</strong></div>
+                <div><label>Comparendo:</label> <strong>{{ persona.comparendo ? 'Sí' : 'No' }}</strong></div>
+                <div><label>Demorado:</label> <strong>{{ persona.demorado ? 'Sí' : 'No' }}</strong></div>
+              </div>
+              <!-- LUGAR DE RESIDENCIA -->
+              <div [ngClass]="persona.extranjero ? 'col-3' : 'col-4'" class="label-compact">
+                <h5 class="mb-1 titulo"><u>Lugar de residencia</u></h5>
+                <div><label>Departamento:</label> <strong>{{ persona.departamento_nombre }}</strong></div>
+                <div><label>Localidad:</label> <strong>{{ persona.localidad_nombre }}</strong></div>
+                <div><label>Domicilio:</label> <strong>{{ persona.domicilio }}</strong></div>
+                <div>
+                  <label>¿Residente?:</label>
+                  <strong>
+                    <span *ngIf="persona.extranjero === true" class="badge bg-danger">Extranjero</span>
+                    <span *ngIf="persona.extranjero === false" class="badge bg-success">Residente</span>
+                  </strong>
+                </div>
+              </div>
+              <!-- LUGAR DE PROCEDENCIA SOLO SI ES EXTRANJERO -->
+              <div class="col-3 label-compact" *ngIf="persona.extranjero">
+                <h5 class="mb-1 titulo"><u>Lugar de procedencia</u></h5>
+                <div><label>Nacionalidad:</label> <strong>{{ persona.nacionalidad }}</strong></div>
+                <div><label>Provincia:</label> <strong>{{ persona.provincia }}</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- listado de novedades involucrado -->
+          <h5 class="titulo">Incidencias en las que estuvo involucrada la persona:</h5>
+         <div class="table-responsive" style="overflow: auto; max-height: 56vh;"> <!-- Menos altura -->
+            <table class="table table-bordered border-primary table-sm table-custom">
+            <thead>
+              <tr>
+                <th class=" text-center text-small">ID</th>
+                <th class=" text-center text-small">U.R. N°</th>
+                <th class=" text-center text-small">Cuadrante</th>
+                <th class=" text-center text-small">Fecha</th>
+                <th class=" text-center text-small">Horario</th>
+                <th class=" text-center text-small">Hecho</th>
+                <th class="text-center text-small">Modus Operandi</th>
+                <th class=" text-center text-small"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let novedad of filteredNovedades" [ngClass]="getColorClass(novedad.codigo)">
+                <td class=" text-center text-small">{{ novedad.id }}</td>
+                <td class=" text-center text-small">{{ novedad.unidad_regional_nombre }}</td>
+                <td class=" text-center text-small">{{ novedad.cuadrante_nombre }}</td>
+                <td class=" text-center text-small">{{ novedad.fecha }}</td>
+                <td class=" text-center text-small">{{ novedad.horario }}</td>
+                <td class="text-center text-small text-truncate-custom">  {{ novedad.descripcion_hecho }} </td>
+                <td class="text-center text-small text-truncate-custom">{{ novedad.modus_operandi_nombre }}</td>
+                <td class="text-center text-small">
+                   <button  (click)="verNovedad(novedad.id.toString())" class="btn btn-success btn-sm">
+                   <i class="bi bi-check2">Ver</i> <!-- Icono de verificación -->
+                   </button>
+                </td>
+              </tr>
+            </tbody>
+            </table>
+          </div>
+       
+      </div>
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>

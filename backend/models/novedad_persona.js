@@ -17,7 +17,11 @@ const NovedadPersona = sequelize.define('NovedadPersona', {
             model: 'Personas',
             key: 'id'
         }
+    },
+    estado: {
+        type: DataTypes.STRING,
     }
+
 }, {
     tableName: 'novedad_persona',
     timestamps: false

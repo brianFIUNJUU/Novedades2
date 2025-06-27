@@ -6,6 +6,11 @@ const sequelize = require('./database'); // Importamos la conexión a PostgreSQL
 const path = require('path');
 const admin = require('firebase-admin');
 const fs = require('fs');
+const uploadDir = 'uploads/personas';
+if (!fs.existsSync(uploadDir)){
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const https = require('https');
 const app = express();
 const Novedades = require('./models/novedades'); // Importa el modelo Novedades desde el directorio models
@@ -53,7 +58,7 @@ const authenticateFirebaseToken = async (req, res, next) => {
 
 // Middlewares
 app.use(cors({
-  origin: "https://192.168.88.239:4200",
+  origin: "https://10.0.10.233:4200",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true, // Permite el uso de cookies o autenticación si es necesario
@@ -90,7 +95,7 @@ app.use('/api/mensaje', require('./routes/mensaje.route.js'));
 app.use('/api/operativo', require('./routes/operativo_route.js'));
 app.use('/api/operativo-personal', require ('./routes/operativoPersonalRoutes.js'));
 app.use('/api/operativo-cuadrante', require ('./routes/operativo_cuadrante.route.js')); // Agregar esta línea para la nueva ruta
-
+app.use('/api/archivo-persona', require('./routes/archivo_persona.route.js'));
 // Endpoint para obtener usuarios
 app.get('/api/users', async (req, res) => {
   try {
@@ -241,7 +246,49 @@ app.get('/api/users/uid/:uid', async (req, res) => {
   }
 });
 
+// Agrega este endpoint en tu index.js
+// Ya existe en tu index.js:
+app.get('/api/users', async (req, res) => {
+  try {
+    const userRecords = await admin.auth().listUsers();
+    const users = await Promise.all(userRecords.users.map(async (user) => {
+      const userDoc = await admin.firestore().collection('usuarios').doc(user.uid).get();
+      const firestoreData = userDoc.exists ? userDoc.data() : {};
+      console.log('UID:', user.uid, 'Firestore:', firestoreData);
+      return {
+        uid: user.uid,
+        email: user.email,
+        legajo: user.legajo,
+        displayName: user.displayName,
+        phoneNumber: user.phoneNumber,
+        ...firestoreData
+      };
+    }));
 
+    res.status(200).json(users);
+  } catch (error) {
+    console.error('Error obteniendo usuarios:', error);
+    res.status(500).send('Error obteniendo usuarios');
+  }
+});
+app.get('/api/users/administradores', async (req, res) => {
+  try {
+    // Consulta solo los usuarios con perfil "administrador"
+    const snapshot = await admin.firestore().collection('usuarios')
+      .where('perfil', '==', 'administrador')
+      .get();
+
+    const administradores = [];
+    snapshot.forEach(doc => {
+      administradores.push({ uid: doc.id, ...doc.data() });
+    });
+
+    res.status(200).json(administradores);
+  } catch (error) {
+    console.error('Error obteniendo administradores:', error);
+    res.status(500).json({ message: 'Error al obtener administradores' });
+  }
+});
 
 // Sincronización con Sequelize
 sequelize.sync().then(() => {
@@ -255,8 +302,8 @@ app.set('port', process.env.PORT || 3000);
 
 // HTTPS configuration (update paths)
 const sslOptions = {
-  key: fs.readFileSync(path.join(__dirname, 'ssl/192.168.88.239-key.pem')),
-  cert: fs.readFileSync(path.join(__dirname, 'ssl/192.168.88.239.pem'))
+  key: fs.readFileSync(path.join(__dirname, 'ssl/10.0.10.233-key.pem')),
+  cert: fs.readFileSync(path.join(__dirname, 'ssl/10.0.10.233.pem'))
 };
 
 // Crear el servidor HTTPS y asociarlo a Socket.IO
@@ -264,7 +311,7 @@ const server = https.createServer(sslOptions, app);
 const io = socketIo(server, {
   cors: {
   methods: ["GET", "POST", "PUT", "DELETE"],
-  origin: "https://192.168.88.239:4200", // URL del frontend  cambiar la ip luego de todo 
+  origin: "https://10.0.10.233:4200", // URL del frontend  cambiar la ip luego de todo 
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
     credentials: true, // Permite autenticación si usas cookies o tokens
@@ -286,5 +333,5 @@ configurarSocket(io);  // Configura los eventos de socket en el servidor
 
 // Iniciar el servidor con HTTPS y Socket.IO
 server.listen(app.get('port'), '0.0.0.0', () => {
-console.log(`🚀 Servidor HTTPS con Socket.IO corriendo en https://192.168.88.239:${app.get('port')}`);
+console.log(`🚀 Servidor HTTPS con Socket.IO corriendo en https://10.0.10.233:${app.get('port')}`);
 });

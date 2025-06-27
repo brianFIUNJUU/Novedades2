@@ -62,9 +62,7 @@ export class NovedadesService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.get<Novedades[]>(this.apiUrl, { headers }).pipe(
-      tap(data => this.novedadesCache = data)
-    );
+    return this.http.get<Novedades[]>(this.apiUrl, { headers });
   }
 
    // Obtener una novedad por ID (sin cache)
@@ -83,9 +81,7 @@ export class NovedadesService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.post<Novedades>(this.apiUrl, novedad, { headers }).pipe(
-      tap(() => this.clearCache())
-    );
+    return this.http.post<Novedades>(this.apiUrl, novedad, { headers })
   }
 
   // Actualizar una novedad existente
@@ -95,9 +91,7 @@ export class NovedadesService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.put<Novedades>(`${this.apiUrl}/${id}`, novedad, { headers }).pipe(
-      tap(() => this.clearCache())
-    );
+    return this.http.put<Novedades>(`${this.apiUrl}/${id}`, novedad, { headers })
   }
 
   // Eliminar una novedad
@@ -107,9 +101,7 @@ export class NovedadesService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers }).pipe(
-      tap(() => this.clearCache())
-    );
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers })
   }
 
   // Obtener personas asociadas a una novedad por ID (con cache)
@@ -122,9 +114,7 @@ export class NovedadesService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.get<Persona[]>(`${this.apiUrl}/${novedadId}/personas`, { headers }).pipe(
-      tap(data => this.personasByNovedadIdCache[novedadId] = data)
-    );
+    return this.http.get<Persona[]>(`${this.apiUrl}/${novedadId}/personas`, { headers });
   }
 
   // Obtener personal asociado a una novedad por ID (con cache)
@@ -137,9 +127,7 @@ export class NovedadesService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.get<Personal[]>(`${this.apiUrl}/${novedadId}/personal`, { headers }).pipe(
-      tap(data => this.personalByNovedadIdCache[novedadId] = data)
-    );
+    return this.http.get<Personal[]>(`${this.apiUrl}/${novedadId}/personal`, { headers });
   }
 
   // Eliminar una persona de una novedad
@@ -149,9 +137,7 @@ export class NovedadesService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.delete<void>(`${this.apiUrl}/${novedadId}/personas/${personaId}`, { headers }).pipe(
-      tap(() => this.clearCache())
-    );
+    return this.http.delete<void>(`${this.apiUrl}/${novedadId}/personas/${personaId}`, { headers });
   }
 
   // Obtener novedades por legajo del personal autor (con cache)
@@ -164,9 +150,7 @@ export class NovedadesService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.get<Novedades[]>(`${this.apiUrl}/personal_autor/${legajo}`, { headers }).pipe(
-      tap(data => this.novedadesByPersonalAutorLegajoCache[legajo] = data)
-    );
+    return this.http.get<Novedades[]>(`${this.apiUrl}/personal_autor/${legajo}`, { headers });
   }
 
   // Obtener novedades solo del día de hoy (con cache)
@@ -179,9 +163,7 @@ export class NovedadesService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.get<Novedades[]>(`${this.apiUrl}/today`, { headers }).pipe(
-      tap(data => this.novedadesByTodayCache = data)
-    );
+    return this.http.get<Novedades[]>(`${this.apiUrl}/today`, { headers });
   }
 
   // Obtener novedades por legajo y día de hoy (con cache)
@@ -194,9 +176,7 @@ export class NovedadesService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.get<Novedades[]>(`${this.apiUrl}/legajo/${legajo}/today`, { headers }).pipe(
-      tap(data => this.novedadesByLegajoTodayCache[legajo] = data)
-    );
+    return this.http.get<Novedades[]>(`${this.apiUrl}/legajo/${legajo}/today`, { headers });
   }
 
   // Obtener novedades por rango de fecha (con cache)
@@ -212,10 +192,7 @@ export class NovedadesService {
     }
     return this.http.get<Novedades[]>(
       `${this.apiUrl}/rango-fecha?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`,
-      { headers }
-    ).pipe(
-      tap(data => this.novedadesByRangoFechaCache[key] = data)
-    );
+      { headers });
   }
 
   // Obtener novedades por legajo y rango de fecha (con cache)
@@ -232,8 +209,6 @@ export class NovedadesService {
     return this.http.get<Novedades[]>(
       `${this.apiUrl}/legajo/${legajo}/rango-fecha?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`,
       { headers }
-    ).pipe(
-      tap(data => this.novedadesByLegajoRangoFechaCache[key] = data)
     );
   }
 
@@ -250,8 +225,6 @@ export class NovedadesService {
     return this.http.get<Novedades[]>(
       `${this.apiUrl}/unidad-regional/${unidad_regional_id}`,
       { headers }
-    ).pipe(
-      tap(data => this.novedadesByUnidadCache[unidad_regional_id] = data)
     );
   }
 
@@ -268,8 +241,6 @@ export class NovedadesService {
     return this.http.get<Novedades[]>(
       `${this.apiUrl}/unidad-regional/${unidad_regional_id}/today`,
       { headers }
-    ).pipe(
-      tap(data => this.novedadesByUnidadTodayCache[unidad_regional_id] = data)
     );
   }
 
@@ -287,8 +258,6 @@ export class NovedadesService {
     return this.http.get<Novedades[]>(
       `${this.apiUrl}/unidad-regional/${unidad_regional_id}/rango-fecha?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`,
       { headers }
-    ).pipe(
-      tap(data => this.novedadesByUnidadRangoFechaCache[key] = data)
     );
   }
   getNovedadesByOperativo(operativo_id: string): Observable<Novedades[]> {
@@ -300,8 +269,6 @@ export class NovedadesService {
   if (token) {
     headers = headers.set('Authorization', `Bearer ${token}`);
   }
-  return this.http.get<Novedades[]>(`${this.apiUrl}/operativo/${operativo_id}`, { headers }).pipe(
-    tap(data => this.novedadesByOperativoCache[operativo_id] = data)
-  );
+  return this.http.get<Novedades[]>(`${this.apiUrl}/operativo/${operativo_id}`, { headers })
 }
 }

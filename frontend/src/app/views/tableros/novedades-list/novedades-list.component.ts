@@ -172,7 +172,9 @@ idFiltro: string = '';
   });
 }
 
-
+verNovedad(id: string): void {
+  this.router.navigate(['/tableros/novedades', id], { queryParams: { view: 'readonly' } });
+}
    onFiltroUnidadChange(event: any) {
     const valor = event.target.value;
     this.mostrarFiltroFechaUnid = false;

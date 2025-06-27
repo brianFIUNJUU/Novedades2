@@ -3,6 +3,7 @@ const sequelize = require('../database');
 const Departamento = require('./departamento');
 const Localidad = require('./localidad');
 const Estado = require('./estado');
+const NovedadPersona = require('./novedad_persona'); // Asegúrate de que la ruta sea correcta
 const Persona = sequelize.define('Persona', {
     id: {
         type: DataTypes.INTEGER,
@@ -51,7 +52,7 @@ const Persona = sequelize.define('Persona', {
         type: DataTypes.STRING, 
     },
 // desde aqui agregue nuevos datos
-        departamento_nombre: {
+    departamento_nombre: {
         type: DataTypes.STRING,
     },  
     localidad_nombre: {
@@ -83,6 +84,10 @@ const Persona = sequelize.define('Persona', {
 
     nacionalidad:{
         type: DataTypes.STRING,
+    },
+    extranjero: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
     },
 
 // 
@@ -135,7 +140,6 @@ const Persona = sequelize.define('Persona', {
 // Definir las relaciones
 Persona.belongsTo(Departamento, { foreignKey: 'departamento_id', as: 'departamento' });
 Persona.belongsTo(Localidad, { foreignKey: 'localidad_id', as: 'localidad' });
-
 Persona.associate = function(models) {
     Persona.hasMany(models.Estado, { foreignKey: 'persona_id', as: 'estados' });
   };

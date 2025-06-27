@@ -9,7 +9,7 @@
   <br>
   <!-- Filtro por estado -->
   <div class="row mb-3">
-    <div class="col-md-4">
+    <div class="col-md-3">
       <label for="filtroEstado" class="form-label">Filtrar por Estado</label>
       <select class="form-select " [(ngModel)]="filtroEstado" (change)="filtrarPorEstado()">
         <option value="">Todos</option>
@@ -17,11 +17,30 @@
         <option value="pendiente">Pendiente</option>
       </select>
     </div>
+    <!-- Filtro por Perfil -->
+    <div class="col-md-3">
+      <label for="filtroPerfil" class="form-label">Filtrar por Perfil</label>
+      <select class="form-select" [(ngModel)]="filtroPerfil" (change)="filtrarPorPerfil()">
+        
+        <option value="administrador">Administrador</option>
+        <option value="">Todos</option>
+        <option value="usuarioDOP">Usuario DOP</option>
+        <option value="usuario">Usuario Común</option>
+             <option value="EncargadoUnidad">Encargado de unidad 1</option>
+                  <option value="EncargadoUnidad 2">Encargado de unidad 2</option>
+                  <option value="EncargadoUnidad 3">Encargado de unidad 3</option>
+                  <option value="EncargadoUnidad 4">Encargado de unidad 4</option>
+                  <option value="EncargadoUnidad 5">Encargado de unidad 5</option>
+                  <option value="EncargadoUnidad 6">Encargado de unidad 6</option>
+                  <option value="EncargadoUnidad 7">Encargado de unidad 7</option>
+                  <option value="EncargadoUnidad 8">Encargado de unidad 8</option>
+      </select>
+    </div>
 
     <!-- Búsqueda por Legajo -->
-    <div class="col-md-4">
-      <label for="buscarLegajo" class="form-label ">Buscar por N° de Legajo</label>
-      <input type="text" id="buscarLegajo" class="form-control" [(ngModel)]="buscarLegajo" (input)="filtrarPorLegajo()" placeholder="Ingrese N° de Legajo">
+    <div class="col-md-3">
+      <label for="buscarLegajo" class="form-label ">Buscar legajo</label>
+      <input type="text" id="buscarLegajo" class="form-control" [(ngModel)]="buscarLegajo" (input)="filtrarPorLegajo()" placeholder="Ingrese N° de Leg.">
     </div>
   </div>
 

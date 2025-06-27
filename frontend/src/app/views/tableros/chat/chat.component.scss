@@ -12,8 +12,6 @@
   display: flex;
   flex-direction: column;
   z-index: 10; /* Asegura que la card no se superponga con el chat */
-
-  
 }
 /* Ajustar la posición de la card y el chat */
 .card3 {
@@ -267,12 +265,17 @@
 /* Estilos para pantallas de celular (ancho máximo 768px - puedes ajustarlo) */
 @media (max-width: 768px) {
   .logo {
-    /* Mantiene el ancho visible y difumina arriba y abajo */
-    background-size: 145% auto; /* Ajusta el ancho al 100% y la altura automáticamente */
+    background-image: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.5),
+        transparent 50%,
+        transparent 80%,
+        rgba(255, 255, 255, 0.5)
+      ),
+      url("/assets/fondocel.jpg") !important;
+    background-size: 145% auto;
     background-position: center center;
-
-    /* Degradado vertical para difuminar arriba y abajo */
-    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), transparent 50%, transparent 80%, rgba(255, 255, 255, 0.5)), url("/assets/GOBIERNO.png");
+    background-repeat: no-repeat;
   }
 }
 /* Media Queries para pantallas más pequeñas */
@@ -331,85 +334,7 @@
     border-radius: 0; /* Elimina el borde redondeado */
   }
 
-  .fullscreen-modal .modal-body {
-    flex-grow: 1; /* Hace que el cuerpo del modal ocupe el espacio restante */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .fullscreen-modal .modal-footer {
-    position: absolute; /* Posiciona el footer de manera absoluta */
-    bottom: 0; /* Lo coloca en la parte inferior */
-    left: 0; /* Lo alinea a la izquierda */
-    right: 0; /* Lo alinea a la derecha */
-    background: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
-    border: none; /* Elimina el borde del footer */
-    display: flex;
-    justify-content: center; /* Centra los botones horizontalmente */
-    gap: 10px; /* Espacio entre los botones */
-    padding: 10px; /* Espaciado interno */
-  }
-
-  .fullscreen-modal .modal-footer .btn {
-    color: white; /* Texto blanco */
-    background: rgba(255, 255, 255, 0.2); /* Fondo semi-transparente */
-    border: 1px solid rgba(255, 255, 255, 0.5); /* Borde semi-transparente */
-    transition: background 0.3s ease; /* Transición suave al hacer hover */
-  }
-
-  .fullscreen-modal .modal-footer .btn:hover {
-    background: rgba(255, 255, 255, 0.4); /* Fondo más claro al hacer hover */
-  }
-  #camera-modal-N .modal-dialog {
-    width: 100% !important; /* Asegura que el modal ocupe toda la pantalla */
-    margin: 0; /* Elimina márgenes */
-    height: 100vh; /* Ajusta el modal a toda la altura de la pantalla */
-    max-width: 100%;
-  }
-
-  #camera-modal-N .modal-content {
-    height: 100%; /* Hace que el contenido del modal ocupe toda la altura disponible */
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* Centra el contenido */
-    padding: 0;
-  }
-
-  #camera-modal-N .modal-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0;
-    height: 100%; /* Asegura que el video se ajuste a toda la altura */
-  }
-  #camera-modal .modal-dialog {
-    width: 100% !important; /* Asegura que el modal ocupe toda la pantalla */
-    margin: 0; /* Elimina márgenes */
-    height: 100vh; /* Ajusta el modal a toda la altura de la pantalla */
-    max-width: 100%;
-  }
-
-  #camera-modal .modal-content {
-    height: 100%; /* Hace que el contenido del modal ocupe toda la altura disponible */
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* Centra el contenido */
-    padding: 0;
-  }
-
-  #camera-modal .modal-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0;
-    height: 100%; /* Asegura que el video se ajuste a toda la altura */
-  }
-  video {
-    max-height: 100vh; /* Asegura que el video ocupe la altura máxima */
-    width: 100%;
-    object-fit: cover; /* Asegura que el video ocupe todo el espacio disponible */
-  }
+}
   
   
   /* Media query para pantallas de celular (ancho máximo de 768px) */
@@ -419,30 +344,11 @@
     padding: 5px; /* Reducir el padding */
   }
 
-  label, p {
-    font-size: 12px; /* Reducir el tamaño de fuente de etiquetas y texto */
-  }
-  h5, h6{
-    font-size: 16px; /* Reducir el tamaño de fuente de encabezados */
-  }
-  .table {
-    font-size: 10px; /* Reducir el tamaño de fuente para tablas */
-  }
-
-  .col-md-4, .col-md-6, .col-md-12 {
-    width: 100%; /* Las columnas ocupan todo el ancho en celulares */
-  }
-
-
   .form-group.d-flex label {
     margin-bottom: 5px; /* Agregar margen inferior a las etiquetas */
   }
 
 
-
-  .table-responsive {
-    overflow-x: auto; /* Permitir scroll horizontal en tablas */
-  }
 }
 
 /* Media query para pantallas aún más pequeñas (ancho máximo de 480px) */
@@ -451,17 +357,5 @@
     font-size: 12px; /* Reducir aún más el tamaño de fuente */
   }
 
-  label, p {
-    font-size: 12px; /* Reducir el tamaño de fuente de etiquetas y texto */
-  }
-  h5, h6{
-    font-size: 16px; /* Reducir el tamaño de fuente de encabezados */
-  }
 
-  .table {
-    font-size: 8px; /* Reducir aún más el tamaño de fuente para tablas */
-  }
-
-
-}
 }

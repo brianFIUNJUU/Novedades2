@@ -2,17 +2,6 @@ import {
   createPopper2 as createPopper
 } from "./chunk-MTK2UXHI.js";
 import {
-  A11yModule,
-  BreakpointObserver,
-  CdkTrapFocus,
-  FocusKeyManager,
-  FocusMonitor
-} from "./chunk-6LEBVM4G.js";
-import {
-  coerceBooleanProperty,
-  coerceNumberProperty
-} from "./chunk-K6YW2B3A.js";
-import {
   ActivatedRoute,
   NavigationEnd,
   Router,
@@ -20,13 +9,6 @@ import {
   RouterLinkActive,
   RouterModule
 } from "./chunk-TTRK7RJQ.js";
-import {
-  IconDirective
-} from "./chunk-CNVUND3J.js";
-import {
-  takeUntilDestroyed,
-  toObservable
-} from "./chunk-2ULZOTVJ.js";
 import {
   AnimationBuilder,
   animate,
@@ -39,6 +21,24 @@ import {
   trigger,
   useAnimation
 } from "./chunk-IIDSOG53.js";
+import {
+  IconDirective
+} from "./chunk-CNVUND3J.js";
+import {
+  takeUntilDestroyed,
+  toObservable
+} from "./chunk-2ULZOTVJ.js";
+import {
+  A11yModule,
+  BreakpointObserver,
+  CdkTrapFocus,
+  FocusKeyManager,
+  FocusMonitor
+} from "./chunk-6LEBVM4G.js";
+import {
+  coerceBooleanProperty,
+  coerceNumberProperty
+} from "./chunk-K6YW2B3A.js";
 import "./chunk-4OO2PO3O.js";
 import "./chunk-Y3G33AUN.js";
 import {

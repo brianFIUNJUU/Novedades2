@@ -31,9 +31,7 @@
     h5, h6{
       font-size: 16px; /* Reducir el tamaño de fuente de encabezados */
     }
-    .table {
-      font-size: 10px; /* Reducir el tamaño de fuente para tablas */
-    }
+  
   
     .col-md-4, .col-md-6, .col-md-12 {
       width: 100%; /* Las columnas ocupan todo el ancho en celulares */
@@ -82,22 +80,13 @@
 }
 
 .table-sm td, .table-sm th {
-  padding: 0.5rem; /* Padding base, puedes ajustarlo */
+  padding: 0.1rem; /* Padding base, puedes ajustarlo */
 }
 
-.text-small {
-  font-size: 0.9rem; /* Tamaño de fuente base, puedes ajustarlo */
-}
+
 
 /* Estilos específicos para pantallas de celular */
 @media (max-width: 768px) { /* Ajusta el breakpoint según necesites */
-  .table-sm td, .table-sm th {
-    padding: 0.2rem; /* Reduce el padding en pantallas pequeñas */
-  }
-
-  .text-small {
-    font-size: 0.7rem; /* Reduce el tamaño de fuente en pantallas pequeñas */
-  }
 
   /* Ajusta el ancho máximo del texto truncado si es necesario */
   .text-truncate-custom {

@@ -19,6 +19,7 @@ export class Persona {
   telefono?: string;
   profesion?: string;
   nacionalidad?: string;
+  extranjero?: boolean;
 
   fechaNacimiento!: string;
   edad!: string;
@@ -44,7 +45,7 @@ export class Persona {
     this.departamento_nombre = '';
     this.localidad_nombre = '';
     this.domicilio = '';
-
+    this.extranjero = false;
     this.fechaNacimiento = '';
     this.sexo = '';
     this.edad = '';

@@ -44,9 +44,7 @@ export class CuadranteService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.get<Cuadrante[]>(url, { headers }).pipe(
-      tap(data => this.cuadrantesByUnidadCache[unidadRegionalId] = data)
-    );
+    return this.http.get<Cuadrante[]>(url, { headers })
   }
   
   // Si necesitas limpiar el cache (por ejemplo, si cambian los datos en la BD)
@@ -98,6 +96,5 @@ export class CuadranteService {
     return this.http.delete<void>(url, { headers });
   }
 
-  // Obtener cuadrantes por unidad regional
 
 }

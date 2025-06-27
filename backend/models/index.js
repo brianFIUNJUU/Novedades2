@@ -6,7 +6,8 @@ const Cuadrante = require('./cuadrante');
 const Unidad_regional = require('./unidad_regional');
 const Personal = require('./personal');
 const OperativoPersonal = require('./operativo_personal');
-
+const Persona = require('./persona');
+const NovedadPersona = require('./novedad_persona');
 
 // Relaciones
 Operativo.hasMany(OperativoCuadrante, { foreignKey: 'operativo_id' });
@@ -19,6 +20,9 @@ OperativoCuadrante.belongsTo(Personal, { as: 'jefeSupervisor', foreignKey: 'jefe
 OperativoPersonal.belongsTo(Operativo, { foreignKey: 'operativo_id' });
 OperativoPersonal.belongsTo(Personal, { foreignKey: 'personal_id' });
 OperativoPersonal.belongsTo(OperativoCuadrante, { foreignKey: 'operativo_cuadrante_id' });
+// Aquí defines las asociaciones
+NovedadPersona.belongsTo(Persona, { foreignKey: 'persona_id', as: 'persona' });
+Persona.hasMany(NovedadPersona, { foreignKey: 'persona_id', as: 'novedadPersonas' });
 
 module.exports = {
   sequelize,
@@ -27,6 +31,8 @@ module.exports = {
   Cuadrante,
   Unidad_regional,
   Personal,
-  OperativoPersonal
+  OperativoPersonal,
+  Persona,
+  NovedadPersona,
 };
 

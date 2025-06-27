@@ -144,5 +144,33 @@ personaCtrl.deletePersona = async (req, res) => {
         });
     }
 };
+// Obtener personas residentes (extranjero = false)
+personaCtrl.getPersonasResidentes = async (req, res) => {
+    try {
+        const personas = await Persona.findAll({
+            where: { extranjero: false },
+        });
+        res.json(personas);
+    } catch (error) {
+        res.status(400).json({
+            'status': '0',
+            'msg': 'Error al obtener personas residentes.'
+        });
+    }
+};
 
+// Obtener personas extranjeras (extranjero = true)
+personaCtrl.getPersonasExtranjeras = async (req, res) => {
+    try {
+        const personas = await Persona.findAll({
+            where: { extranjero: true },
+        });
+        res.json(personas);
+    } catch (error) {
+        res.status(400).json({
+            'status': '0',
+            'msg': 'Error al obtener personas extranjeras.'
+        });
+    }
+};
 module.exports = personaCtrl;

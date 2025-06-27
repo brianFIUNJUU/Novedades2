@@ -19,8 +19,10 @@
   import { HttpHeaders } from '@angular/common/http';
   import { from } from 'rxjs';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { jwtDecode } from "jwt-decode";
+import { signOut } from '@angular/fire/auth';
 
-
+import Swal from 'sweetalert2';
 
   @Injectable({
     providedIn: 'root'
@@ -29,6 +31,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
     private app = initializeApp(environment.firebase);
     private auth = getAuth(this.app);
     private apiUrl = environment.apiUrl 
+    
     constructor(
       private router: Router, 
       public firestore: AngularFirestore, 
@@ -146,55 +149,98 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
      * @param password
      */
 
+programarAvisoExpiracion(idToken: string) {
+  const decoded: any = jwtDecode(idToken);
+  const exp = decoded.exp * 1000; // en milisegundos
+  const now = Date.now();
+  const msAntesDeExpirar = exp - now - (3 * 60 * 1000); // 3 minutos antes
+  const msHastaExpirar = exp - now;
+
+  if (msAntesDeExpirar > 0) {
+    setTimeout(() => {
+      Swal.fire({
+        icon: 'warning',
+        title: '¡Atención!',
+        text: 'Tu sesión de 1 hora está por expirar por cuestiones de seguridad, tendrás que volver a iniciar sesión. Guarda tus datos, te quedan 3 minutos para hacerlo.',
+        confirmButtonText: 'Aceptar'
+      });
+    }, msAntesDeExpirar);
+  }
+
+  if (msHastaExpirar > 0) {
+    setTimeout(() => {
+      Swal.fire({
+        icon: 'info',
+        title: 'Sesión expirada',
+        text: 'Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.',
+        confirmButtonText: 'Aceptar'
+      }).then(() => {
+        this.logout();
+      });
+    }, msHastaExpirar);
+  }
+}
+   logout() {
+  this.auth.signOut().then(() => {
+    // Redirige al login después de cerrar sesión
+    this.router.navigate(['/login']);
+  });
+}
     login(email: string, password: string): Promise<UserCredential> {
-      return signInWithEmailAndPassword(this.auth, email, password)
-        .then(async (result) => {
-          const user = result.user;
-  
-          // Verificar si el correo es el del administrador
-          if (email === '41409926@fi.unju.edu.ar') {
-            // Crear usuario con perfil "administrador" si no existe en Firestore
-            const firestoreInstance = getFirestore(this.app);
-            const userRef = doc(firestoreInstance, 'usuarios', user.uid);  // Cambié el método a doc() para usar Firestore v9+
-            const userSnap = await getDoc(userRef);
-  
-            if (!userSnap.exists()) {
-              await setDoc(userRef, {
-                email: user.email,
-                perfil: 'administrador',
-                creadoEn: new Date(),
-                verificado: user.emailVerified
-              });
-              console.log("Usuario 'administrador' creado en Firestore.");
-            }
-  
-            return result; // Retorna el resultado para el componente
-          }
-  
-          // Si el correo no es el del administrador, continuar con el flujo normal
-          if (!user.emailVerified) {
-            await sendEmailVerification(user);
-            this.logout();
-            throw new Error('auth/email-not-verified');
-          }
-  
-          // Cambia el campo `estado` a true en Firestore después de iniciar sesión
-          await this.updateUserStatus2(user.uid, true);  // Actualización a `estado: true`
-  
-          return result; // Retorna el resultado para el componente
-        })
-        .catch((error) => {
-          console.error('Error en el inicio de sesión: ', error);
-  
-          if (error.code === 'auth/too-many-requests') {
-            throw new Error('Revisa la bandeja de entrada de tu Gmail para verificarlo');
-          } else if (error.code === 'auth/email-not-verified') {
-            throw new Error('El correo electrónico no está verificado.');
-          } else {
-            throw new Error('Error en el inicio de sesión: ' + error.message);
-          }
-        });
-    }//solucion
+  return signInWithEmailAndPassword(this.auth, email, password)
+    .then(async (result) => {
+      const user = result.user;
+
+      // Verificar si el correo es el del administrador
+      if (email === '41409926@fi.unju.edu.ar') {
+        const firestoreInstance = getFirestore(this.app);
+        const userRef = doc(firestoreInstance, 'usuarios', user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+          await setDoc(userRef, {
+            email: user.email,
+            perfil: 'administrador',
+            creadoEn: new Date(),
+            verificado: user.emailVerified
+          });
+          console.log("Usuario 'administrador' creado en Firestore.");
+        }
+
+        // Programar aviso de expiración de sesión
+        const idToken = await user.getIdToken();
+        this.programarAvisoExpiracion(idToken);
+
+        return result;
+      }
+
+      // Si el correo no es el del administrador, continuar con el flujo normal
+      if (!user.emailVerified) {
+        await sendEmailVerification(user);
+        this.logout();
+        throw new Error('auth/email-not-verified');
+      }
+
+      await this.updateUserStatus2(user.uid, true);
+
+      // Programar aviso de expiración de sesión
+      const idToken = await user.getIdToken();
+      this.programarAvisoExpiracion(idToken);
+
+      return result;
+    })
+    .catch((error) => {
+      console.error('Error en el inicio de sesión: ', error);
+
+      if (error.code === 'auth/too-many-requests') {
+        throw new Error('Revisa la bandeja de entrada de tu Gmail para verificarlo');
+      } else if (error.code === 'auth/email-not-verified') {
+        throw new Error('El correo electrónico no está verificado.');
+      } else {
+        throw new Error('Error en el inicio de sesión: ' + error.message);
+      }
+    });
+}
   
     // Método para actualizar el campo `estado` en Firestore
     private updateUserStatus2(uid: string, estado: boolean): Promise<void> {
@@ -216,11 +262,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
     
     /**
      * Cerrar sesión
-     */
-    logout() {
-      this.auth.signOut();
-    }
-
+     
     /**
      * Restablecer contraseña
      * @param email
@@ -355,5 +397,15 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
           }
         })
       );
+    }
+        getAllUsuarios(): Observable<Usuario[]> {
+      const token = this.getAuthToken();
+      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+      return this.http.get<Usuario[]>(`${this.apiUrl}/users`, { headers });
+    }
+        getUsuariosAdministradores(): Observable<Usuario[]> {
+      const token = this.getAuthToken();
+      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+      return this.http.get<Usuario[]>(`${this.apiUrl}/users/administradores`, { headers });
     }
   } 

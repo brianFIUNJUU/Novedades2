@@ -1,11 +1,9 @@
-<div class="container mt-4">
-  <!-- Tabla para mostrar la lista de Personales -->
-  <div class="mt-4">
-    <div class="card text-white custom-card">
-      <div class="card-body text-center p-2">
-        <h6 class="card-title font-weight-bold mb-0">PLANTA DE PERSONAL</h6>
-      </div>
+<div class="container-fluid p-0">
+  <div class="card text-white custom-card">
+    <div class="card-body text-center p-2">
+      <h6 class="card-title font-weight-bold mb-0">PERSONAL POLICIAL:</h6>
     </div>
+  </div>
     <br/>
     <div>
       <div class="col-md-12">
@@ -44,31 +42,31 @@
     </div>
     <br/>
     <div class="table-responsive">
-      <table class="table table-bordered border-primary table-sm">
-        <thead>
+    <table class="table table-bordered border-primary table-sm table-custom">        
+      <thead>
           <tr>
-            <th class="text-small">Legajo</th>
-            <th class="text-small">Jerarquía</th>
-            <th class="text-small">Dependencia</th>
+            <th class="text-center text-small">Legajo</th>
+            <th class="text-center text-small">Jerarquía</th>
+            <th class="text-center text-small">Dependencia</th>
             <!-- <th class="text-small">Unidad Regional</th> -->
-            <th class="text-small">Nombre</th>
-            <th class="text-small">Apellido</th>
-            <th class="text-small">DNI</th>
-            <th class="text-small">Email</th>
-            <th class="text-small">Acciones</th>
+            <th class="text-center text-small">Nombre</th>
+            <th class="text-center text-small">Apellido</th>
+            <th class="text-center text-small">DNI</th>
+            <th class="text-center text-small">Email</th>
+            <th class="text-center text-small">Acciones</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let personal of personales">
-            <td class="text-small">{{ personal.legajo }}</td>
-            <td class="text-small">{{ personal.jerarquia }}</td>
-            <td class="text-small">{{ personal.dependencia_nombre }}</td>
+            <td class="text-center text-small">{{ personal.legajo }}</td>
+            <td class="text-center text-small">{{ personal.jerarquia }}</td>
+            <td class="text-center text-small">{{ personal.dependencia_nombre }}</td>
             <!-- <td class="text-small">{{ personal.unidad_regional_nombre }}</td> -->
-            <td class="text-small">{{ personal.nombre }}</td>
-            <td class="text-small">{{ personal.apellido }}</td>
-            <td class="text-small">{{ personal.dni }}</td>
-            <td class="text-small">{{ personal.email }}</td>
-            <td>
+            <td class="text-center text-small">{{ personal.nombre }}</td>
+            <td class="text-center text-small">{{ personal.apellido }}</td>
+            <td class="text-center text-small">{{ personal.dni }}</td>
+            <td class="text-center text-small">{{ personal.email }}</td>
+            <td class="text-center text-small">
               <button class="btn btn-warning btn-sm" (click)="editarPersonal(personal)">Editar</button>
               <button  *ngIf="userType === 'administrador'" class="btn btn-danger btn-sm" (click)="eliminarPersonal(personal.id.toString())">Eliminar</button>
             </td>
@@ -76,7 +74,7 @@
         </tbody>
       </table>
     </div>
-  </div>
+  
 </div>
 <!-- Modal para Personal -->
 <div class="modal fade" id="modalPersonal" tabindex="-1" aria-labelledby="modalPersonalLabel" aria-hidden="true">

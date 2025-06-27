@@ -1,7 +1,4 @@
 import {
-  FirebaseApp
-} from "./chunk-BOFTALHR.js";
-import {
   FIREBASE_APP_NAME,
   FIREBASE_OPTIONS,
   ɵapplyMixins,
@@ -12,6 +9,9 @@ import {
 import {
   firebase
 } from "./chunk-V33TBWGW.js";
+import {
+  FirebaseApp
+} from "./chunk-BOFTALHR.js";
 import {
   VERSION,
   keepUnstableUntilFirst,
@@ -1003,7 +1003,7 @@ var AngularFireAuth = class _AngularFireAuth {
   credential;
   constructor(options, name2, platformId, zone, schedulers, useEmulator, settings, tenantId, languageCode, useDeviceLanguage, persistence, _appCheckInstances) {
     const logins = new Subject();
-    const auth = of(void 0).pipe(observeOn(schedulers.outsideAngular), switchMap(() => zone.runOutsideAngular(() => import("./index.esm-CTYOH23Q.js"))), map(() => ɵfirebaseAppFactory(options, zone, name2)), map((app) => ɵauthFactory(app, zone, useEmulator, tenantId, languageCode, useDeviceLanguage, settings, persistence)), shareReplay({
+    const auth = of(void 0).pipe(observeOn(schedulers.outsideAngular), switchMap(() => zone.runOutsideAngular(() => import("./index.esm-SLPIBE4X.js"))), map(() => ɵfirebaseAppFactory(options, zone, name2)), map((app) => ɵauthFactory(app, zone, useEmulator, tenantId, languageCode, useDeviceLanguage, settings, persistence)), shareReplay({
       bufferSize: 1,
       refCount: false
     }));
@@ -1288,4 +1288,4 @@ export {
    * limitations under the License.
    *)
 */
-//# sourceMappingURL=chunk-LFIP5RPF.js.map
+//# sourceMappingURL=chunk-IISPDJH5.js.map

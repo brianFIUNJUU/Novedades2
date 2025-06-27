@@ -94,6 +94,9 @@ export class DistribucionlistComponent implements OnInit {
         }
       });
     }
+    verNovedad(id: string): void {
+  this.router.navigate(['/tableros/novedades', id], { queryParams: { view: 'readonly' } });
+}
   ngAfterViewInit(): void {
     // Inicializar el mapa cuando se muestra el modal
     const modalElement = document.getElementById('modalMapa');

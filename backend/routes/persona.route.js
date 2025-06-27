@@ -4,6 +4,8 @@ const personaCtrl = require('./../controllers/persona.controller');
 
 // Definir las rutas para la gestión de personas
 router.get('/', personaCtrl.getPersonas);
+router.get('/residentes', personaCtrl.getPersonasResidentes);
+router.get('/extranjeras', personaCtrl.getPersonasExtranjeras);
 router.post('/', personaCtrl.createPersona);
 router.get('/:id', personaCtrl.getPersona);
 router.put('/:id', personaCtrl.editPersona);

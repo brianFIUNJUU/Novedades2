@@ -31,15 +31,13 @@ export class NovedadesPersonaService {
     return this.http.get<Persona[]>(`${this.apiNovedadPersonaUrl}/${novedadId}/personas`, httpOptions);
   }
 
-  // Agregar una persona a una novedad
-  addPersonaToNovedad(novedadId: number, personaId: number): Observable<void> {
+  addPersonaToNovedad(novedadId: number, personaId: number, estado: string): Observable<void> {
     const token = this.getAuthToken();
     const headers = new HttpHeaders({ 
       'Content-Type': 'application/json',
       ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     });
-    const body = { novedad_id: novedadId, persona_id: personaId };
-    console.log('Datos enviados para agregar persona a la novedad:', body); // Agregar un log para ver los datos enviados
+    const body = { novedad_id: novedadId, persona_id: personaId, estado };
     return this.http.post<void>(`${this.apiNovedadPersonaUrl}/add`, body, { headers });
   }
 
@@ -53,5 +51,46 @@ export class NovedadesPersonaService {
       }),
     };
     return this.http.delete<void>(`${this.apiNovedadPersonaUrl}/${novedadId}/personas/${personaId}`, httpOptions);
+  }
+    getVictimarios(): Observable<any[]> {
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this.http.get<any[]>(`${this.apiNovedadPersonaUrl}/victimarios`, httpOptions);
+  }
+    getNovedadesByPersona(personaId: number): Observable<any[]> {
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this.http.get<any[]>(`${this.apiNovedadPersonaUrl}/persona/${personaId}`, httpOptions);
+  }
+    getResidenteVictimario(): Observable<any[]> {
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this.http.get<any[]>(`${this.apiNovedadPersonaUrl}/victimarios/residentes`, httpOptions);
+  }
+  
+  getExtranjeroVictimario(): Observable<any[]> {
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this.http.get<any[]>(`${this.apiNovedadPersonaUrl}/victimarios/extranjeros`, httpOptions);
   }
 }

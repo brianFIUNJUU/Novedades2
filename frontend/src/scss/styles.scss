@@ -43,57 +43,164 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     color: white !important;
   }
   
-  @media (max-width: 768px) {
-    .swal2-popup {
-      width: 260px !important;
-      max-width: 90% !important;
-      padding: 12px !important;
-      font-size: 20px !important;
-      border-radius: 10px !important;
-    }
+  // @media (max-width: 768px) {
+  //   .swal2-popup {
+  //     width: 260px !important;
+  //     max-width: 90% !important;
+  //     padding: 12px !important;
+  //     font-size: 20px !important;
+  //     border-radius: 10px !important;
+  //   }
   
-    .swal2-title {
-      font-size: 20px !important;
-      margin-bottom: 10px !important;
-    }
+  //   .swal2-title {
+  //     font-size: 20px !important;
+  //     margin-bottom: 10px !important;
+  //   }
   
-    .swal2-html-container {
-      font-size: 20px !important;
-      text-align: center !important;
-    }
+  //   .swal2-html-container {
+  //     font-size: 20px !important;
+  //     text-align: center !important;
+  //   }
   
-    .swal2-content {
-      font-size: 16px !important;
-    }
+  //   .swal2-content {
+  //     font-size: 16px !important;
+  //   }
   
-    .swal2-confirm, 
-     .swal2-deny, .swal2-cancel{
-      font-size: 16px !important;
-      padding: 6px 12px !important;
-      border-radius: 5px !important;
-    }
+  //   .swal2-confirm, 
+  //    .swal2-deny, .swal2-cancel{
+  //     font-size: 16px !important;
+  //     padding: 6px 12px !important;
+  //     border-radius: 5px !important;
+  //   }
     
     
+ 
+  
+.card-title {
+    font-size: 1,2rem;
   }
+.btn-close-red {
+  background-color: red;
+  border: none;
+  opacity: 1;
+}
+
+.btn-close-red:hover {
+  background-color: darkred;
+}
+.btn {
+  
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.swal2-title .swal-titulo-ajustado {
+  font-size: 1.4rem !important;   // Más grande
+  margin-bottom: 0.5rem !important; // Menos espacio debajo
+  margin-top: 0.5rem !important;    // Menos espacio arriba
+  line-height: 1.2 !important;
+}
+
+.swal2-popup .swal2-title {
+  margin-bottom: 0.5rem !important; // Ajusta el margen general del título
+  margin-top: 0.5rem !important;
+}.swal2-title .swal-titulo-ajustado {
+  font-size: 1.4rem !important;   // Más grande
+  margin-bottom: 0.5rem !important; // Menos espacio debajo
+  margin-top: 0.5rem !important;    // Menos espacio arriba
+  line-height: 1.2 !important;
+}
+
+.swal2-popup .swal2-title {
+  margin-bottom: 0.5rem !important; // Ajusta el margen general del título
+  margin-top: 0.5rem !important;
+}
+
+  .swal2-html-container,
+  .swal2-confirm,
+  .swal2-cancel,
+  .swal2-deny {
+    font-size: 0,7rem !important;
+  }
+      .swal2-title{
+    font-size: 2rem !important;
+      }
+   .swal2-popup {
+    width: 40vw !important;        // Ajusta el ancho a tu gusto (por ejemplo, 40% del viewport)
+    max-width: 90vw !important;    // Máximo ancho permitido
+    padding-left: 0rem !important;
+    padding-right: 0rem !important;
+  }
+.table-sm td, .table-sm th {
+  padding: 0.1rem; /* Padding base, puedes ajustarlo */
+}
+.table td, .table th {
+  padding: 0.1rem; /* Padding base, puedes ajustarlo */
+}
+
+.text-small {
+  font-size: 0.7rem!important; 
+}
+.text-danger {
+  color: red !important;
+    font-size: 0.6rem!important; 
+
+}
+  @media (max-width: 600px) {
+    .table{
+      font-size: 0.6rem !important; // Reducir el tamaño de fuente de la tabla
+    }
+    .swal2-popup {
+      width: 95vw !important;      // Para móviles, casi todo el ancho
+      padding-left: 0rem !important;
+      padding-right: 0rem !important;
+    }
+  }
+      label,
+    input,
+    select,p,strong,
+    textarea,
+    span,
+    button,table,
+    .btn {
+      font-size: 0.7rem !important;
+    }
+        form span,
+    .form-group span,
+    .form-control-plaintext {
+      font-size: 0.7rem !important;
+    }
+        select option {
+      font-size: 0.55rem !important;
+    }
+    
+        @media (max-width: 576px) {
+      select option {
+        font-size: 0.55rem !important;
+      }
+    }
   @media (max-width: 768px) {
     ng-select {
-      font-size: 12px !important;
+      font-size: 0.7rem !important;
     }
     
     .ng-dropdown-panel .ng-option {
-      font-size: 10px !important;
+      font-size: 0.7rem!important;
     }
   
     .ng-dropdown-panel .ng-option-label {
-      font-size: 10px !important;
+      font-size: 0.7rem !important;
     }
   
     .ng-select .ng-value-container {
-      font-size: 10px !important;
+      font-size: 0.7rem !important;
     }
   
     .ng-select .ng-option-selected {
-      font-size: 10px !important;
+      font-size: 0.7rem !important;
     }
+
+
   }
   

@@ -13,8 +13,15 @@ import { ExcelExportService } from '../../../services/excel-export.service';
 import { AuthenticateService } from '../../../services/authenticate.service'; // Importar el servicio de autenticación
 import Swal from 'sweetalert2';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-
-
+import { NovedadesPersonaService } from '../../../services/novedades_persona.service'; // importa el service
+import { PAISES } from '../../../models/paises'; // Importa la lista de países
+import { AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
+import { Novedades } from '../../../models/novedades'; // Importa el modelo de Novedades
+import { ArchivoPersona } from '../../../models/archivo_persona'; // Importa el modelo de ArchivoPersona
+import { ArchivoPersonaService } from '../../../services/archivo_persona.service'; // Importa el servicio de ArchivoPersona
+import { environment } from '../../../environments/environment'; 
 @Component({
   selector: 'app-persona',
    standalone: true,
@@ -31,23 +38,45 @@ export class PersonaComponent implements OnInit {
   isUpdating: boolean = false;
   mensajeError: string = '';
   userType: string = ''; // Variable para almacenar el tipo de usuario
-
-
-  archivosPersonas: { file: File | null, base64: string, mimeType: string, fileName: string }[] = [
-    { file: null, base64: '', mimeType: '', fileName: '' }
+  userInfo: any; // Variable para almacenar la información del usuario
+  victimarios: any[] = [];
+  persona_edad_valor: number = 0;
+persona_edad_unidad: string = 'años'; // por defecto
+  paises = PAISES; // Lista de países
+filteredNovedades: any[] = []; // Agrega esta propiedad arriba
+   archivosPersonas: {
+    file: File | null,
+    mimeType: string,
+    fileName: string,
+    url?: string,
+    previewUrl?: string
+  }[] = [
+    { file: null, mimeType: '', fileName: '' }
   ];
+  mostrarCamara: boolean = false;
 
+streamNovedad!: MediaStream;
+stream!: MediaStream;
+videoElementRef!: HTMLVideoElement;
+  // Variable para almacenar los dispositivos de cámara disponibles
+availableCameras: MediaDeviceInfo[] = [];
+currentCameraIndex: number = 0;
+private scrollPosition: number = 0; // Almacena la posición del scroll
   constructor(
     private personaService: PersonaService,
     private departamentoService: DepartamentoService,
     private localidadService: LocalidadService,
     public domSanitizer: DomSanitizer,
     private authService: AuthenticateService,
+    private novedadesPersonaService: NovedadesPersonaService,
+    private cdr: ChangeDetectorRef,
+          private router: Router,
+    private archivoPersonaService: ArchivoPersonaService,
       
   ) { }
 
   ngOnInit(): void {
-    this.getPersonas();
+    this.getVictimarios();
     this.cargarDepartamentos();
     this.persona.departamento_id = null;
     this.persona.localidad_id = null;
@@ -55,6 +84,63 @@ export class PersonaComponent implements OnInit {
       console.log('Tipo de usuario:', userType); // Mostrar el tipo de usuario en la consola
       this.userType = userType ? userType.trim() : ''; // Asigna el tipo de usuario desde el servicio de autenticación y elimina espacios adicionales
     });
+    this.authService.getUserInfo().subscribe(userInfo => {
+    this.userInfo = userInfo;
+  });
+  }
+        getColorClass(codigo: string): string {
+    switch (codigo) {
+      case 'R':
+        return 'rojo';
+      case 'A':
+        return 'amarillo';
+      case 'V':
+        return 'verde';
+      default:
+        return '';
+    }
+  }
+  verNovedad(id: string): void {
+    const modalElement = document.getElementById('modalPresentacionPersona');
+    if (modalElement) {
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      if (modal) {
+        modal.hide();
+      }
+    }
+    this.router.navigate(['/tableros/novedades', id], { queryParams: { view: 'readonly' } });
+  }
+    verVictimario(victimario: any): void {
+      this.persona = { ...victimario.persona };
+      this.cargarArchivosPersona(this.persona); // Si quieres mostrar fotos
+    
+      // Llama al service para obtener las novedades asociadas a la persona
+      this.novedadesPersonaService.getNovedadesByPersona(this.persona.id).subscribe(
+        (novedades) => {
+          this.filteredNovedades = novedades;
+        },
+        (error) => {
+          this.filteredNovedades = [];
+          console.error('Error al obtener novedades de la persona:', error);
+        }
+      );
+    
+      const modalElement = document.getElementById('modalPresentacionPersona');
+      if (modalElement) {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+      }
+    }
+
+  getVictimarios(): void {
+    this.novedadesPersonaService.getVictimarios().subscribe(
+      (data) => {
+        this.victimarios = data;
+      },
+      (error) => {
+        console.error('Error al obtener victimarios:', error);
+      }
+    );
   }
   getPersonas(): void {
     this.personaService.getPersonas().subscribe(
@@ -80,34 +166,77 @@ export class PersonaComponent implements OnInit {
       }
     );
   }
-  
-
-
-    cargarDepartamentos(): void {
-      this.departamentoService.getDepartamentos().subscribe(
-        data => {
-          this.departamentos = data;
+      getPersonasResidentes(): void {
+      this.novedadesPersonaService.getResidenteVictimario().subscribe(
+        (data: any[]) => {
+          this.victimarios = data;
         },
-        error => {
-          this.mensajeError = 'Error al cargar departamentos';
-          Swal.fire('Error', 'Error al cargar departamentos: ' + error.message, 'error');
-        }
-      );
-    }
-  
-    cargarLocalidades(departamentoId: number | null | undefined): void {
-      if (departamentoId == null) return; // Si es null o undefined, salir
-      this.localidadService.getLocalidadesByDepartamento(departamentoId.toString()).subscribe(
-        data => {
-          this.localidades = data;
-        },
-        error => {
-          this.mensajeError = 'Error al cargar localidades';
-          Swal.fire('Error', 'Error al cargar localidades: ' + error.message, 'error');
+        (error) => {
+          console.error('Error al obtener victimarios residentes:', error);
         }
       );
     }
     
+    getPersonasExtranjeras(): void {
+      this.novedadesPersonaService.getExtranjeroVictimario().subscribe(
+        (data: any[]) => {
+          this.victimarios = data;
+        },
+        (error) => {
+          console.error('Error al obtener victimarios extranjeros:', error);
+        }
+      );
+    }
+
+
+ cargarDepartamentos(): void {
+    this.departamentoService.getDepartamentos().subscribe(
+      data => {
+        this.departamentos = data;
+      },
+      error => {
+        this.mensajeError = 'Error al cargar departamentos';
+        Swal.fire('Error', 'Error al cargar departamentos: ' + error.message, 'error');
+      }
+    );
+  }
+
+  cargarLocalidades(departamentoId: number | null | undefined): void {
+    if (departamentoId == null) return; // Si es null o undefined, salir
+    this.localidadService.getLocalidadesByDepartamento(departamentoId.toString()).subscribe(
+      data => {
+        this.localidades = data;
+      },
+      error => {
+        this.mensajeError = 'Error al cargar localidades';
+        Swal.fire('Error', 'Error al cargar localidades: ' + error.message, 'error');
+      }
+    );
+  }
+  
+       onDepartamentoChange() {
+      const dep = this.departamentos.find(d => Number(d.id) === Number(this.persona.departamento_id));
+      this.persona.departamento_nombre = dep ? dep.nombre : '';
+      if (this.persona.departamento_id) {
+        this.cargarLocalidades(this.persona.departamento_id);
+      }
+    }
+    
+    onLocalidadChange() {
+      const loc = this.localidades.find(l => String(l.id) === String(this.persona.localidad_id));
+      this.persona.localidad_nombre = loc ? loc.nombre : '';
+    }
+        private asignarEdadAuxiliarPersona(persona: Persona): void {
+      let edad_valor = 0;
+      let edad_unidad = 'años';
+      if (persona && persona.edad) {
+        const partes = persona.edad.split(' ');
+        edad_valor = Number(partes[0]) || 0;
+        edad_unidad = partes[1] || 'años';
+      }
+      this.persona_edad_valor = edad_valor;
+      this.persona_edad_unidad = edad_unidad;
+    }
     buscarPersonaPorDNI(dni: string): void {
       if (!dni) {
         Swal.fire({
@@ -120,13 +249,17 @@ export class PersonaComponent implements OnInit {
   
       this.personaService.getPersonaByDni(dni).subscribe(
         (data: Persona) => {
+        
           Swal.fire({
             icon: 'success',
             title: 'Persona encontrada',
             text: `La persona con DNI ${dni} ha sido encontrada.`,
           });
+
           this.persona = data;
-          this.cargarArchivosPersona(data); // Cargar los archivos de la persona
+                this.cargarArchivosPersona(data); // <--- ¡AQUÍ!
+
+          this.asignarEdadAuxiliarPersona(data);
           if (data.localidad_id !== null && data.localidad_id !== undefined) {
             this.cargarLocalidadPorId(+data.localidad_id); // Cargar la localidad por ID
           }
@@ -151,34 +284,28 @@ export class PersonaComponent implements OnInit {
         }
       );
     }
-  
+  // Nuevo método para subir archivos
+
     guardarPersona(verificado: boolean = false): void {
       if (!verificado) {
 this.verificarDuplicidadDNI(this.persona.dni || '');
         return;
       }
-  
-      if (this.persona.nombre && this.persona.apellido && this.persona.dni) {
-        this.persona.foto = this.archivosPersonas[0]?.base64 || '';
-        this.persona.foto1 = this.archivosPersonas[1]?.base64 || '';
-        this.persona.foto2 = this.archivosPersonas[2]?.base64 || '';
-        this.persona.foto_tipo = this.archivosPersonas[0]?.mimeType || '';
-        this.persona.foto_tipo1 = this.archivosPersonas[1]?.mimeType || '';
-        this.persona.foto_tipo2 = this.archivosPersonas[2]?.mimeType || '';
-        this.persona.foto_nombre = this.archivosPersonas[0]?.fileName || '';
-        this.persona.foto_nombre1 = this.archivosPersonas[1]?.fileName || '';
-        this.persona.foto_nombre2 = this.archivosPersonas[2]?.fileName || '';
-  
+      this.asignarEdad(); // <--- AGREGA ESTA LÍNEA
+      if (this.persona.nombre ) {  
         if (this.persona.id) {
+                this.asignarEdad(); // <-- También aquí, por claridad
+
           console.log('Datos enviados para actualizar persona:', JSON.stringify(this.persona, null, 2)); // Agregar un log para ver los datos enviados
-          this.personaService.updatePersona(this.persona).subscribe(
+        this.personaService.updatePersona(this.persona).subscribe(
             (response) => {
               Swal.fire({
                 icon: 'success',
                 title: 'Persona actualizada',
                 text: 'Los datos de la persona han sido actualizados exitosamente.',
               });
-              this.getPersonas();
+             this.subirArchivosPersona(this.persona.id);
+              this.getVictimarios(); // <--- Cambia aquí
               this.resetFormulario();
               this.cerrarModalPersona();
             },
@@ -192,17 +319,17 @@ this.verificarDuplicidadDNI(this.persona.dni || '');
             }
           );
         } else {
+                this.asignarEdad(); // <-- También aquí, por claridad
+
           console.log('Datos enviados para crear persona:', JSON.stringify(this.persona, null, 2)); // Agregar un log para ver los datos enviados
           this.personaService.createPersona(this.persona).subscribe(
             (response) => {
-              Swal.fire({
-                icon: 'success',
-                title: 'Persona guardada',
-                text: 'La persona ha sido guardada exitosamente.',
-              });
-              this.getPersonas();
-              this.resetFormulario();
-              this.cerrarModalPersona();
+          const personaId = response.id || response.persona?.id; // Ajusta según tu backend
+          this.subirArchivosPersona(personaId);
+          Swal.fire({ icon: 'success', title: 'Persona guardada', text: 'La persona ha sido guardada exitosamente.' });
+          this.getVictimarios();
+          this.resetFormulario();
+          this.cerrarModalPersona();
             },
             (error) => {
               console.error('Error al crear persona:', error);
@@ -218,7 +345,8 @@ this.verificarDuplicidadDNI(this.persona.dni || '');
         Swal.fire({
           icon: 'warning',
           title: 'Datos incompletos',
-          text: 'Por favor, complete todos los campos requeridos.',
+  
+          text: 'El campo Nombre es obligatorio para guardar.'
         });
       }
     }
@@ -229,27 +357,26 @@ this.verificarDuplicidadDNI(this.persona.dni || '');
       if (modal) modal.hide();
     }
   }
-  
-    verificarDuplicidadDNI(dni: string): void {
+  asignarEdad() {
+    this.persona.edad = `${this.persona_edad_valor} ${this.persona_edad_unidad}`;
+  }
+     verificarDuplicidadDNI(dni: string): void {
       this.personaService.getPersonaByDni(dni).subscribe(
         (data: Persona) => {
           if (data) {
-            Swal.fire({
-              icon: 'warning',
-              title: 'Persona ya existe',
-              text: 'Ya existe una persona cargada con este DNI. ¿Deseas actualizar sus datos?',
-              showCancelButton: true,
-              confirmButtonText: 'Sí, actualizar',
-              cancelButtonText: 'No, buscar',
-            }).then((result) => {
-              if (result.isConfirmed) {
-                this.persona = data;
-                this.isUpdating = true;
-                this.showModal();
-              }
-            });
+            // Si estoy editando y el id es el mismo, no es error
+            if (this.persona.id && data.id === this.persona.id) {
+              this.guardarPersona(true); // Permite actualizar
+            } else {
+              // Si el id es diferente, sí es duplicado
+              Swal.fire({
+                icon: 'warning',
+                title: 'Persona ya existe',
+                text: 'Ya existe una persona cargada con este DNI.',
+              });
+            }
           } else {
-            this.guardarPersona(true); // Llama a guardarPersona con un flag para indicar que la verificación ya se hizo
+            this.guardarPersona(true); // No existe, permite crear
           }
         },
         (error) => {
@@ -264,30 +391,21 @@ this.verificarDuplicidadDNI(this.persona.dni || '');
     }
   
     actualizarPersona(): void {
-      if (this.persona.nombre && this.persona.apellido && this.persona.dni) {
-        // Asignar los archivos a la persona
-        this.persona.foto = this.archivosPersonas[0]?.base64 || '';
-        this.persona.foto1 = this.archivosPersonas[1]?.base64 || '';
-        this.persona.foto2 = this.archivosPersonas[2]?.base64 || '';
-        this.persona.foto_tipo = this.archivosPersonas[0]?.mimeType || '';
-        this.persona.foto_tipo1 = this.archivosPersonas[1]?.mimeType || '';
-        this.persona.foto_tipo2 = this.archivosPersonas[2]?.mimeType || '';
-        this.persona.foto_nombre = this.archivosPersonas[0]?.fileName || '';
-        this.persona.foto_nombre1 = this.archivosPersonas[1]?.fileName || '';
-        this.persona.foto_nombre2 = this.archivosPersonas[2]?.fileName || '';
-  
+      if (this.persona.nombre ) {
+ 
         console.log('Datos enviados para actualizar persona:', JSON.stringify(this.persona, null, 2)); // Agregar un log para ver los datos enviados
-        this.personaService.updatePersona(this.persona).subscribe(
-          (response) => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Persona actualizada',
-              text: 'Los datos de la persona han sido actualizados exitosamente.',
-            });
-            this.getPersonas();
-            this.resetFormulario();
-          },
-          (error) => {
+         this.personaService.updatePersona(this.persona).subscribe(
+              (response) => {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Persona actualizada',
+                  text: 'Los datos de la persona han sido actualizados exitosamente.',
+                });
+                this.getVictimarios(); // <-- Cambia aquí
+                this.resetFormulario();
+                this.cerrarModalPersona();
+              },
+              (error) => {
             console.error('Error al actualizar persona:', error);
             Swal.fire({
               icon: 'error',
@@ -300,7 +418,7 @@ this.verificarDuplicidadDNI(this.persona.dni || '');
         Swal.fire({
           icon: 'warning',
           title: 'Datos incompletos',
-          text: 'Por favor, complete todos los campos requeridos.',
+          text: 'El campo Nombre es obligatorio para actualizar.',
         });
       }
     }
@@ -320,14 +438,15 @@ this.verificarDuplicidadDNI(this.persona.dni || '');
 // Métodos para los botones de eliminar, editar y ver persona
 editarPersona(persona: Persona): void {
   this.persona = { ...persona };
-  this.cargarArchivosPersona(persona); // Cargar los archivos de la persona
+  this.asignarEdadAuxiliarPersona(persona);
+  this.cargarArchivosPersona(persona); // <--- ¡AQUÍ!
   this.isUpdating = true;
   this.showModal();
   if (persona.localidad_id !== null && persona.localidad_id !== undefined) {
-    this.cargarLocalidadPorId(+persona.localidad_id); // Cargar la localidad por ID
+    this.cargarLocalidadPorId(+persona.localidad_id);
   }
-
 }
+
   eliminarPersona(id: string): void {
     Swal.fire({
       title: '¿Estás seguro?',
@@ -354,16 +473,18 @@ editarPersona(persona: Persona): void {
 
   verPersona(persona: Persona): void {
     this.persona = { ...persona };
+    this.asignarEdadAuxiliarPersona(persona);
+    this.cargarArchivosPersona(persona); // <-- AGREGA ESTA LÍNEA
     this.isUpdating = false;
     this.showModal();
   }
-  
-   resetFormulario(): void {
+    resetFormulario(): void {
     this.isUpdating = false;
     this.persona = new Persona();
-     this.resetArchivosPersona(); // Restablecer los archivos de la persona
- 
-   }
+    this.persona_edad_valor = 0;
+    this.persona_edad_unidad = 'años';
+    this.resetArchivosPersona();
+  }
    showModal(): void {
     const modalElement = document.getElementById('modalPersona');
     if (modalElement) {
@@ -371,65 +492,276 @@ editarPersona(persona: Persona): void {
       modal.show();
     }
   }
-   
+   onExtranjeroChange(valor: boolean) {
+  if (!valor) {
+    this.persona.nacionalidad = '';
+    this.persona.provincia = '';
+  }
+}
+subirArchivosPersona(personaId: number): void {
+  this.archivosPersonas.forEach((archivo) => {
+    if (archivo.file) {
+      const formData = new FormData();
+      formData.append('archivo', archivo.file, archivo.fileName);
+      this.archivoPersonaService.subirArchivo(personaId, formData).subscribe({
+        next: (res) => console.log('Archivo subido:', res),
+        error: (err) => console.error('Error al subir archivo:', err)
+      });
+    }
+    // Ya no necesitas manejar base64 ni blobs aquí
+  });
+}
+cargarArchivosPersona(persona: Persona): void {
+  // Limpia el array antes de cargar nuevos archivos
+  this.archivosPersonas = [];
+  this.archivoPersonaService.listarArchivosPorPersona(persona.id).subscribe(
+    (archivos: ArchivoPersona[]) => { 
+      this.archivosPersonas = archivos.map(a => ({
+        file: null,
+        mimeType: a.tipo,
+        fileName: a.nombre,
+        url: `${environment.apiUrl.replace('/api', '')}/${a.ruta.replace(/\\/g, '/')}`
+      }));
+    }
+  );
+}
   ///////////////////////////////////////////////////////
-// Manejo de archivos para personas
-
-onFileSelectedPersona(event: any, index: number): void {
-  const file: File = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
+  
+   onFileSelectedPersona(event: any, index: number): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      // Libera el blob anterior si existe
+          if (typeof this.archivosPersonas[index].previewUrl === 'string') {
+        URL.revokeObjectURL(this.archivosPersonas[index].previewUrl!);
+      }
       this.archivosPersonas[index] = {
         file: file,
-        base64: e.target.result.split(',')[1],
         mimeType: file.type,
-        fileName: file.name
+        fileName: file.name,
+        previewUrl: URL.createObjectURL(file) // <-- Guarda la URL aquí
       };
-      console.log('Archivo cargado para persona:', this.archivosPersonas[index]);
-    };
-    reader.readAsDataURL(file);
+      this.cdr.detectChanges();
+    }
   }
-}
+  agregarArchivoPersona(): void {
+    if (this.archivosPersonas.length < 3) {
+      this.archivosPersonas.push({ file: null, mimeType: '', fileName: '' });
+    } else {
+      Swal.fire('Límite alcanzado', 'No puedes agregar más de 3 archivos.', 'warning');
+    }
+  }
+eliminarArchivoCargadoP(index: number): void {
+  const archivo = this.archivosPersonas[index];
 
-cargarArchivosPersona(persona: Persona): void {
-  this.archivosPersonas = [
-    { file: null, base64: persona.foto || '', mimeType: persona.foto_tipo || '', fileName: persona.foto_nombre || '' },
-    { file: null, base64: persona.foto1 || '', mimeType: persona.foto_tipo1 || '', fileName: persona.foto_nombre1 || '' },
-    { file: null, base64: persona.foto2 || '', mimeType: persona.foto_tipo2 || '', fileName: persona.foto_nombre2 || '' }
-  ];
-}
+  // Libera el blob local si existe
+  if (archivo.previewUrl) {
+    URL.revokeObjectURL(archivo.previewUrl);
+  }
 
-agregarArchivoPersona(): void {
-  if (this.archivosPersonas.length < 3) {
-    this.archivosPersonas.push({ file: null, base64: '', mimeType: '', fileName: '' });
+  if (archivo.url && archivo.fileName) {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'El archivo será eliminado permanentemente.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.archivoPersonaService.listarArchivosPorPersona(this.persona.id).subscribe(archivos => {
+          const archivoBD = archivos.find(a => a.nombre === archivo.fileName);
+          if (archivoBD) {
+            this.archivoPersonaService.borrarArchivo(archivoBD.id).subscribe(() => {
+              this.cargarArchivosPersona(this.persona); // Refresca la lista
+              Swal.fire('Eliminado', 'El archivo ha sido eliminado.', 'success');
+            });
+          }
+        });
+      }
+    });
   } else {
-    Swal.fire('Límite alcanzado', 'No puedes agregar más de 3 archivos.', 'warning');
+    // Si es un archivo nuevo (no subido aún), solo límpialo del array
+    this.archivosPersonas[index] = { file: null, mimeType: '', fileName: '' };
   }
 }
+  resetArchivosPersona(): void {
+    this.archivosPersonas = [
+      { file: null, mimeType: '', fileName: '' },
+      { file: null, mimeType: '', fileName: '' },
+      { file: null, mimeType: '', fileName: '' }
+    ];
+  }
+  abrirSistemaArchivos(): void {
+    console.log('Abriendo sistema de archivos...');
+    const index = this.obtenerIndiceDisponible();
+    if (index !== -1) {
+      const inputElement = document.getElementById('archivoPersona') as HTMLInputElement;
+      if (inputElement) {
+        console.log('Input de archivo encontrado, haciendo clic...');
+        inputElement.setAttribute('accept', '*/*');
+        inputElement.click();
+      } else {
+        console.error('Input de archivo no encontrado');
+      }
+    } else {
+      Swal.fire('Límite alcanzado', 'No puedes agregar más de 3 archivos ar.', 'warning');
+    }
+  }
+   
+  obtenerIndiceDisponible(): number {
+    // Permite hasta 3 archivos
+    if (this.archivosPersonas.length < 3) {
+      this.archivosPersonas.push({ file: null, mimeType: '', fileName: '' });
+      return this.archivosPersonas.length - 1;
+    }
+    // Busca un slot vacío
+    for (let i = 0; i < this.archivosPersonas.length; i++) {
+      if (!this.archivosPersonas[i].file && !this.archivosPersonas[i].url) {
+        return i;
+      }
+    }
+    return -1;
+  }
 
-eliminarArchivoPersona(index: number): void {
-  this.archivosPersonas.splice(index, 1);
+   // Otros atributos y métodos...
+  
+   abrirCamara(): void {
+    const index = this.obtenerIndiceDisponible();
+    if (index !== -1) {
+      // Mostrar el modal de la cámara
+      this.openModalCamara();
+  
+      // Listar los dispositivos de cámara disponibles
+      navigator.mediaDevices.enumerateDevices()
+        .then((devices) => {
+          this.availableCameras = devices.filter(device => device.kind === 'videoinput');
+          if (this.availableCameras.length > 0) {
+            // Iniciar con la primera cámara disponible
+            this.iniciarCamara(this.availableCameras[0].deviceId);
+          } else {
+            Swal.fire('Error', 'No se encontraron cámaras disponibles.', 'error');
+            this.cerrarCamara();
+          }
+        })
+        .catch((error) => {
+          console.error('Error al listar dispositivos:', error);
+          Swal.fire('Error', 'No se pudieron listar los dispositivos.', 'error');
+          this.cerrarCamara();
+        });
+    } else {
+      Swal.fire('Límite alcanzado', 'No puedes agregar más de 3 archivos.', 'warning');
+    }
+  }
+  // Método para iniciar la cámara con un dispositivo específico
+  // Método para alternar entre cámaras
+  alternarCamara(): void {
+    if (this.availableCameras.length > 1) {
+      this.currentCameraIndex = (this.currentCameraIndex + 1) % this.availableCameras.length;
+      const nextCamera = this.availableCameras[this.currentCameraIndex];
+      this.iniciarCamara(nextCamera.deviceId);
+    } else {
+      // Mostrar un mensaje si solo hay una cámara disponible
+      Swal.fire('Advertencia', 'Solo hay una cámara disponible.', 'warning');
+      this.cerrarCamara();
+    }
+  }
+  
+  // Método para iniciar la cámara con un dispositivo específico
+  iniciarCamara(deviceId: string): void {
+    if (this.stream) {
+      this.stream.getTracks().forEach(track => track.stop()); // Detener la cámara actual
+    }
+  
+    const constraints = {
+      video: {
+        deviceId: deviceId ? { ideal: deviceId } : undefined,
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    };
+  
+    navigator.mediaDevices.getUserMedia(constraints)
+      .then((stream) => {
+        this.stream = stream;
+  
+        // Asignar el stream al elemento de video
+        if (this.videoElementRef) {
+          this.videoElementRef.srcObject = stream;
+          this.videoElementRef.play();
+        }
+      })
+      .catch((error) => {
+        console.error('Error al acceder a la cámara:', error);
+        Swal.fire('No puedes invertir la camara', 'Solo hay una cámara disponible.', 'warning');
+        this.cerrarCamara();
+      });
+  }
+  cerrarCamara(): void {
+    if (this.stream) {
+      this.stream.getTracks().forEach(track => track.stop());
+    }
+    this.mostrarCamara = false;
+    const modalElement = document.getElementById('camera-modal');
+    if (modalElement) {
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      if (modal) {
+        modal.hide();
+      }
+    }
+  }
+  openModalCamara() {
+    const modalElement = document.getElementById('camera-modal');
+    if (modalElement) {
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+    }
+  }
+   tomarFoto(): void {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+  
+    if (context && this.videoElementRef) {
+      canvas.width = this.videoElementRef.videoWidth;
+      canvas.height = this.videoElementRef.videoHeight;
+      context.drawImage(this.videoElementRef, 0, 0, canvas.width, canvas.height);
+  
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const index = this.obtenerIndiceDisponible();
+          if (index !== -1) {
+            const file = new File([blob], `foto_${index + 1}.png`, { type: 'image/png' });
+            this.archivosPersonas[index] = {
+              file: file,
+              mimeType: 'image/png',
+              fileName: `foto_${index + 1}.png`
+            };
+            this.cerrarCamara();
+          } else {
+            Swal.fire('Límite alcanzado', 'No puedes agregar más de 3 archivos.', 'warning');
+          }
+        }
+      }, 'image/png');
+    }
+  }
+  @ViewChild('videoElement', { static: false }) set videoElement(element: ElementRef<HTMLVideoElement>) {
+    if (element) {
+      this.videoElementRef = element.nativeElement;
+    }
+  }
+getFilePreviewUrl(file: File | null): string | null {
+  return file ? URL.createObjectURL(file) : null;
 }
-
-getFileUrlPersona(base64: string, mimeType: string): SafeUrl {
-  const url = `data:${mimeType};base64,${base64}`;
-  return this.domSanitizer.bypassSecurityTrustUrl(url);
-}
-
-getArchivosPersona(persona: Persona): { base64: string; mimeType: string; fileName: string }[] {
-  return [
-    { base64: persona.foto || '', mimeType: persona.foto_tipo || 'application/octet-stream', fileName: persona.foto_nombre || 'Foto 1' },
-    { base64: persona.foto1 || '', mimeType: persona.foto_tipo1 || 'application/octet-stream', fileName: persona.foto_nombre1 || 'Foto 2' },
-    { base64: persona.foto2 || '', mimeType: persona.foto_tipo2 || 'application/octet-stream', fileName: persona.foto_nombre2 || 'Foto 3' }
-  ];
-}
-
-resetArchivosPersona(): void {
-  this.archivosPersonas = [
-    { file: null, base64: '', mimeType: '', fileName: '' },
-    { file: null, base64: '', mimeType: '', fileName: '' },
-    { file: null, base64: '', mimeType: '', fileName: '' }
-  ];
-}
+  limpiarDni(event: any) {
+    this.persona.dni = event.target.value.replace(/[^0-9]/g, '');
+  }
+   ampliarImagen(event: any): void {
+    const img = event.target;
+    if (img.style.maxWidth === '600px') {
+      img.style.maxWidth = '100%';
+      img.style.maxHeight = '100%';
+    } else {
+      img.style.maxWidth = '600px';
+      img.style.maxHeight = '600px';
+    }
+  }
 }

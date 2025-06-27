@@ -59,9 +59,7 @@ export class PersonaService {
         ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       }),
     };
-    return this._http.get<Persona>(this.hostBase + '/dni/' + dni, httpOptions).pipe(
-      tap(data => this.personaByDniCache[dni] = data)
-    );
+    return this._http.get<Persona>(this.hostBase + '/dni/' + dni, httpOptions)
   }
 
   // Crear una nueva persona
@@ -91,9 +89,7 @@ export class PersonaService {
         ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       }),
     };
-    return this._http.get<Persona>(this.hostBase + '/' + id, httpOptions).pipe(
-      tap(data => this.personaByIdCache[id] = data)
-    );
+    return this._http.get<Persona>(this.hostBase + '/' + id, httpOptions)
   }
 
   // Editar una persona
@@ -127,5 +123,26 @@ export class PersonaService {
     return this._http.delete(this.hostBase + '/' + id, httpOptions).pipe(
       tap(() => this.clearCache())
     );
+  }
+    getPersonasResidentes(): Observable<Persona[]> {
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this._http.get<Persona[]>(this.hostBase + '/residentes', httpOptions);
+  }
+  
+  getPersonasExtranjeras(): Observable<Persona[]> {
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this._http.get<Persona[]>(this.hostBase + '/extranjeras', httpOptions);
   }
 }

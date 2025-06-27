@@ -17,6 +17,7 @@ perfilUsuarioActual: string = '';
   usuariosFiltrados: any[] = []; // Array para almacenar los usuarios filtrados
   filtroEstado: string = ''; // Variable para el filtro de estado
   buscarLegajo: string = ''; // Variable para el filtro por legajo
+  filtroPerfil: string = ''; // Variable para el filtro por perfil
 
   constructor(private authService: AuthenticateService) {}
 
@@ -26,16 +27,16 @@ perfilUsuarioActual: string = '';
     this.authService.getUserInfo().subscribe(userInfo => {
       this.perfilUsuarioActual = userInfo.perfil;
     });
-    this.loadUsuarios();
+    this.loadAdministradores(); // Cambia aquí
   }
-  
-  loadUsuarios(): void {
-    this.authService.firestore.collection('usuarios').valueChanges().subscribe((firestoreUsuarios) => {
-      console.log('Usuarios Firestore:', firestoreUsuarios);  // Verifica si los usuarios son correctos
-      this.usuarios = firestoreUsuarios;
-      this.filtrarUsuarios(); // Aplicar los filtros iniciales
+
+  // Cargar solo administradores por defecto
+  loadAdministradores(): void {
+    this.authService.getUsuariosAdministradores().subscribe((usuarios) => {
+      this.usuarios = usuarios;
+      this.usuariosFiltrados = usuarios;
     }, (error) => {
-      console.error('Error al cargar los usuarios:', error);
+      console.error('Error al cargar administradores:', error);
     });
   }
   
@@ -57,7 +58,7 @@ perfilUsuarioActual: string = '';
             'El usuario ha sido eliminado.',
             'success'
           );
-          this.loadUsuarios(); // Volver a cargar la lista de usuarios
+          this.loadAdministradores(); // Volver a cargar la lista de usuarios
         }, (error) => {
           console.error('Error al eliminar el usuario: ', error);
           Swal.fire(
@@ -69,24 +70,53 @@ perfilUsuarioActual: string = '';
       }
     });
   }
-
+   // Cargar todos los usuarios solo si el filtro es "Todos"
+  loadTodosUsuarios(): void {
+    this.authService.getAllUsuarios().subscribe((usuarios) => {
+      this.usuarios = usuarios;
+      this.usuariosFiltrados = usuarios;
+    }, (error) => {
+      console.error('Error al cargar todos los usuarios:', error);
+    });
+  }
+    loadUsuarios(): void {
+  this.authService.firestore.collection('usuarios').valueChanges().subscribe((firestoreUsuarios) => {
+    console.log('Usuarios Firestore:', firestoreUsuarios);  // Verifica si los usuarios son correctos
+    this.usuarios = firestoreUsuarios;
+    this.filtrarUsuarios(); // Aplicar los filtros iniciales
+  }, (error) => {
+    console.error('Error al cargar los usuarios:', error);
+  });
+}
+  filtrarPorPerfil(): void {
+    if (!this.filtroPerfil) {
+      // Si el filtro es "Todos", cargar todos los usuarios
+      this.loadUsuarios();
+    } else {
+      // Si es otro perfil, filtrar localmente
+      this.usuariosFiltrados = this.usuarios.filter(usuario =>
+        usuario.perfil === this.filtroPerfil
+      );
+    }
+  }
   // Método para filtrar usuarios
+   // Método para filtrar usuarios
   filtrarUsuarios(): void {
     let usuariosFiltrados = this.usuarios;
-
+  
     // Filtrar por estado
     if (this.filtroEstado !== '') {
       const estadoFiltro = this.filtroEstado === 'activo';
       usuariosFiltrados = usuariosFiltrados.filter(usuario => usuario.estado === estadoFiltro);
     }
-
+  
     // Filtrar por legajo
     if (this.buscarLegajo !== '') {
       usuariosFiltrados = usuariosFiltrados.filter(usuario =>
-        usuario.legajo.toLowerCase().includes(this.buscarLegajo.toLowerCase())
+        String(usuario.legajo).toLowerCase().includes(this.buscarLegajo.toLowerCase())
       );
     }
-
+  
     this.usuariosFiltrados = usuariosFiltrados;
   }
 
