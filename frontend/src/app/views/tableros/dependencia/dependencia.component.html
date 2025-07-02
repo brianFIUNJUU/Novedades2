@@ -1,0 +1,73 @@
+
+ 
+
+  <!-- Modal para Dependencia -->
+  <div class="modal fade" id="modalDependencia" tabindex="-1" aria-labelledby="modalDependenciaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header custom-modal-header p-2">
+          <h5 class="modal-title mb-0" id="modalDependenciaLabel">Datos de la Dependencia:</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="guardarDependencia()">
+            <div class="form-group">
+              <label for="nombre">Nombre</label>
+              <input type="text" id="nombre" [(ngModel)]="selectedDependencia.juridiccion" name="nombre" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label for="unidad_regional">Unidad Regional</label>
+              <select id="unidad_regional" [(ngModel)]="selectedDependencia.unidad_regional_id" name="unidad_regional" class="form-control form-select" required>
+                <option value="" disabled selected>Selecciona una Unidad Regional</option>
+                <option *ngFor="let unidad of unidadesRegionales" [value]="unidad.id">
+                  {{ unidad.unidad_regional }}
+                </option>
+              </select>
+            </div>
+            <div class="form-group text-center mt-4">
+              <button type="submit" class="btn btn-primary">{{ selectedDependencia.id ? 'Actualizar' : 'Guardar' }}</button>
+              <button type="button" class="btn btn-secondary mx-2" data-bs-dismiss="modal" (click)="resetForm()">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+  <div class="card text-white custom-card">
+    <div class="card-body text-center p-2">
+      <h6 class="card-title font-weight-bold mb-2">DEPENDENCIAS</h6>
+    </div>
+  </div>
+  <br/>
+  <!-- Botón para abrir el modal de Dependenciaa -->
+  <div *ngIf="userType === 'administrador'|| userType === 'usuarioDOP'" class="mb-2">
+    <button type="button" class="btn btn-primary" (click)="showModal()">
+      Agregar Dependencia
+    </button>
+  </div>
+  
+  <div class="table-responsive">
+    <table class="table table-bordered border-primary table-sm">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Jurisdicción</th>
+          <th>Unidad Regional</th>
+          <th class="text-small" *ngIf="userType === 'administrador'">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let dep of dependencias">
+          <td>{{ dep.id}}</td>
+          <td>{{ dep.juridiccion }}</td>
+          <td>{{ dep.unidad_regional_nombre }}</td>
+          <td class="text-small" *ngIf="userType === 'administrador'|| userType === 'usuarioDOP'">
+            <button class="btn btn-primary" (click)="editarDependencia(dep)">Editar</button>
+            <button class="btn btn-danger" (click)="eliminarDependencia(dep.id)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>

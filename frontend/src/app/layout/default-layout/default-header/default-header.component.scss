@@ -1,0 +1,86 @@
+/* Asegura que el fondo azul se aplique a todo el contenedor */
+.full-width-container {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  background-color: #081a2e !important; /* Fondo azul */
+  color: #fff; /* Texto blanco por defecto */
+  border: none !important; /* Eliminar cualquier borde */
+  box-shadow: none !important; /* Eliminar cualquier sombra */
+}
+.custom-link {
+  text-decoration: none; /* Quita el subrayado por defecto */
+  transition: transform 0.2s ease, color 0.2s ease; /* Para el efecto de agrandar y color */
+  color: #fdfdfd; /* Cambia el color a un tono más claro al pasar el cursor (opcional) */
+
+}
+
+.custom-link:hover {
+  transform: scale(1.1); /* Agranda el enlace al 10% cuando se pase el cursor */
+  color: #00d7fd; /* Cambia el color a un tono más claro al pasar el cursor (opcional) */
+}
+
+/* Estilo de la clase tu (el título) */
+.tu {
+  justify-items: center;
+  align-items: center;
+  margin-top: auto;
+  margin-bottom: auto;
+  padding-top: auto;
+  color: #fff; /* Texto blanco para el título */
+}
+.btn{
+ 
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 10px 10px;
+  cursor: pointer;
+  margin-top: 10px;
+ 
+}
+/* Estilo para los enlaces dentro del menú de usuario */
+c-dropdownItem {
+  color: #fff; /* Texto blanco para los enlaces */
+}
+
+c-dropdownItem:hover {
+  background-color: #081a2e; /* Fondo azul al pasar el ratón */
+}
+
+/* Estilo para los elementos del menú de configuración */
+c-dropdownHeader, c-dropdownMenu {
+  color: #fff; /* Asegura que los encabezados y los menús tengan texto blanco */
+}
+
+.c-header-nav h5 {
+  color: #fff; /* Asegura que el texto dentro del <h5> también sea blanco */
+  padding: 20px 20px;
+}
+
+/* Estilo para los iconos dentro de los botones */
+svg {
+  fill: #fff; /* Cambia el color de los iconos a blanco */
+}
+/* Eliminar bordes predeterminados en componentes CoreUI */
+.c-header-nav, .btn, .c-container, .full-width-container {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Media Queries para pantallas más pequeñas */
+@media (max-width: 600px) {
+  .tu {
+    font-size: 20px; /* Cambia el tamaño de fuente para pantallas pequeñas */
+    margin-top: 0; /* Ajusta el margen superior */
+    margin-bottom: 0; /* Ajusta el margen inferior */
+    padding-top: 0; /* Ajusta el relleno superior */
+  }
+  c-dropdown{
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 400px) {
+ 
+}

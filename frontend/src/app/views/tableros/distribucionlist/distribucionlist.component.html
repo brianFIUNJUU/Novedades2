@@ -1,0 +1,193 @@
+<div class="card text-white custom-card">
+  <div class="card-body text-center p-2">
+    <h6 class="card-title font-weight-bold mb-0">LISTADO DE OPERATIVOS DEL DOP</h6>
+  </div>
+</div>
+  <br>
+<div class="row">
+ 
+
+       <!-- Agrega esto arriba de la tabla, por ejemplo después del título -->
+    <!-- Selector de tipo de filtro -->
+        <div class="col-md-3" *ngIf="mostrarFiltrosAvanzados">
+        <div class="row align-items-end">
+          <div class="col-auto">
+            <label for="tipoFiltro" class="form-label mb-0 me-2">Operativos:</label>
+          </div>
+          <div class="col-auto">
+            <select id="tipoFiltro" class="form-select" [(ngModel)]="tipoFiltro" (change)="onTipoFiltroChange()">
+              <option value="ultimos7">Últimos 7 días</option>
+              <option value="todos">Todos</option>
+              <option value="unidad">Unidad Regional</option>
+              <!-- Aquí puedes agregar más tipos de filtro en el futuro -->
+            </select>
+          </div>
+        </div>
+      </div>
+      <!-- Filtros por unidad regional y fechas, solo si el tipo es "unidad" -->
+      <ng-container *ngIf="tipoFiltro === 'unidad'">
+        <div class="col-md-3">
+          <label for="filtroUnidad" class="form-label">Filtrar por Unidad Regional</label>
+          <select id="filtroUnidad" class="form-select" [(ngModel)]="unidadFiltro" (change)="onUnidadFiltroChange()">
+            <option value="">Seleccionar...</option>
+            <option *ngFor="let ur of unidadesRegionales" [value]="ur">{{ ur }}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="fechaInicio" class="form-label">Fecha desde</label>
+          <input id="fechaInicio" type="date" class="form-control" [(ngModel)]="fechaInicioFiltro">
+        </div>
+        <div class="col-md-3">
+          <label for="fechaFin" class="form-label">Fecha hasta</label>
+          <input id="fechaFin" type="date" class="form-control" [(ngModel)]="fechaFinFiltro">
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <button class="btn btn-primary w-100" (click)="filtrarPorUnidadYFecha()">Filtrar</button>
+        </div>
+      </ng-container>
+            <!-- Botón para exportar a Excel -->
+        <div class="col-md-2" *ngIf="mostrarFiltrosAvanzados">
+          <button class="btn btn-success w-100" (click)="exportarExcel()">
+            <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
+          </button>
+        </div>
+</div>    
+ 
+    <br>
+    <div class="table-responsive">
+          <table class="table table-bordered border-primary table-sm table-custom">
+
+        <thead>
+          <tr>
+            <th class="text-center text-small">Id</th>
+            <th class="text-center text-small">Jurisdicción</th>
+            <th class="text-center text-small">Operativo</th>
+            <th class="text-center text-small">Desde/Hasta</th>
+            <th class="text-center text-small">Turno</th> 
+            <th class="text-center text-small">Afectados</th>
+            <th class="text-center text-small">Mapa</th>
+            <th class="text-center text-small">Novedades</th>  <!-- Agregar este campo para mostrar el botón de visualizar mapa -->
+            <th class="text-center text-small" *ngIf="mostrarFiltrosAvanzados">Acciones</th>
+           
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let operativo of operativosFiltrados">
+            <td class="text-center text-small">{{ operativo.id }}</td>
+            <td class="text-center text-small">U.R.n°:{{ operativo.unidades_regionales }}</td>
+            <td class="text-center text-small">{{ operativo.nombre_operativo }}</td>
+            <td class="text-center text-small">{{ operativo.fecha_desde }}/{{ operativo.fecha_hasta }}</td>
+            <td class="text-center text-small">{{ operativo.turno }}</td>  
+            <td class="text-center text-small">{{ operativo.cant_total_personal }} efectivos</td>
+               <!-- <td class="text-small">{{ operativo.jefeSupervisor }}</td>
+              <td class="text-small">{{ operativo.fuerzaEfectiva }}</td> -->
+              
+              <td class="text-center text-small">
+                <button class="btn btn-secondary btn-sm text-small" (click)="abrirModalMapa(operativo)">Visualizar</button>
+              </td>
+              <td class="text-center text-small">
+                  <button type="button" class="btn btn-primary btn-sm" title="Agregar Novedad" (click)="navegarAFormularioNovedades()" ><i class="bi bi-plus"></i></button>
+                  <!-- boton para agregar novedades -->
+              <button type="button" class="btn btn-primary btn-sm" title="Ver listado de novedades" (click)="openModalNovedades(operativo)">
+                    <i class="bi bi-list"></i>
+              </button>
+              </td>
+            <td class="text-center text-small"*ngIf="mostrarFiltrosAvanzados">
+              <button class="btn btn-warning btn-sm" (click)="editarOperativo(operativo.id)" title="Editar">
+                <i class="bi bi-pencil"></i>
+              </button>
+                            <button class="btn btn-danger btn-sm" title="Eliminar" (click)="eliminarOperativoCompleto(operativo.id)">
+                <i class="bi bi-x"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+   
+     <!-- Modal Alternativo para Novedades -->
+    <div class="modal fade" id="novedadesModal" tabindex="-1" aria-labelledby="novedadesModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header custom-modal-header2">
+            <h6 class="modal-title mb-0" id="novedadesModalLabel">Listado de Novedades del Operativo</h6>
+            <button type="button" class="btn-close btn-close-red" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-bordered border-primary table-striped text-small">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>U.R. N°</th>
+                    <th>Cuadrante</th>
+                    <th>Fecha</th>
+                    <th>Horario</th>
+                    <th>Hecho</th>
+                    <th>Personal Autor</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                                 <tr *ngFor="let novedad of novedades">
+                    <td>{{ novedad.id }}</td>
+                    <td>{{ novedad.unidad_regional_nombre }}</td>
+                    <td>{{ novedad.cuadrante_nombre }}</td>
+                    <td>{{ novedad.fecha }}</td>
+                    <td>{{ novedad.horario }}</td>
+                    <td>{{ novedad.descripcion_hecho }}</td>
+                    <td>{{ novedad.personal_autor_nombre }}</td>
+                    <td class="text-small">
+                      <button 
+                        *ngIf="isEditable(novedad) && userInfo.perfil !== 'usuarioDOP'" 
+                        (click)="navigateToUpdateForm(novedad.id.toString())" 
+                        class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+
+                      <button
+                        *ngIf="isEditable(novedad) && userInfo.perfil !== 'usuarioDOP'"
+                        (click)="deleteNovedad(novedad.id.toString())"
+                        class="btn btn-danger btn-sm align-middle">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                      <button  (click)="verNovedad(novedad.id.toString())" class="btn btn-success btn-sm">
+                        <i class="bi bi-check2">ver</i> <!-- Icono de verificación -->
+                      </button>
+                      <!-- Otros botones que no dependan de isEditable pueden ir aquí -->
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  <!-- Modal para visualizar el mapa -->
+  <div class="modal fade" id="modalMapa" tabindex="-1" aria-labelledby="modalMapaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+      <div class="modal-content">
+        <div class="modal-header custom-modal-header2 p-2 w-100 d-flex justify-content-center">
+           <h5 class="modal-title mb-0" id="modalMapaLabel">Mapa del Operativo</h5> 
+          <button type="button"  class="btn-close btn-close-red position-absolute end-0 me-2" (click)="cerrarModal('modalMapa')" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+        <div class="row">   
+          <div class="col-md-3">
+            <button type="button" class="btn btn-success" (click)="descargarImagen()">Descargar Imagen</button>
+          </div>
+
+        </div>
+          <div id="mapaOperativo" style="width:2100px; height:1080px;"></div>    
+          </div>
+    </div>
+  </div>
+  
+  
+  

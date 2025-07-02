@@ -1,0 +1,19 @@
+
+# Excluir todos los node_modules
+frontend/node_modules/
+frontend/src/ssl
+backend/node_modules/
+backend/config/
+backend/ssl
+frontend/.angular/
+# Otros archivos o carpetas que desees excluir
+.vscode/
+.idea/
+*.log
+*.env
+*.zip
+# Ignorar archivos de configuración de Google Cloud
+*.json
+*.key
+.env
+.pem

@@ -1,0 +1,383 @@
+<div class="container-fluid p-0"> 
+<div class="card text-white custom-card">
+  <div class="card-body text-center p-2">
+    <h6 class="card-title font-weight-bold mb-0">LISTADO DE NOVEDADES</h6>
+  </div>
+</div>
+<div class="row g-2">
+  <!-- admin y dop -->
+  <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP'" class="col-12 col-md-3 d-flex align-items-center gap-2">
+    <label for="filtroAdmin" class="form-label mb-0">Novedades:</label>
+    <select id="filtroAdmin" class="form-select form-select-sm" (change)="onFiltroAdminChange($event)">
+      <option value="hoy">Del Día</option>
+      <option value="todas">Todas</option>
+      <option value="fecha">Por Fecha</option>
+      <option value="porLegajo">Por legajo</option>
+      <option value="porId">Por N° ID</option>
+      <option value="porUnidad">Por U.R.</option>
+    </select>
+  </div>
+  <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP'" class="col-12 col-md-3 d-flex align-items-center gap-2">
+    <!-- byfecha -->
+    <div *ngIf="mostrarFiltroFechaAdmin" class="d-flex flex-column w-100">
+      <div class="d-flex gap-2">
+        <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroAdminInicio" placeholder="Desde" />
+        <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroAdminFin" placeholder="Hasta" />
+      </div>
+      <button class="btn btn-primary btn-sm mt-1" (click)="filtrarNovedadesPorFechaAdmin()">Filtrar</button>
+    </div>
+    <!-- bylegajo -->
+    <div *ngIf="mostrarFiltroLegajoAdmin" class="d-flex align-items-center gap-2 w-100">
+      <input type="text" class="form-control form-control-sm" [(ngModel)]="legajoFiltro" placeholder="Ingrese legajo" />
+      <button class="btn btn-primary btn-sm" (click)="filtrarporLegajoAdmin()">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+    <!-- byid -->
+    <div *ngIf="mostrarFiltroIdAdmin" class="d-flex align-items-center gap-2 w-100">
+      <input type="text" class="form-control form-control-sm" [(ngModel)]="idFiltro" placeholder="Ingrese N° ID" />
+      <button class="btn btn-primary btn-sm" (click)="filtrarporIdAdmin()">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+    <!-- by unidad regional -->
+    <div *ngIf="mostrarFiltroUnidadAdmin" class="d-flex align-items-center gap-2 w-100">
+      <select class="form-select form-select-sm" [(ngModel)]="unidadFiltro" (change)="filtrarporUnidadAdmin()">
+        <option value="" disabled selected>Seleccione Unid..</option>
+        <option value="1">Unidad Regional 1</option>
+        <option value="2">Unidad Regional 2</option>
+        <option value="3">Unidad Regional 3</option>
+        <option value="4">Unidad Regional 4</option>
+        <option value="5">Unidad Regional 5</option>
+        <option value="6">Unidad Regional 6</option>
+        <option value="7">Unidad Regional 7</option>
+        <option value="8">Unidad Regional 8</option>
+      </select>
+    </div>
+  </div>
+  <!--usuario Unidad  -->
+  <div *ngIf="userInfo.perfil && userInfo.perfil.startsWith('EncargadoUnidad')" class="col-12 col-md-3 d-flex align-items-center gap-2">
+    <label class="form-label mb-0">Novedades:</label>
+    <select class="form-select form-select-sm" (change)="onFiltroUnidadChange($event)">
+      <option value="hoy">Del Día</option>
+      <option value="todas">Todas</option>
+      <option value="fecha">Por Fecha</option>
+    </select>
+  </div>
+  <div *ngIf="mostrarFiltroFechaUnid" class="col-12 col-md-3">
+    <div class="d-flex flex-column gap-2">
+      <div class="d-flex gap-2">
+        <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUnidadInicio" placeholder="Desde" />
+        <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUnidadFin" placeholder="Hasta" />
+      </div>
+      <button class="btn btn-primary btn-sm" (click)="filtrarNovedadesUnidadPorFecha()">Filtrar</button>
+    </div>
+  </div>
+  <!-- usuario -->
+  <div *ngIf="userInfo.perfil === 'usuario'" class="col-12 col-md-3 d-flex align-items-center gap-2">
+    <label for="filtroUsuario" class="form-label mb-0">Novedades:</label>
+    <select id="filtroUsuario" class="form-select form-select-sm" (change)="onFiltroUsuarioChange($event)">
+      <option value="hoy">Del Día</option>
+      <option value="todas">Todas</option>
+      <option value="fecha">Por Fecha</option>
+    </select>
+  </div>
+  <div *ngIf="userInfo.perfil === 'usuario' && mostrarFiltroFechaUsuario" class="col-12 col-md-4 d-flex align-items-center gap-2">
+    <div class="d-flex gap-2 w-100">
+      <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUsuarioInicio" placeholder="Desde" />
+      <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUsuarioFin" placeholder="Hasta" />
+    </div>
+    <button class="btn btn-primary btn-sm mt-1" (click)="filtrarMisNovedadesPorFecha()">Filtrar</button>
+  </div>
+  <!-- bycoloro -->
+  <div class="col-12 col-md-2 d-flex align-items-center">
+    <label for="colorFilter" class="me-2">Filtrar color:</label>
+    <select id="colorFilter" class="form-select form-select-sm w-100" (change)="setColorFilter($event)">
+      <option value="">Todos</option>
+      <option value="R">Rojo</option>
+      <option value="A">Amarillo</option>
+      <option value="V">Verde</option>
+    </select>
+  </div>
+  <!-- btnExcel -->
+   <div class="col-12 col-md-2" style="padding-top: 10px;">
+    <button (click)="exportToExcel()" class="btn btn-success btn-sm w-100">Exportar a Excel</button>
+  </div>
+  <div class="col-12 col-md-2" style="padding-top: 10px;">
+    <button class="btn btn-primary btn-sm w-100 text-small" (click)="abrirModalMapa()">Ver Mapa</button>
+  </div>
+</div>
+
+
+<div class="table-responsive" style="overflow: auto; max-height: 56vh;"> <!-- Menos altura -->
+    <table class="table table-bordered border-primary table-sm table-custom">
+    <thead>
+      <tr>
+        <th class=" text-center text-small">ID</th>
+        <th class=" text-center text-small">U.R. N°</th>
+        <th class=" text-center text-small">Cuadrante</th>
+        <th class=" text-center text-small">Fecha</th>
+        <th class=" text-center text-small">Horario</th>
+        <th class=" text-center text-small">Hecho</th>
+        <!-- <th class="text-small">Involucrado</th> -->
+        <th class=" text-center text-small">Personal Autor</th>
+        <th class=" text-center text-small">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let novedad of filteredNovedades" [ngClass]="getColorClass(novedad.codigo)">
+        <td class=" text-center text-small">{{ novedad.id }}</td>
+        <td class=" text-center text-small">{{ novedad.unidad_regional_nombre }}</td>
+        <td class=" text-center text-small">{{ novedad.cuadrante_nombre }}</td>
+        <td class=" text-center text-small">{{ novedad.fecha }}</td>
+        <td class=" text-center text-small">{{ novedad.horario }}</td>
+        <td class="text-center text-small text-truncate-custom">
+          {{ novedad.descripcion_hecho }}
+        </td>
+      
+        <td class=" text-center text-small">{{novedad.personal_autor_nombre}}</td>
+        <td class=" text-center text-small">
+            <button 
+            *ngIf="isEditable(novedad) && userInfo.perfil !== 'usuarioDOP'" 
+            (click)="navigateToUpdateForm(novedad.id.toString())" 
+            class="btn btn-warning btn-sm">
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button 
+            *ngIf="userInfo.perfil !== 'usuarioDOP'" 
+            (click)="openDocumentOptions(novedad)" 
+            class="btn btn-primary btn-sm">
+            <i class="bi bi-file-earmark-text"></i>
+          </button>
+          <button
+            *ngIf="isEditable(novedad) && userInfo.perfil !== 'usuarioDOP'"
+            (click)="deleteNovedad(novedad.id.toString())"
+            class="btn btn-danger btn-sm align-middle">
+            <i class="bi bi-x-lg"></i>
+          </button>
+          <button  (click)="verNovedad(novedad.id.toString())" class="btn btn-success btn-sm">
+            <i class="bi bi-check2">ver</i> <!-- Icono de verificación -->
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<!-- Modal para visualizar el mapa -->
+<div class="modal fade" id="modalMapa" tabindex="-1" aria-labelledby="modalMapaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header custom-modal-header2 p-2 w-100 d-flex justify-content-center">
+        <h5 class="modal-title mb-0" id="modalMapaLabel">Novedades de incidencias policiales</h5>
+        <button type="button"  class="btn-close btn-close-red position-absolute end-0 me-2" (click)="cerrarModal('modalMapa')" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Filtro de Fecha -->
+         <div class="row">
+         
+          <div class="col-md-3 d-flex align-items-center gap-2">
+            <label for="fechaDesde">Desde:</label>
+            <input type="date" id="fechaDesde" class="form-control" (change)="filtrarPorFecha()" />
+          
+            <label for="fechaHasta">Hasta:</label>
+            <input type="date" id="fechaHasta" class="form-control" (change)="filtrarPorFecha()" />
+          </div>
+          
+        
+          
+        <div class="col-md-3">
+          <button type="button" class="btn btn-success" (click)="descargarImagen()">Descargar Imagen</button>
+        </div>
+        </div>
+        <!-- Mapa -->
+        <div id="mapaOperativo" style="height: 100vh; width: 100%;"></div>
+      </div>
+     
+    </div>
+  </div>
+</div>
+
+<!-- Modal para editar/crear acta -->
+<div class="modal fade" id="actaModal" tabindex="-1" aria-labelledby="actaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header custom-modal-header2">
+        <h5 class="modal-title" id="actaModalLabel">Generar Acta de Procedimiento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Formulario de la novedad -->
+        <form [formGroup]="actaForm">
+          <div class="row">
+            <div class="col-md-3 mb-3">
+
+                <label for="fechaActa" class="form-label">Fecha de emisión de acta</label>
+                <input type="date" id="fechaActa" formControlName="fechaActa" class="form-control">        
+                  </div>
+            <div class="col-md-3 mb-3">
+                <label for="horaActa" class="form-label">Hora de emisión de acta</label>
+<input type="time" id="horaActa" formControlName="horaActa" class="form-control">            </div>
+                        <div class="col-md-3">
+                <label for="departamento">Departamento:*</label>
+                <select id="departamento" class="form-select"
+                        formControlName="departamento"
+                        (change)="onDepartamentoChange(actaForm.get('departamento')?.value)">
+                  <option value="">-- Seleccionar --</option>
+                  <option *ngFor="let departamento of departamentos" [value]="departamento.nombre">
+                    {{ departamento.nombre }}
+                  </option>
+                </select>
+                <div *ngIf="actaForm.get('departamento')?.invalid && actaForm.get('departamento')?.touched"
+                    class="text-danger mt-1">
+                  Falta cargar el departamento.
+                </div>
+              </div>
+
+              <!-- LOCALIDAD -->
+              <div class="col-md-3">
+                <label for="localidad">Localidad:*</label>
+                <select id="localidad" class="form-select"
+                        formControlName="localidad"
+                        (change)="onLocalidadChange(actaForm.get('localidad')?.value)">
+                  <option value="">-- Seleccionar --</option>
+                  <option *ngFor="let localidad of localidades" [value]="localidad.nombre">
+                    {{ localidad.nombre }}
+                  </option>
+                </select>
+                <div *ngIf="actaForm.get('localidad')?.invalid && actaForm.get('localidad')?.touched"
+                    class="text-danger mt-1">
+                  Falta cargar la localidad.
+                </div>
+              </div>
+          </div>
+          
+       
+          
+     
+
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="direccion" class="form-label">Direccion</label>
+              <input type="text" id="direccion" formControlName="direccion" class="form-control">
+            </div> 
+          </div>
+          
+          <div class="table-responsive" style="overflow: auto; max-height: 56vh;"> <!-- Menos altura -->
+            <table class="table table-bordered border-primary table-sm table-custom">
+            <thead>
+              <tr>
+                <th class="text-small">Nombre y Apellido</th>
+                <th class="text-small">DNI</th>
+                <th class="text-small">Sexo</th>
+                <th class="text-small">Departamento</th>
+                <th class="text-small">Localidad</th>
+                <th class="text-small">Domicilio</th>
+                <th class="text-small">Edad</th>
+                <th class="text-small">estado</th>
+         
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let persona of personasParaActa">
+                <td class="text-small">{{ persona.nombre }} {{ persona.apellido }}</td>
+                <td class="text-small">{{ persona.dni }}</td>
+                <td class="text-small">{{ persona.sexo }}</td>
+                <td class="text-small">{{ persona.departamento_id}}</td>
+                <td class="text-small">{{ persona.localidad_id }}</td>
+                <td class="text-small">{{ persona.domicilio }}</td>
+                <td class="text-small">{{ persona.edad }}</td>
+                <td class="text-small">{{ persona.estado}}</td>
+    
+              </tr>
+              
+            </tbody>
+          </table>
+        </div>
+       
+          <div class="col-md-12 mb-3">
+            <label for="relato" class="form-label">Relato</label>
+            <textarea id="relato" formControlName="relato" class="form-control"></textarea> 
+          </div>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary" (click)="generatePDF()">Generar PDF</button>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- Modal para editar/crear acta -->
+<div class="modal fade" id="actaSecModal" tabindex="-1" aria-labelledby="actaSecModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="actaModalSecLabel">Generar Acta de Secuestro</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Formulario de la novedad -->
+        <form [formGroup]="actaSecForm">
+          <div class="row">
+                      <div class="col-md-3 mb-3">
+                          <label for="fechaActa" class="form-label">Fecha de emisión de acta</label>
+                          <input type="date" id="fechaActa" formControlName="fechaActa" class="form-control">
+                      </div>
+                      <div class="col-md-3 mb-3">
+                          <label for="horaActa" class="form-label">Hora de emisión de acta</label>
+                          <input type="time" id="horaActa" formControlName="horaActa" class="form-control">
+                      </div>
+                      <div class="col-md-3 mb-3">
+                          <label for="latitud" class="form-label">Latitud</label>
+                          <input type="text" id="latitud" formControlName="latitud" class="form-control">
+                      </div>
+                      <div class="col-md-3 mb-3">
+                          <label for="longitud" class="form-label">Longitud</label>
+                          <input type="text" id="longitud" formControlName="longitud" class="form-control">
+                      </div>
+          </div>
+          
+          
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <label for="descripcion_hecho" class="form-label">Descripción del Hecho</label>
+              <input type="text" id="descripcion_hecho" formControlName="descripcion_hecho" class="form-control">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="direccion" class="form-label">Direccion</label>
+              <input type="text" id="direccion" formControlName="direccion" class="form-control">
+            </div> 
+          </div>
+          
+          <!-- <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="involucrados" class="form-label">Involucrados</label>
+              <input type="text" id="involucrados" formControlName="involucrados" class="form-control">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="personalAutor" class="form-label">Personal Autor</label>
+              <input type="text" id="personalAutor" formControlName="personalAutor" class="form-control">
+            </div>
+          </div> -->
+          <div class="col-md-12 mb-3">
+            <label for="relato" class="form-label">Relato</label>
+            <textarea id="relato" formControlName="relato" class="form-control"></textarea> 
+          </div>
+          
+          <!-- Agrega más campos según sea necesario -->
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary" (click)="generateSecPDF()">Generar PDF</button>
+      </div>
+      
+    </div>
+  </div>
+</div>

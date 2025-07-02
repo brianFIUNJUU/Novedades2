@@ -1,0 +1,85 @@
+<div class="container mt-4">
+  <div class="container-fluid p-0">
+    <div class="card text-white custom-card">
+      <div class="card-body text-center p-2">
+        <h6 class="card-title font-weight-bold mb-0">Lista de Usuarios</h6>
+      </div>
+    </div>
+  <div>
+  <br>
+  <!-- Filtro por estado -->
+  <div class="row mb-3">
+    <div class="col-md-3">
+      <label for="filtroEstado" class="form-label">Filtrar por Estado</label>
+      <select class="form-select " [(ngModel)]="filtroEstado" (change)="filtrarPorEstado()">
+        <option value="">Todos</option>
+        <option value="activo">Activo</option>
+        <option value="pendiente">Pendiente</option>
+      </select>
+    </div>
+    <!-- Filtro por Perfil -->
+    <div class="col-md-3">
+      <label for="filtroPerfil" class="form-label">Filtrar por Perfil</label>
+      <select class="form-select" [(ngModel)]="filtroPerfil" (change)="filtrarPorPerfil()">
+        
+        <option value="administrador">Administrador</option>
+        <option value="">Todos</option>
+        <option value="usuarioDOP">Usuario DOP</option>
+        <option value="usuario">Usuario Común</option>
+             <option value="EncargadoUnidad">Encargado de unidad 1</option>
+                  <option value="EncargadoUnidad 2">Encargado de unidad 2</option>
+                  <option value="EncargadoUnidad 3">Encargado de unidad 3</option>
+                  <option value="EncargadoUnidad 4">Encargado de unidad 4</option>
+                  <option value="EncargadoUnidad 5">Encargado de unidad 5</option>
+                  <option value="EncargadoUnidad 6">Encargado de unidad 6</option>
+                  <option value="EncargadoUnidad 7">Encargado de unidad 7</option>
+                  <option value="EncargadoUnidad 8">Encargado de unidad 8</option>
+      </select>
+    </div>
+
+    <!-- Búsqueda por Legajo -->
+    <div class="col-md-3">
+      <label for="buscarLegajo" class="form-label ">Buscar legajo</label>
+      <input type="text" id="buscarLegajo" class="form-control" [(ngModel)]="buscarLegajo" (input)="filtrarPorLegajo()" placeholder="Ingrese N° de Leg.">
+    </div>
+  </div>
+
+  <!-- Tabla de Usuarios -->
+  <div class="table-responsive">
+  <div class="table-bordered border-primary table-sm table-custom">
+    <table *ngIf="usuariosFiltrados.length > 0" class="table table-striped table-bordered">
+      <thead class="thead-dark">
+        <tr>
+          <!-- <th>ID</th> -->
+          <th class="text-small">N° de Legajo</th>
+          <th class="text-small">Nombre</th>
+          <th class="text-small">Email</th>
+          <th class="text-small">Perfil</th>
+          <th class="text-small">Estado</th>
+    <th class="text-small" *ngIf="perfilUsuarioActual === 'administrador' || perfilUsuarioActual === 'usuarioDOP'">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let usuario of usuariosFiltrados">
+          <td class="text-small">{{ usuario.legajo }}</td>
+          <td class="text-small">{{ usuario.nombre }}</td>
+          <td class="text-small">{{ usuario.email }}</td>
+          <td class="text-small">{{ usuario.perfil }}</td>
+          <td class="text-small">{{ usuario.estado ? 'Activo' : 'Pendiente' }}</td>
+          <td>
+            <button 
+              class="btn btn-danger btn-sm" 
+              *ngIf="perfilUsuarioActual === 'administrador' || perfilUsuarioActual === 'usuarioDOP'"
+              (click)="eliminarUsuario(usuario.uid)">
+              Eliminar
+            </button>          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  </div>
+
+  <div *ngIf="usuariosFiltrados.length === 0" class="alert alert-info">
+    <p>No hay usuarios para mostrar.</p>
+  </div>
+</div>

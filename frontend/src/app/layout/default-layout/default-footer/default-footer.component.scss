@@ -1,0 +1,111 @@
+
+// .gov-footer {
+//   background-color: #f1f1f1;
+//   padding: 20px 0;
+// //   color: #666;
+// }
+
+// .gov-footer h3 {
+//   color: #333;
+// }
+
+// .gov-footer ul {
+//   list-style: none;
+//   padding: 0;
+// }
+
+// .gov-footer ul li {
+//   margin-bottom: 90px;
+// }
+
+// .gov-footer ul li a {
+//   color: #666;
+//   text-decoration: none;
+// }
+
+// .gov-footer ul li a:hover {
+//   color: #333;
+// }
+
+// .container {
+//   width: 90%;
+//   margin: 0 auto;
+// }
+
+// .row {
+//   display: flex;
+//   flex-wrap: wrap;
+//   margin-bottom: 20px;
+// }
+
+// .col-md-6 {
+//   width: 50%;
+// }
+
+
+
+/* Estilos para el footer fijo */
+/* Estilos para el footer fijo */
+/* Estilos para el footer fijo */
+.fixed-footer {
+  position: fixed; /* Fija el footer en la pantalla */
+  bottom: 0; /* Lo coloca en la parte inferior */
+  left: 0; /* Lo alinea a la izquierda */
+  right: 0; /* Lo alinea a la derecha */
+  width: 100%; /* Ocupa todo el ancho */
+  background-color: #000000; /* Color de fondo */
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+  padding: 0px 0; /* Padding reducido */
+  text-align: center; /* Centra el texto */
+  height: auto; /* Altura automática (se ajusta al contenido) */
+}
+
+.custom-card {
+  background-color: #000000 !important; /* Color azul */
+  color: white; /* Color del texto */
+  border: none !important; /* Elimina el borde */
+  box-shadow: none !important; /* Elimina la sombra */
+  margin: 0; /* Elimina el margen */
+}
+
+/* Asegura que el footer ocupe todo el ancho */
+::ng-deep app-default-footer {
+  background-color: #000000 !important; /* Color azul */
+  border: none !important;
+  box-shadow: none !important;
+  width: 100% !important; /* Asegura que el footer ocupe todo el ancho */
+  padding: 2px 0 !important; /* Padding reducido */
+  position: relative;
+  left: 0;
+  right: 0;
+  display: flex; /* Usamos flexbox para centrar el contenido */
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center; /* Centra verticalmente */
+  height: auto; /* Altura automática (se ajusta al contenido) */
+  text-align: center; /* Centra el texto dentro del footer */
+}
+
+::ng-deep app-default-footer .custom-card {
+  background-color: #000000 !important;
+  border: none !important;
+  box-shadow: none !important;
+  width: 100% !important; /* Asegura que la tarjeta ocupe todo el ancho */
+  display: flex;
+  justify-content: center; /* Asegura que el contenido de la tarjeta esté centrado */
+  align-items: center; /* Centra verticalmente */
+}
+
+::ng-deep app-default-footer .card-body {
+  background-color: #040014 !important;
+  border: none !important;
+  box-shadow: none !important;
+  width: 100% !important;
+  text-align: center; /* Centra el texto dentro del card-body */
+  padding: 0px 0; /* Padding muy reducido */
+}
+
+::ng-deep app-default-footer p {
+  color: white !important;
+  font-size: 0.8rem; /* Fuente más pequeña */
+  margin: 0;
+}

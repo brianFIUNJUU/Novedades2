@@ -1,0 +1,1613 @@
+<div class="container-fluid p-0">
+  <div class="card text-white custom-card">
+    <div class="card-body text-center p-2">
+      <h6 class="card-title font-weight-bold mb-0">FORMULARIO DE INTERVENCION POLICIAL</h6>
+    </div>
+  </div>
+  <div>
+  <br>
+  <div class="container-fluid p-0">
+    <form>
+        
+      <div class="row"> 
+                <div class="col-md-4">
+          <div class="form-group row">
+            <label for="usuario" class="col-sm-4 col-form-label">Usuario:</label>
+            <div class="col-sm-8">
+              <span class="form-control-plaintext">
+                {{ nuevaNovedad.personal_autor_nombre }}
+              </span>
+            </div>
+          </div>
+          <div *ngIf="mensajeError" class="text-danger mt-2">
+            {{ mensajeError }}
+          </div>
+        </div>
+              
+        <div class="col-md-4">
+          <div class="form-group row">
+            <label for="fecha" class="col-sm-4 col-form-label">Fecha:</label>
+            <div class="col-sm-8">
+              <input type="date" id="fecha" name="fecha" [(ngModel)]="nuevaNovedad.fecha" class="form-control" [disabled]="readonlyMode">
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="form-group row">
+            <label for="horario" class="col-sm-4 col-form-label">Horario de llegada:</label>
+            <div class="col-sm-8">
+              <input type="time" id="horario" name="horario" [(ngModel)]="nuevaNovedad.horario" class="form-control" [disabled]="readonlyMode">
+              
+            </div>
+          </div>
+        </div>
+     <div *ngIf="isUpdating" class="mb-2">
+                <label class="form-label fw-bold">ID de novedad:</label>
+                <span>{{ nuevaNovedad.id }}</span>
+              </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+           <div class="form-group">
+            <h5 class="titulo">Personal Interviniente: 
+              <button  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode"  type="button" class="btn btn-primary btn-sm" (click)="OpenModalPolicia()" >
+              <i class="bi bi-plus"></i>
+            </button></h5>
+            
+          </div> 
+        </div>
+      </div>
+      <div class="table-responsive">
+        
+        <table class="table table-bordered border-primary table-sm table-custom">
+
+          <thead>
+            <tr>
+              <th class="text-center text-small">Legajo</th>
+              <th class="text-center text-small">Nombre y Apellido</th>
+              <th class="text-center text-small">Jerarquía</th>
+              <th  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode"class="text-center text-small">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pt of personalTemporales">
+              <td class="text-small">{{ pt.personal.legajo }}</td>
+              <td class="text-small">{{ pt.personal.nombre }} {{ pt.personal.apellido }}</td>
+              <td class="text-small">{{ pt.personal.jerarquia }}</td>
+              <td  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode" class="text-small text-center">
+                
+                <button  class="btn btn-danger btn-sm" (click)="borrarPersonalTemporal(pt.personal.id)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+
+    </form>
+    
+    <!-- aquie empieza los datos de la intervencion -->
+     <div class="container-fluid p-0">
+          <div class="card text-white custom-card2">
+            <div class="card-body text-center p-2">
+              <h6 class="card-title font-weight-bold mb-0">Ubicacion del hecho</h6>
+            </div>
+          </div>
+        </div>
+        <br>
+    <form>
+      <div class="row">
+        
+              <div class="col-md-6">
+                    <div class="form-group d-flex align-items-center">
+              <label for="unidad_regional">Unidad Regional:</label>
+              <select [disabled]="readonlyMode" id="unidad_regional" name="unidad_regional" [(ngModel)]="nuevaNovedad.unidad_regional_id" class="form-select" (change)="cargarCuadrantes(+nuevaNovedad.unidad_regional_id)" (change)="onUnidadRegionalChange($event)">
+                <option *ngFor="let unidad_regional of unidadesRegionales" [value]="unidad_regional.id">{{ unidad_regional.unidad_regional}}</option>
+              </select>
+              </div>
+            </div>
+
+                   <div class="col-md-6">
+              <div class="form-group d-flex align-items-center">
+                <label for="cuadrante">Cuadrante:</label>
+                <select [disabled]="readonlyMode" id="cuadrante"
+                        name="cuadrante"
+                        [(ngModel)]="nuevaNovedad.cuadrante_id"
+                        class="form-select"
+                        required
+                        (change)="onCuadranteChange($event)">
+                  <option value="" disabled selected>Seleccione un cuadrante</option>
+                  <option *ngFor="let cuadrante of cuadrantes" [value]="cuadrante.id">{{ cuadrante.nombre }}</option>
+                </select>
+              </div>
+              <!-- Mensaje de error reutilizable -->
+              <div *ngIf="mostrarErrorCampo(nuevaNovedad.cuadrante_id)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
+            </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group d-flex align-items-center">
+            <label for="tipo_lugar_hecho" class="mr-2">Tipo de Lugar del Hecho</label>
+            <select [disabled]="readonlyMode"id="tipo_lugar_hecho" name="tipo_lugar_hecho" [(ngModel)]="nuevaNovedad.tipo_lugar" class="form-select">
+              <option value="comercio">Comercio</option>
+              <option value="domicilio particular">Domicilio Particular</option>
+              <option value="via publica">Vía Pública</option>
+              <option value="banco">Banco</option>
+              <option value="institucion publica">Institución Pública</option>
+              <option value="institucion privada">Institución Privada</option>
+              <option value="no especifica">No Especifica</option>
+            </select>
+          </div>
+           <!-- Mensaje de error reutilizable -->
+              <div *ngIf="mostrarErrorCampo(nuevaNovedad.tipo_lugar)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group d-flex align-items-center">
+            <label for="lugar_hecho" class="mr-2">Lugar del Hecho</label>
+            <input [disabled]="readonlyMode"type="text" id="lugar_hecho" name="lugar_hecho" [(ngModel)]="nuevaNovedad.lugar_hecho" class="form-control">
+          </div>
+            <!-- Mensaje de error reutilizable -->
+              <div *ngIf="mostrarErrorCampo(nuevaNovedad.lugar_hecho)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="form-group d-flex align-items-center">
+            <label for="latitud" class="mr-2">Latitud</label>
+            <input type="text" id="latitud" name="latitud" [(ngModel)]="nuevaNovedad.latitud" class="form-control" [disabled]="isUpdating && !ubicacionEditable" (change)="actualizarMapaDesdeFormulario()">
+          </div>
+            <!-- Mensaje de error reutilizable -->
+              <div *ngIf="mostrarErrorCampo(nuevaNovedad.latitud)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group d-flex align-items-center">
+            <label for="longitud" class="mr-2">Longitud</label>
+            <input type="text" id="longitud" name="longitud" [(ngModel)]="nuevaNovedad.longitud" class="form-control" [disabled]="isUpdating && !ubicacionEditable" (change)="actualizarMapaDesdeFormulario()">
+          </div>
+            <!-- Mensaje de error reutilizable -->
+              <div *ngIf="mostrarErrorCampo(nuevaNovedad.longitud)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
+        </div> 
+
+        <div class="col-md-3">
+          <button type="button" *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode" class="btn btn-primary" (click)="obtenerUbicacionActual()">Usar ubicación actual</button>
+        </div>
+        <div class="col-md-3" *ngIf="isUpdating && !ubicacionEditable">
+          <button type="button" *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode" class="btn btn-warning" (click)="preguntarDesbloquearUbicacion()">¿Desea modificar la ubicación?</button>
+        </div>
+        <div class="col-md-3" *ngIf="isUpdating">
+        <button type="button" *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode" class="btn btn-secondary"(click)=" actualizarMapaDesdeFormulario()">Encontrar ubicacion</button>
+        </div>
+       
+       
+        
+      </div>
+      <div id="map" style="height: 400px; width: 100%;"></div>
+    </form>
+     <hr />
+      <!-- AQUI COMIENZA DATOS DEL HECHO -->
+      <div class="container-fluid p-0">
+          <div class="card text-white  custom-card2">
+            <div class="card-body text-center p-2">
+              <h6 class="card-title font-weight-bold mb-0">Datos del hecho</h6>
+            </div>
+          </div>
+        </div>
+        <br/>
+        <form>
+        <div class="row">
+       
+        <div class="col-md-6">
+          <div class="form-group d-flex align-items-center">
+            <label for="origen_novedad" class="mr-2">Origen de la Novedad</label>
+            <select [disabled]="readonlyMode"id="origen_novedad" name="origen_novedad" [(ngModel)]="nuevaNovedad.origen_novedad" class="form-select">
+              <option value="BASE OPERACIONAL">BASE OPERACIONAL</option>
+              <option value="BASE CONSOLA">BASE CONSOLA</option>
+              <option value="SEGURIDAD INTERNA">SEGURIDAD PRIVADA</option>
+              <option value="TORRE 131">TORRE 131</option>
+              <option value="TORRE 911">TORRE 911</option>
+              <option value="TORRE 125">TORRE 125(CGSC)</option>
+              <option value="T-350">RECORRIDO PREVENTIVO</option>
+              <option value="MONITOREO">COMISARIA</option>
+            </select>
+          </div>
+            <!-- Mensaje de error reutilizable -->
+              <div *ngIf="mostrarErrorCampo(nuevaNovedad.origen_novedad)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
+        </div>
+              <div class="col-md-3" *ngIf="['BASE OPERACIONAL','BASE CONSOLA','TORRE 131','TORRE 911','TORRE 125','COMISARIA'].includes(nuevaNovedad.origen_novedad)">
+          <div class="form-group row">
+            <label for="horario" class="col-sm-4 col-form-label">Hora de aviso:</label>
+            <div class="col-sm-8">
+              <input [disabled]="readonlyMode" type="time" id="horario" name="horario" [(ngModel)]="nuevaNovedad.horaIncidencia" class="form-control">
+            </div>
+          </div>
+        </div>
+           <div class="col-md-3" *ngIf="nuevaNovedad.origen_novedad === 'TORRE 911'">
+          <div class="form-group row">
+            <label for="n_incidencia" class="col-sm-4 col-form-label">N°Incidencia:</label>
+            <div class="col-sm-8">
+              <input [disabled]="readonlyMode"id="n_incidencia" name="n_incidencia" [(ngModel)]="nuevaNovedad.n_incidencia" class="form-control">
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="form-group d-flex align-items-center">
+            <label for="unidad_interviniente" class="mr-2">Unidad Interviniente</label>
+            <select [disabled]="readonlyMode"id="unidad_interviniente" name="unidad_interviniente" [(ngModel)]="nuevaNovedad.unidad_interviniente" class="form-select">
+                            <option value="GUARDIA URBANA">GUARDIA URBANA(PARADA EN CALLE)</option>
+              <option value="CSPC">CSPC</option>
+              <option value="GRUPO DINAMICO DE PREVENCION DEL DELITO">GRUPO DINAMICO DE PREVENCION DEL DELITO</option>
+              <option value="CONTRAVENCIONAL">CONTRAVENCIONAL</option>
+              <option value="POLICIA TURISTICA">POLICIA TURISTICA</option>
+              <option value="UNIDAD MOTORIZADA">UNIDAD MOTORIZADA</option>
+              <option value="UNIDAD MOVIL">UNIDAD MOVIL</option>
+              <option value="SEGURIDAD VIAL">SEGURIDAD VIAL</option>
+              <option value="UPCAR">UPCAR</option>
+              <option value="INFANTERIA">INFANTERIA</option> 
+              <option value ="CEOP">CEOP</option>
+              <option value="BOMBEROS">BOMBEROS</option>
+              <option value="BRIGADA DE INVESTIGACIONES">BRIGADA DE INVESTIGACIONES</option>
+            </select>
+          </div>
+           <!-- Mensaje de error reutilizable -->
+              <div *ngIf="mostrarErrorCampo(nuevaNovedad.unidad_interviniente)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
+          <br />
+        </div> 
+             <div class="col-md-6">
+                    <div class="form-group d-flex align-items-center">
+              <label for="operativo">Operativo:</label>
+                     <select [disabled]="readonlyMode"id="operativo" name="operativo" [(ngModel)]="nuevaNovedad.operativo_id" class="form-select" (change)="onOperativoChange($event)">
+                <option *ngFor="let operativo of operativosFiltrados" [value]="operativo.id">{{ operativo.nombre_operativo }} ({{operativo.fecha_desde}}/{{operativo.fecha_hasta}})</option>
+              </select>
+              </div>
+            </div>
+
+     
+      </div>  
+      </form>
+      </div>   
+    
+
+                <div class="row">
+                  <div class="col-md-6"><label for="descripcion_hecho" class="mr-2">Tipo de hecho</label>
+                    <div class="form-group d-flex align-items-center">
+                      
+                      <ng-select
+                        [items]="descripcionesHecho"
+                        bindLabel="descripcion_hecho"
+                        bindValue="id"
+                        [typeahead]="searchText$"
+                        [(ngModel)]="nuevaNovedad.descripcion_hecho_id"
+                        (ngModelChange)="asignarDescripcionHecho($event)"
+                        dropdownPosition="bottom"
+                        appendTo="body"
+                        class="form-control flex-grow-1"
+                          [disabled]="readonlyMode">
+
+                      </ng-select>
+                      <i class="bi bi-search ml-2" style="font-size: 1.2rem; color: #6c757d;"></i>
+
+                    </div>
+                     <!-- Mensaje de error reutilizable -->
+                    <div *ngIf="mostrarErrorCampo(nuevaNovedad.tipo_hecho)">
+                <small class="text-danger">Completar este campo</small>
+              </div>
+                  </div>
+                <div class="col-md-6"> 
+                    <!-- Mostrar los datos obtenidos -->
+                    <p><strong>Subtipo de hecho:</strong> {{ nuevaNovedad.subtipo_hecho }} - <strong>Tipificación:</strong> {{ nuevaNovedad.tipo_hecho }}</p>
+                    <br/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">  <label for="modus_operandi" class="mr-2">Modus Operandi</label>
+                  <div class="form-group d-flex align-items-center">
+                  
+                    
+                      <ng-select
+                        [items]="modusOperandiList"
+                        bindLabel="modus_operandi"
+                        bindValue="id"
+                        [typeahead]="searchModusOperandi$"
+                        [(ngModel)]="nuevaNovedad.modus_operandi_id"
+                        (change)="asignarModusOperandi(nuevaNovedad.modus_operandi_id)"
+                        dropdownPosition="bottom"
+                        appendTo="body"
+                        class="form-control flex-grow-1"
+                         [disabled]="readonlyMode">
+                      </ng-select>
+                      <i class="bi bi-search ml-2" style="font-size: 1.2rem; color: #6c757d;"></i>
+
+                  </div>
+                    <div *ngIf="mostrarErrorCampo(nuevaNovedad.modus_operandi_id)">
+                <small class="text-danger">Completar este campo</small>
+              </div><br/>
+                </div>
+                 <!-- Mensaje de error reutilizable -->
+            
+              
+              </div>
+<div class="container-fluid p-0">
+ 
+
+    <!-- AQUI COMIENZA LOS DATOS DE LOS INVOLUCRADOS -->
+    <div class="container-fluid p-0">
+      <div class="card text-white  custom-card2">
+        <div class="card-body text-center p-2">
+          <h6 class="card-title font-weight-bold mb-0">Datos de los involucrados</h6>
+        </div>
+      </div>
+    </div>
+    <br/>
+    <form  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode">
+    <div class="row">
+      <div class="col-md-12">
+         <div  class="form-group">
+          <label for="victima" class="mr-2">Agregar Involucrados:  </label>
+          <button  type="button" class="btn btn-primary btn-sm" (click)="abrirModalInvolucrado()" >
+            <i class="bi bi-plus"></i>
+          </button>
+        </div> 
+      </div>
+    </div>
+       <br/>
+   </form>
+
+      <!-- Tabla para mostrar los inculpados cargados -->
+      <div class="table-responsive">
+        <h5 class="titulo">Personas Involucradas al hecho:</h5>
+                       <table class="table table-bordered border-primary table-sm table-custom">
+
+            <thead>
+              <tr>
+                <th class="text-center text-small">NyA</th>
+                <th class="text-center text-small">DNI</th>
+                <th class="text-center text-small">Edad</th>
+                <th class="text-center text-small">Sexo</th>
+                <th class="text-center text-small">Domicilio</th>
+                <!-- <th class="text-center text-small">Nacionalidad</th> -->
+                <!-- <th class="text-center text-small">Vínculo</th>
+                <th class="text-center text-small">Demorado</th>
+                <th class="text-center text-small">Comparendo</th> -->
+                <th class="text-center text-small">Estado</th>
+                <th  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode" class="text-center text-small"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let pt of personasTemporales">
+                <td class="text-center text-small">{{ pt.persona.nombre }} {{ pt.persona.apellido }}</td>
+                <td class="text-center text-small">{{ pt.persona.dni }}</td>
+                <td class="text-center text-small">{{ pt.persona.edad }}</td>
+                <td class="text-center text-small">{{ pt.persona.sexo }}</td>
+                <td class="text-center text-small">{{ pt.persona.domicilio }}</td>
+                <td class="text-center text-small">{{ pt.estado }}</td>
+
+                <td  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode"class="text-center text-small">
+                  <!-- Botones de editar y borrar -->
+                  <button class="btn btn-danger btn-sm" (click)="borrarPersona(pt.persona.id)"><i class="bi bi-x"></i></button>
+                  <button class="btn btn-warning btn-sm" (click)="editarPersona(pt.persona.id, pt.estado)"><i class="bi bi-pencil"></i></button>
+                  </td>             
+              </tr>
+            </tbody>
+          </table>
+      </div>
+      <br/>
+  
+ <!-- AQUI COMIENZA LOS RESULTADOS DE LA INTERVENCION -->
+ <div class="container-fluid p-0">
+  <div class="card text-white  custom-card2">
+    <div class="card-body text-center p-2">
+      <h6 class="card-title font-weight-bold mb-0">Resultado de la intervencion</h6>
+    </div>
+  </div>
+</div>
+<br/>
+<form>
+  <div class="row">
+    <div  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode"class="col-md-12">
+      <div class="form-group ">
+       <label for="victima" class="">Agregar Elementos:  </label>
+       <button type="button" class="btn btn-primary btn-sm" (click)="showSwalElemento()" >
+         <i class="bi bi-plus"></i>
+       </button>
+     </div> 
+   </div>
+   <!-- Tabla para mostrar los elementos agregados -->
+<div class="table-responsive ">
+  <h5 class="titulo">Elementos Agregados:</h5>
+        <table class="table table-bordered border-primary table-sm table-custom">
+    <thead>
+      <tr>
+        <th  class="text-center text-small">Elemento</th>
+        <th  class="text-center text-small">Descripción</th>
+        <th  class="text-center text-small">Tipo</th>
+        <th   *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode"class="text-center text-small">Acciones</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of elementosAgregados; let i = index">
+        <td class="text-center text-small">{{ item.descripcion }}</td>
+        <td class="text-center text-small">{{ item.caracteristicas}}</td>
+        <td class="text-center text-small">{{ item.tipo }}</td>
+        <td  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode"class="text-center text-small">
+          <button class="btn btn-warning btn-sm" (click)="editarElemento(i)"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-danger btn-sm" (click)="eliminarElemento(i)"><i class="bi bi-x"></i></button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+    <hr />
+  
+    <!-- <div class="col-md-12">
+      <div class="form-group d-flex align-items-center mb-2">
+        <label for="observaciones" class="mr-2 titulo">Observaciones:</label>
+        <textarea id="observaciones" name="observaciones" [(ngModel)]="nuevaNovedad.observaciones" class="form-control"></textarea>
+      </div>
+    </div> -->
+    <div class="row">
+ 
+      <div class="col-md-12">
+      <label for="descripcion" class="mr-2 titulo">RELATO:</label>
+
+          <div class="form-group d-flex align-items-center mb-2">
+            <textarea   [disabled]="readonlyMode"id="descripcion" name="descripcion" [(ngModel)]="nuevaNovedad.descripcion" class="form-control w-100"  rows="8" cols="60"></textarea>
+          </div>
+          <br />
+      </div>
+    
+    </div> 
+   
+    <hr />
+        
+          <!-- Mostrar la lista de archivos cargados -->
+<div class="md-12">
+  <h5 class="titulo">Archivos vinculados al hecho:</h5>
+  <ul *ngIf="archivos.length > 0" class="list-unstyled">
+    <li *ngFor="let archivo of archivos; let i = index">
+      <div *ngIf="archivo.base64 && archivo.fileName" class="file-info">
+        <p class="mb-1">
+          <a [href]="getFileUrlNovedad(archivo.base64, archivo.mimeType)" [download]="archivo.fileName" target="_blank">{{ archivo.fileName }}</a>
+        </p>
+        <div *ngIf="archivo.mimeType.startsWith('image/')">
+          <img [src]="getFileUrlNovedad(archivo.base64, archivo.mimeType)" alt="{{ archivo.fileName }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
+        </div>
+        <button   [disabled]="readonlyMode" type="button" class="btn btn-danger btn-sm mt-2" (click)="eliminarArchivoCargadoN(i)">Eliminar</button>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<!-- Input de archivo oculto -->
+<div>
+  <input type="file" id="archivoNovedad" style="display: none;" (change)="onFileSelectedNovedad($event, obtenerIndiceDisponibleN())">
+</div>
+
+<div  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode"class="form-group d-flex align-items-center">
+  <button type="button" class="btn btn-success me-3" (click)="abrirCamaraN()">
+    <i class="bi bi-camera"></i> Cámara
+  </button>
+  <button type="button" class="btn btn-warning text-dark" (click)="abrirSistemaArchivosNovedad()">
+    <i class="bi bi-folder2-open"></i> Archivos
+  </button>
+</div>
+<!-- Modal de Novedad -->
+<!-- Modal de Novedad -->
+<div class="modal fade fullscreen-modal" id="camera-modal-N" tabindex="-1" aria-labelledby="cameraModalLabelNovedad" aria-hidden="true" (hidden.bs.modal)="cerrarCamaraN()">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header custom-modal-header2 p-2">
+        <button type="button" class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Close" (click)="cerrarCamaraN()"></button>
+      </div>
+      <div class="modal-body p-0">
+        <video #videoElementNovedad autoplay style="width: 100%; height: 100%;"></video>
+      </div>
+      <div class="modal-footer custom-modal-footer">
+        <button class="btn btn-secondary" (click)="alternarCamaraN()">
+          <i class="bi bi-arrow-repeat"></i> <!-- Ícono de invertir cámara -->
+        </button>
+        <button class="btn btn-primary" (click)="tomarFotoN()">
+          <i class="bi bi-camera"></i> <!-- Ícono de cámara -->
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+        <!-- AQUI COMIENZA DATOS DEL HECHO -->
+        <!-- <div class="container-fluid p-0">
+          <div class="card text-white  custom-card2">
+            <div class="card-body text-center p-2">
+              <h6 class="card-title font-weight-bold mb-0">Unidad Actuante</h6>
+             
+            </div>
+            
+          </div>
+          <br/>
+        </div>
+        <br/>
+        <form>
+          
+           <div class="row">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group d-flex align-items-center">
+                  <label for="legajo" class="mr-2">Oficial a Cargo:</label>
+                  <input type="text" id="legajo" name="legajo" [(ngModel)]="nuevoLegajo" class="form-control" placeholder="Buscar Legajo">
+                  <button type="button" class="btn btn-warning btn-sm" (click)="actualizarOficialCargo(nuevoLegajo)">
+                  <i class="bi bi-search"></i>
+                  </button>
+                  <br/>
+                </div>
+                <div *ngIf="mensajeError" class="text-danger mt-2">
+                  {{ mensajeError }}
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div *ngIf="oficialCargo">
+                  <p>{{oficialCargo.jerarquia}}: {{ oficialCargo.nombre }} {{ oficialCargo.apellido }} ({{ oficialCargo.legajo }})</p>
+                </div>
+                <br/>
+              </div>
+              <div class="col-md-12">
+                <div class="form-group d-flex align-items-center">
+                  <label for="unidad_actuante" class="mr-2">Unidad Actuante : {{ nuevaNovedad.unidad_actuante }} </label>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          <hr>
+      </form> -->
+
+  </form>
+  <hr>
+            <div class="d-flex justify-content-end">
+                      <button (click)="isUpdating ? cancelUpdate() : resetFormNov()" class="btn btn-secondary">
+                        {{ isUpdating ? 'Cancelar Actualización' : 'Cancelar Carga' }}
+                      </button>
+                                           <button *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode" (click)="isUpdating ? updateNovedad() : addNovedad()" class="btn btn-primary ms-2">
+                        {{ isUpdating ? 'Actualizar Novedad' : 'Crear Novedad' }}
+                      </button>
+                   
+            <br>
+           </div>   
+</div>     
+
+
+    <!-- Modal para Víctima -->
+<div class="modal fade" id="modalVictima" tabindex="-1" aria-labelledby="modalVictimaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header custom-modal-header p-2">
+        <h5 class="modal-title mb-0" id="modalVictimaLabel">Datos de la Víctima:</h5>
+        <button type="button"  class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-3">
+            <label for="victima_dni">DNI:</label>
+            <div class="input-group">
+              
+              <input
+                type="number"
+                id="victima_dni"
+                name="victima_dni"
+                [(ngModel)]="victima.dni"
+                class="form-control"
+                min="0"
+                step="1"
+                (input)="limpiarDni($event)"
+              />
+              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(victima.dni || '' , 'victima')" >
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="victima_nombre">Nombre:</label>
+            <input type="text" id="victima_nombre" name="victima_nombre" [(ngModel)]="victima.nombre" class="form-control">
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="victima_apellido">Apellido:</label>
+            <input type="text" id="victima_apellido" name="victima_apellido" [(ngModel)]="victima.apellido" class="form-control">
+          </div>
+          <!-- logica de edad para input de numeros+cadena de caracteres -->
+          <div class="col-6 col-md-3">
+            <label for="victima_edad">Edad:</label>
+            <div class="input-group">
+                                                                                                  <!-- Ejemplo para víctima -->
+                                                      <input type="number" min="0" [(ngModel)]="victima_edad_valor" class="form-control" placeholder="Edad" id="victima_edad">
+                                                      <select [(ngModel)]="victima_edad_unidad" class="form-select" style="max-width: 100px;">
+                                                        <option value="años">Años</option>
+                                                        <option value="meses">Meses</option>
+                                                        <option value="días">Días</option>
+                                                      </select>
+            </div>
+          </div>
+          <!-- telefono -->
+            <div class="col-6 col-md-3">
+            <label for="victima_telefono">Teléfono:</label>
+            <input
+              type="number"
+              id="victima_telefono"
+              name="victima_telefono"
+              [(ngModel)]="victima.telefono"
+              class="form-control"
+              step="1"
+              min="0"
+              pattern="[0-9]*"
+              inputmode="numeric"
+            >
+          </div>     
+
+          <div class="col-6 col-md-3">
+            <label for="victima_sexo">Sexo</label>
+            <select id="victima_sexo" name="victima_sexo" [(ngModel)]="victima.sexo" class="form-select">
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="victima_genero">Género:</label>
+            <select id="victima_genero" name="victimario_genero" [(ngModel)]="victima.genero" class="form-select">
+              <option value="Heterosexual">Heterosexual</option>
+              <option value="Transexual">Transexual</option>
+              <option value="Homossexual">Homosexual</option>
+              <option value="Indefinido">Otro</option>
+
+            </select>  
+          </div>
+           <h5 class="titulo">Lugar de residencia:</h5>
+
+          <div class="col-6 col-md-3">
+            <label for="victima_departamento">Departamento:</label>
+            <select id="victima_departamento" name="victima_departamento" [(ngModel)]="victima.departamento_id" class="form-select"
+  (change)="onDepartamentoChange('victima')">
+              <option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</option>
+            </select>
+          </div>
+          
+          <div class="col-6 col-md-3">
+            <label for="victima_localidad">Localidad:</label>
+            <select id="victima_localidad" name="victima_localidad" [(ngModel)]="victima.localidad_id" class="form-select"   (change)="onLocalidadChange('victima')">
+
+              <option *ngFor="let localidad of localidades" [value]="localidad.id">{{ localidad.nombre }}</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="victima_direccion">Domicilio:</label>
+            <input type="text" id="victima_direccion" name="victima_direccion" [(ngModel)]="victima.domicilio" class="form-control">
+          </div>
+                                                        <div class="col-md-12">
+                                                          <div class="form-check mt-2 victima-extranjero-box"> 
+                                                            <label class="form-check-label ms-2" for="victima_extranjero">
+                                                              ¿Es extranjero?(Marcar el tilde en caso que sea procedente de otro país o provincia)
+                                                            </label>
+                                                                                                                       <input
+                                                              type="checkbox"
+                                                              id="victima_extranjero"
+                                                              name="victima_extranjero"
+                                                              [(ngModel)]="victima.extranjero"
+                                                              class="form-check-input"
+                                                              (ngModelChange)="onExtranjeroChange($event)"
+                                                            />
+                                                          </div>
+                                                        </div>
+          <!-- procednecia -->
+           
+   <!-- Solo se muestra si el checkbox está marcado -->
+<div class="row extranjero" *ngIf="victima.extranjero">
+  <hr>
+  <h5 class="titulo">Lugar de procedencia:</h5>
+  <div class="col-6 col-md-3">
+    <label for="victima_nacionalidad">Nacionalidad:</label>
+       <select id="victima_nacionalidad" name="victima_nacionalidad"
+      [(ngModel)]="victima.nacionalidad" class="form-select">
+      <option *ngFor="let pais of paises" [value]="pais.valor">{{ pais.nombre }}</option>
+    </select>
+  </div>
+  <div class="col-6 col-md-3">
+    <label for="victima_provincia">Provincia:</label>
+    <input type="text" id="victima_provincia" name="victima_provincia" [(ngModel)]="victima.provincia" class="form-control">
+  </div>
+</div>
+       
+            <div>
+                  <h5 class="titulo">Fotos de la persona:</h5>
+                  <div class="form-group md-12 d-flex align-items-center">
+                    <ul *ngIf="archivosPersonas.length > 0" class="list-unstyled">
+                      <li *ngFor="let archivo of archivosPersonas; let i = index">
+                        <div *ngIf="archivo.url && archivo.fileName" class="file-info">
+                          <p class="mb-1">
+                            <a [href]="archivo.url" [download]="archivo.fileName" target="_blank">{{ archivo.fileName }}</a>
+                          </p>
+                          <div *ngIf="archivo.mimeType.startsWith('image/')">
+                            <img [src]="archivo.url" alt="{{ archivo.fileName }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
+                          </div>
+<button type="button" class="btn btn-danger btn-sm mt-2" (click)="eliminarArchivoCargadoP(i, victima)">Eliminar</button>                        
+                        </div>
+                        <!-- Si el archivo aún no tiene url (recién cargado, antes de guardar), muestra la vista previa local -->
+                                                                    <div *ngIf="!archivo.url && archivo.file && archivo.fileName" class="file-info">
+                                                <p class="mb-1">{{ archivo.fileName }}</p>
+                                                <div *ngIf="archivo.mimeType.startsWith('image/')">
+                                                  <img *ngIf="archivo.previewUrl" [src]="archivo.previewUrl" alt="{{ archivo.fileName }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
+                                                </div>
+<button type="button" class="btn btn-danger btn-sm mt-2" (click)="eliminarArchivoCargadoP(i, victima)">Eliminar</button>                                           
+                                              </div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <input type="file" id="archivoPersona" style="display: none;" (change)="onFileSelectedPersona($event, obtenerIndiceDisponible())">
+                  </div>
+                  <div class="form-group d-flex align-items-center">
+                    <button type="button" class="btn btn-success me-3" (click)="abrirCamara()">
+                      <i class="bi bi-camera"></i> Cámara
+                    </button>
+                    <button type="button" class="btn btn-warning text-dark" (click)="abrirSistemaArchivos()">
+                      <i class="bi bi-folder2-open"></i> Archivos
+                    </button>
+                  </div>
+                </div>
+    </div>
+  </div>
+   <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"(click)="resetFormulario('victima')" (click)="cancelarActualizacion('modalVictima')">Cerrar</button>
+        <button *ngIf="!isEditing" type="button" class="btn btn-primary" (click)="guardarPersona('victima', false)">Guardar</button>
+        <button *ngIf="isEditing" type="button" class="btn btn-primary" (click)="actualizarPersona('victima')">Actualizar Datos</button>
+ </div>
+</div>
+</div>
+</div>
+
+<!-- Modal para Protagonista -->
+<div class="modal fade" id="modalProtagonista" tabindex="-1" aria-labelledby="modalProtagonistaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header custom-modal-header p-2">
+        <h5 class="modal-title mb-0" id="modalProtagonistaLabel">Datos del Protagonista:</h5>
+        <button type="button"  class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-3">
+            <label for="protagonista_dni">DNI:</label>
+            <div class="input-group">
+
+              <input
+                type="number"
+                id="protagonista_dni"
+                name="protagonista_dni"
+                [(ngModel)]="protagonista.dni"
+                class="form-control"
+                min="0"
+                step="1"
+                (input)="limpiarDni($event)"
+              />              
+              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(protagonista.dni || '', 'protagonista')" [disabled]="isEditing">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="protagonista_nombre">Nombre:</label>
+            <input type="text" id="protagonista_nombre" name="protagonista_nombre" [(ngModel)]="protagonista.nombre" class="form-control">
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="protagonista_apellido">Apellido:</label>
+            <input type="text" id="protagonista_apellido" name="protagonista_apellido" [(ngModel)]="protagonista.apellido" class="form-control">
+          </div>
+          <!-- edad logica oara oider sunar los ebteri ci ka caea de carceers -->
+         <div class="col-6 col-md-3">
+            <label for="protagonista_edad">Edad:</label>
+          <div class="input-group">
+                                                                                                  <!-- Ejemplo para protagonista -->
+                                    <input type="number" min="0" [(ngModel)]=" protagonista_edad_valor" class="form-control" placeholder="Edad" id="protagonista_edad">
+                                      <select [(ngModel)]="protagonista_edad_unidad" class="form-select" style="max-width: 100px;">
+                                       <option value="años">Años</option>
+                                       <option value="meses">Meses</option>
+                                       <option value="días">Días</option>
+                                    </select>
+            </div>
+          </div>
+    <div class="col-6 col-md-3">
+  <label for="protagonista_telefono">Teléfono:</label>
+  <input
+    type="number"
+    id="protagonista_telefono"
+    name="protagonista_telefono"
+    [(ngModel)]="protagonista.telefono"
+    class="form-control"
+    step="1"
+    min="0"
+    pattern="[0-9]*"
+    inputmode="numeric"
+  >
+</div>
+
+          <div class="col-6 col-md-2">
+            <label for="protagonista_sexo">Sexo </label>
+            <select id="protagonista_sexo" name="protagonista_sexo" [(ngModel)]="protagonista.sexo" class="form-select">
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="protagonista_genero">Género:</label>
+
+            <select id="protagonista_genero" name="protagonista_genero" [(ngModel)]="protagonista.genero" class="form-select">
+              <option value="Heterosexual">Heterosexual</option>
+              <option value="Transexual">Transexual</option>
+              <option value="Homossexual">Homosexual</option>
+                            <option value="Indefinido">Otro</option>
+
+            </select>  
+          </div>
+               <div class="col-6 col-md-2">
+            <label for="protagonista_comparendo">Comparendo:</label>
+            <select id="protagonista_comparendo" name="protagonista_comparendo" [(ngModel)]="protagonista.comparendo" class="form-select">
+              <option [value]="true">Sí</option>
+              <option [value]="false">No</option>
+              <option [value]="false">Desconocido</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-2">
+            <label for="protagonista_demorado">Demorado:</label>
+            <select id="protagonista_demorado" name="protagonista_demorado" [(ngModel)]="protagonista.demorado" class="form-select">
+              <option [value]="true">Sí</option>
+              <option [value]="false">No</option>
+            </select>
+          </div>
+          <!-- lugar de residencia domicilio real -->
+         <h5 class="titulo">Lugar de residencia:</h5>
+          <div class="col-6 col-md-3">
+            <label for="protagonista_departamento">Departamento:</label>
+            <select id="protagonista_departamento" name="protagonista_departamento" [(ngModel)]="protagonista.departamento_id" class="form-select"
+              (change)="onDepartamentoChange('protagonista')">
+
+              <option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</option>
+            </select>
+          </div>
+          
+          <div class="col-6 col-md-3">
+            <label for="protagonista_localidad">Localidad:</label>
+            <select id="protagonista_localidad" name="protagonista_localidad" [(ngModel)]="protagonista.localidad_id" class="form-select" (change)="onLocalidadChange('protagonista')">
+              <option *ngFor="let localidad of localidades" [value]="localidad.id">{{ localidad.nombre }}</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="protagonista_direccion">Domicilio:</label>
+            <input type="text" id="protagonista_direccion" name="protagonista_direccion" [(ngModel)]="protagonista.domicilio" class="form-control">
+          </div>
+                                                <div class="col-md-12">
+                                                          <div class="form-check mt-2 victima-extranjero-box"> 
+                                                            <label class="form-check-label ms-2" for="protagonista_extranjero">
+                                                              ¿Es extranjero?(Marcar el tilde en caso que sea procedente de otro país o provincia)
+                                                            </label>
+                                                                                                                       <input
+                                                              type="checkbox"
+                                                              id="protagonista_extranjero"
+                                                              name="protagonista_extranjero"
+                                                              [(ngModel)]="protagonista.extranjero"
+                                                              class="form-check-input"
+                                                              (ngModelChange)="onExtranjeroChange($event)"
+                                                            />
+                                                          </div>
+                                                        </div>
+        <!-- lugar de procedencia domicilio de la persona proveniente -->
+          <div class="row extranjero" *ngIf="protagonista.extranjero">
+          <hr>                   
+          <h5 class="titulo">Lugar de procedencia:</h5>
+          <div class="col-6 col-md-3">
+            <label for="protagonista_nacionalidad">Nacionalidad:</label>
+            <select id="protagonista_nacionalidad" name="protagonista_nacionalidad" [(ngModel)]="protagonista.nacionalidad" class="form-select">
+              <option *ngFor="let pais of paises" [value]="pais.valor">{{ pais.nombre }}</option>
+            </select>
+          </div> 
+          <div class="col-6 col-md-3">
+            <label for="protagonista_provincia">Provincia:</label>
+            <input type="text" id="protagonista_provincia" name="protagonista_provincia" [(ngModel)]="protagonista.provincia" class="form-control">
+          </div>
+          </div>
+
+     
+            <div>
+                  <h5 class="titulo">Fotos de la persona:</h5>
+                  <div class="form-group md-12 d-flex align-items-center">
+                    <ul *ngIf="archivosPersonas.length > 0" class="list-unstyled">
+                      <li *ngFor="let archivo of archivosPersonas; let i = index">
+                        <div *ngIf="archivo.url && archivo.fileName" class="file-info">
+                          <p class="mb-1">
+                            <a [href]="archivo.url" [download]="archivo.fileName" target="_blank">{{ archivo.fileName }}</a>
+                          </p>
+                          <div *ngIf="archivo.mimeType.startsWith('image/')">
+                            <img [src]="archivo.url" alt="{{ archivo.fileName }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
+                          </div>
+<button type="button" class="btn btn-danger btn-sm mt-2" (click)="eliminarArchivoCargadoP(i, protagonista)">Eliminar</button>
+                        
+                        </div>
+                        <!-- Si el archivo aún no tiene url (recién cargado, antes de guardar), muestra la vista previa local -->
+                                                                    <div *ngIf="!archivo.url && archivo.file && archivo.fileName" class="file-info">
+                                                <p class="mb-1">{{ archivo.fileName }}</p>
+                                                <div *ngIf="archivo.mimeType.startsWith('image/')">
+                                                  <img *ngIf="archivo.previewUrl" [src]="archivo.previewUrl" alt="{{ archivo.fileName }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
+                                                </div>
+<button type="button" class="btn btn-danger btn-sm mt-2" (click)="eliminarArchivoCargadoP(i, protagonista)">Eliminar</button>
+                                             
+                                              </div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <input type="file" id="archivoPersona" style="display: none;" (change)="onFileSelectedPersona($event, obtenerIndiceDisponible())">
+                  </div>
+                  <div class="form-group d-flex align-items-center">
+                    <button type="button" class="btn btn-success me-3" (click)="abrirCamara()">
+                      <i class="bi bi-camera"></i> Cámara
+                    </button>
+                    <button type="button" class="btn btn-warning text-dark" (click)="abrirSistemaArchivos()">
+                      <i class="bi bi-folder2-open"></i> Archivos
+                    </button>
+                  </div>
+                </div>
+          </div>
+        </div>
+         <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"(click)="resetFormulario('protagonista')" (click)="cancelarActualizacion('modalProtagonista')">Cerrar</button>
+          <button *ngIf="!isEditing" type="button" class="btn btn-primary" (click)="guardarPersona('protagonista', false)">Guardar</button>
+          <!-- <button *ngIf="!isEditing" type="button" class="btn btn-primary" (click)="agregarPersonaTemporal('protagonista')">Agregar a Novedad</button> -->
+          <button *ngIf="isEditing" type="button" class="btn btn-primary" (click)="actualizarPersona('protagonista')">Actualizar Datos</button>
+       </div>
+      </div>
+    </div>
+  </div>
+
+
+
+<!-- Modal para Victimario -->
+<div class="modal fade" id="modalVictimario" tabindex="-1" aria-labelledby="modalVictimarioLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header custom-modal-header p-2">
+        <h5 class="modal-title mb-0" id="modalVictimarioLabel">Datos del Victimario:</h5>
+        <button type="button"  class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-3">
+            <label for="victimario_dni">DNI:</label>
+            <div class="input-group">
+
+              <input
+                type="number"
+                id="victimario_dni"
+                name="victimario_dni"
+                [(ngModel)]="victimario.dni"
+                class="form-control"
+                min="0"
+                step="1"
+                (input)="limpiarDni($event)"
+              />
+              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(victimario.dni || '', 'victimario')" [disabled]="isEditing">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="victimario_nombre">Nombre:</label>
+            <input type="text" id="victimario_nombre" name="victimario_nombre" [(ngModel)]="victimario.nombre" class="form-control">
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="victimario_apellido">Apellido:</label>
+            <input type="text" id="victimario_apellido" name="victimario_apellido" [(ngModel)]="victimario.apellido" class="form-control">
+          </div>
+          <!-- logica de edad para input de numeros+cadena de caracteres -->
+          <div class="col-6  col-md-3">
+            <label for="victimario_edad">Edad:</label>
+            <div class="input-group">
+                                                                                                  <!-- Ejemplo para víctimario -->
+                                          <input type="number" min="0" [(ngModel)]="victimario_edad_valor" class="form-control" placeholder="Edad" id="victimario_edad">
+                                             <select [(ngModel)]="victimario_edad_unidad" class="form-select" style="max-width: 100px;">
+                                              <option value="años">Años</option>
+                                              <option value="meses">Meses</option>
+                                            <option value="días">Días</option>
+                                           </select>
+            </div>
+          </div>
+                                        <div class=" col-6 col-md-3">
+                      <label for="victimario_telefono">Teléfono:</label>
+                      <input
+                        type="number"
+                        id="victimario_telefono"
+                        name="victimario_telefono"
+                        [(ngModel)]="victimario.telefono"
+                        class="form-control"
+                        step="1"
+                        min="0"
+                        pattern="[0-9]*"
+                        inputmode="numeric"
+                      >
+                    </div>
+          <div class="col-6 col-md-2">
+            <label for="victimario_sexo">Sexo</label>
+            <select id="victimario_sexo" name="victimario_sexo" [(ngModel)]="victimario.sexo" class="form-select">
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="victimario_genero">Género:</label>
+            <select id="victimario_genero" name="victimario_genero" [(ngModel)]="victimario.genero" class="form-select">
+              <option value="Heterosexual">Heterosexual</option>
+              <option value="Transexual">Transexual</option>
+              <option value="Homossexual">Homosexual</option>
+                            <option value="Indefinido">Otro</option>
+
+            </select>  
+          </div>
+                     <div class="col-6 col-md-2">
+            <label for="victimario_comparendo">Comparendo:</label>
+            <select id="victimario_comparendo" name="victimario_comparendo" [(ngModel)]="victimario.comparendo" class="form-select">
+              <option [value]="true">Sí</option>
+              <option [value]="false">No</option>
+              <option [value]="false">Desconocido</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-2">
+            <label for="victimario_demorado">Demorado:</label>
+            <select id="victimario_demorado" name="victimario_demorado" [(ngModel)]="victimario.demorado" class="form-select">
+              <option [value]="true">Sí</option>
+              <option [value]="false">No</option>
+            </select>
+          </div> 
+          <!-- datos del domicilio de la persona -->
+              <h5 class="titulo">Lugar de residencia:</h5>
+          <div class="col-6 col-md-3">
+            <label for="victimario_departamento">Departamento:</label>
+            <select id="victimario_departamento" name="victimario_departamento" [(ngModel)]="victimario.departamento_id" class="form-select"
+  (change)="onDepartamentoChange('victimario')">            
+              <option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="victimario_localidad">Localidad:</label>
+            <select id="victimario_localidad" name="victimario_localidad" [(ngModel)]="victimario.localidad_id" class="form-select" (change)="onLocalidadChange('victimario')">
+              <option *ngFor="let localidad of localidades" [value]="localidad.id">{{ localidad.nombre }}</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="victimario_direccion">Domicilio:</label>
+            <input type="text" id="victimario_direccion" name="victimario_direccion" [(ngModel)]="victimario.domicilio" class="form-control">
+          </div>
+           
+                                                        <div class="col-md-12">
+                                                          <div class="form-check mt-2 victimario-extranjero-box"> 
+                                                            <label class="form-check-label ms-2" for="victimario_extranjero">
+                                                              ¿Es extranjero?(Marcar el tilde en caso que sea procedente de otro país o provincia)
+                                                            </label>
+                                                                                                                       <input
+                                                              type="checkbox"
+                                                              id="victimario_extranjero"
+                                                              name="victimario_extranjero"
+                                                              [(ngModel)]="victimario.extranjero"
+                                                              class="form-check-input"
+                                                              (ngModelChange)="onExtranjeroChange($event)"
+                                                            />
+                                                          </div>
+                                                        </div>
+          <!-- lugar de procedencia -->
+           <div class="row extranjero" *ngIf="victimario.extranjero">
+           <hr>
+          <h5 class="titulo">Lugar de procedencia:</h5>
+          <div class="col-6 col-md-3">
+            <label for="victimario_nacionalidad">Nacionalidad:</label>
+            <select id="victimario_nacionalidad" name="victimario_nacionalidad"
+              [(ngModel)]="victimario.nacionalidad" class="form-select">
+              <option *ngFor="let pais of paises" [value]="pais.valor">{{ pais.nombre }}</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="victimario_provincia">Provincia:</label>
+            <input type="text" id="victimario_provincia" name="victimario_provincia" [(ngModel)]="victimario.provincia" class="form-control">
+          </div>
+         </div>
+             <div>
+                  <h5 class="titulo">Fotos de la persona:</h5>
+                  <div class="form-group md-12 d-flex align-items-center">
+                    <ul *ngIf="archivosPersonas.length > 0" class="list-unstyled">
+                      <li *ngFor="let archivo of archivosPersonas; let i = index">
+                        <div *ngIf="archivo.url && archivo.fileName" class="file-info">
+                          <p class="mb-1">
+                            <a [href]="archivo.url" [download]="archivo.fileName" target="_blank">{{ archivo.fileName }}</a>
+                          </p>
+                          <div *ngIf="archivo.mimeType.startsWith('image/')">
+                            <img [src]="archivo.url" alt="{{ archivo.fileName }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
+                          </div>
+<button type="button" class="btn btn-danger btn-sm mt-2" (click)="eliminarArchivoCargadoP(i, victimario)">Eliminar</button>
+                        
+                        </div>
+                        <!-- Si el archivo aún no tiene url (recién cargado, antes de guardar), muestra la vista previa local -->
+                                                                    <div *ngIf="!archivo.url && archivo.file && archivo.fileName" class="file-info">
+                                                <p class="mb-1">{{ archivo.fileName }}</p>
+                                                <div *ngIf="archivo.mimeType.startsWith('image/')">
+                                                  <img *ngIf="archivo.previewUrl" [src]="archivo.previewUrl" alt="{{ archivo.fileName }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
+                                                </div>
+<button type="button" class="btn btn-danger btn-sm mt-2" (click)="eliminarArchivoCargadoP(i, victimario)">Eliminar</button>
+                                             
+                                              </div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <input type="file" id="archivoPersona" style="display: none;" (change)="onFileSelectedPersona($event, obtenerIndiceDisponible())">
+                  </div>
+                  <div class="form-group d-flex align-items-center">
+                    <button type="button" class="btn btn-success me-3" (click)="abrirCamara()">
+                      <i class="bi bi-camera"></i> Cámara
+                    </button>
+                    <button type="button" class="btn btn-warning text-dark" (click)="abrirSistemaArchivos()">
+                      <i class="bi bi-folder2-open"></i> Archivos
+                    </button>
+                  </div>
+                </div>
+          </div>
+        </div>
+         <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"(click)="resetFormulario('victimario')" (click)="cancelarActualizacion('modalProtagonista')">Cerrar</button>
+          <button *ngIf="!isEditing" type="button" class="btn btn-primary" (click)="guardarPersona('victimario', false)">Guardar</button>
+          <!-- <button *ngIf="!isEditing" type="button" class="btn btn-primary" (click)="agregarPersonaTemporal('protagonista')">Agregar a Novedad</button> -->
+          <button *ngIf="isEditing" type="button" class="btn btn-primary" (click)="actualizarPersona('victimario')">Actualizar Datos</button>
+       </div>
+      </div>
+    </div>
+    
+
+  </div>
+
+
+<div class="modal fade" id="modalTestigo" tabindex="-1" aria-labelledby="modalTestigoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header custom-modal-header p-2">
+        <h5 class="modal-title mb-0" id="modalTestigoLabel">DATOS DEL TESTIGO:</h5>
+        <button type="button"  class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-3">
+            <label for="testigo_dni">DNI:</label>
+            <div class="input-group">
+
+              <input
+                type="number"
+                id="testigo_dni"
+                name="testigo_dni"
+                [(ngModel)]="testigo.dni"
+                class="form-control"
+                min="0"
+                step="1"
+                (input)="limpiarDni($event)"
+              />              
+              <button class="btn btn-primary" type="button" (click)="buscarPersonaPorDNI(testigo.dni || '', 'testigo')" [disabled]="isEditing">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="testigo_nombre">Nombre:</label>
+            <input type="text" id="testigo_nombre" name="testigo_nombre" [(ngModel)]="testigo.nombre" class="form-control">
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="testigo_apellido">Apellido:</label>
+            <input type="text" id="testigo_apellido" name="testigo_apellido" [(ngModel)]="testigo.apellido" class="form-control">
+          </div>
+         <!-- logica de edad para input de numeros+cadena de caracteres -->
+          <div class="col-6 col-md-3">
+            <label for="testigo_edad">Edad:</label>
+             <div class="input-group">
+                                                                                                  <!-- Ejemplo para víctima -->
+                                         <input type="number" min="0" [(ngModel)]="testigo_edad_valor" class="form-control" placeholder="Edad" id="testigo_edad">
+                                          <select [(ngModel)]="testigo_edad_unidad" class="form-select" style="max-width: 100px;">
+                                          <option value="años">Años</option>
+                                          <option value="meses">Meses</option>
+                                          <option value="días">Días</option>
+                                          </select>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="testigo_telefono">Teléfono:</label>
+            <input
+              type="number"
+              id="testigo_telefono"
+              name="testigo_telefono"
+              [(ngModel)]="testigo.telefono"
+              class="form-control"
+              step="1"
+              min="0"
+              pattern="[0-9]*"
+              inputmode="numeric"
+            >
+          </div>
+          <div class="col-6 col-md-2">
+            <label for="testigo_sexo">Sexo </label>
+            <select id="testigo_sexo" name="testigo_sexo" [(ngModel)]="testigo.sexo" class="form-select">
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+            </select>
+          </div>
+          <!-- nueov -->
+          <div class="col-6 col-md-3">
+            <label for="testigo_genero">Género:</label>
+            <select id="testigo_genero" name="testigo_genero" [(ngModel)]="testigo.genero" class="form-select">
+              <option value="Heterosexual">Heterosexual</option>
+              <option value="Transexual">Transexual</option>
+              <option value="Homossexual">Homosexual</option>
+                            <option value="Indefinido">Otro</option>
+
+            </select>  
+          </div>
+          <!--  -->
+         <h5 class="titulo">Lugar de residencia:</h5>
+          <div class="col-6 col-md-3">
+            <label for="testigo_departamento">Departamento:</label>
+            <select id="testigo_departamento" name="testigo_departamento" [(ngModel)]="testigo.departamento_id" class="form-select"
+  (change)="onDepartamentoChange('testigo')">            
+              <option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label for="testigo_localidad">Localidad:</label>
+            <select id="testigo_localidad" name="testigo_localidad" [(ngModel)]="testigo.localidad_id" class="form-select" (change)="onLocalidadChange('testigo')">
+              <option *ngFor="let localidad of localidades" [value]="localidad.id">{{ localidad.nombre }}</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-6">
+            <label for="testigo_direccion">Domicilio:</label>
+            <input type="text" id="testigo_direccion" name="testigo_direccion" [(ngModel)]="testigo.domicilio" class="form-control">
+          </div>
+          <div class="col-md-12">
+                                                          <div class="form-check mt-2 testigo-extranjero-box"> 
+                                                            <label class="form-check-label ms-2" for="testigo_extranjero">
+                                                              ¿Es extranjero?(Marcar el tilde en caso que sea procedente de otro país o provincia)
+                                                            </label>
+                                                                                                                       <input
+                                                              type="checkbox"
+                                                              id="testigo_extranjero"
+                                                              name="testigo_extranjero"
+                                                              [(ngModel)]="testigo.extranjero"
+                                                              class="form-check-input"
+                                                              (ngModelChange)="onExtranjeroChange($event)"
+                                                            />
+                                                          </div>
+                                                        </div>
+          <!--  -->
+         <div class="row extranjero" *ngIf="testigo.extranjero">                                
+          <hr>
+          <h5 class="titulo">Lugar de procedencia:</h5>
+          <div class="col-6 col-md-3">
+            <label for="testigo_nacionalidad">Nacionalidad:</label>
+            <select id="testigo_nacionalidad" name="testigo_nacionalidad" [(ngModel)]="testigo.nacionalidad" class="form-select">
+              <option *ngFor="let pais of paises" [value]="pais.valor">{{ pais.nombre }}</option>
+            </select>
+          </div>
+
+            <div class="col-6 col-md-3">
+            <label for="testigo_provincia">Provincia:</label>
+            <input type="text" id="testigo_provincia" name="testigo_provincia" [(ngModel)]="testigo.provincia" class="form-control">
+          </div>   
+          </div>
+               <!--  -->
+        <div>
+                  <h5 class="titulo">Fotos de la persona:</h5>
+                  <div class="form-group md-12 d-flex align-items-center">
+                    <ul *ngIf="archivosPersonas.length > 0" class="list-unstyled">
+                      <li *ngFor="let archivo of archivosPersonas; let i = index">
+                        <div *ngIf="archivo.url && archivo.fileName" class="file-info">
+                          <p class="mb-1">
+                            <a [href]="archivo.url" [download]="archivo.fileName" target="_blank">{{ archivo.fileName }}</a>
+                          </p>
+                          <div *ngIf="archivo.mimeType.startsWith('image/')">
+                            <img [src]="archivo.url" alt="{{ archivo.fileName }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
+                          </div>
+<button type="button" class="btn btn-danger btn-sm mt-2" (click)="eliminarArchivoCargadoP(i, testigo)">Eliminar</button>                     
+                        </div>
+                        <!-- Si el archivo aún no tiene url (recién cargado, antes de guardar), muestra la vista previa local -->
+                                                                    <div *ngIf="!archivo.url && archivo.file && archivo.fileName" class="file-info">
+                                                <p class="mb-1">{{ archivo.fileName }}</p>
+                                                <div *ngIf="archivo.mimeType.startsWith('image/')">
+                                                  <img *ngIf="archivo.previewUrl" [src]="archivo.previewUrl" alt="{{ archivo.fileName }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
+                                                </div>
+<button type="button" class="btn btn-danger btn-sm mt-2" (click)="eliminarArchivoCargadoP(i, testigo)">Eliminar</button>                                           
+                                              </div>
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <input type="file" id="archivoPersona" style="display: none;" (change)="onFileSelectedPersona($event, obtenerIndiceDisponible())">
+                  </div>
+                  <div class="form-group d-flex align-items-center">
+                    <button type="button" class="btn btn-success me-3" (click)="abrirCamara()">
+                      <i class="bi bi-camera"></i> Cámara
+                    </button>
+                    <button type="button" class="btn btn-warning text-dark" (click)="abrirSistemaArchivos()">
+                      <i class="bi bi-folder2-open"></i> Archivos
+                    </button>
+                  </div>
+                </div>
+          </div>
+        </div>
+         <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"(click)="resetFormulario('testigo')" (click)="cancelarActualizacion('modalTestigo')">Cerrar</button>
+          <button *ngIf="!isEditing" type="button" class="btn btn-primary" (click)="guardarPersona('testigo', false)">Guardar</button>
+          <!-- <button *ngIf="!isEditing" type="button" class="btn btn-primary" (click)="agregarPersonaTemporal('protagonista')">Agregar a Novedad</button> -->
+          <button *ngIf="isEditing" type="button" class="btn btn-primary" (click)="actualizarPersona('testigo')">Actualizar Datos</button>
+       </div>
+      </div>
+    </div>
+  </div>
+  
+     
+   
+<!-- Modal para la cámara -->
+<div class="modal fade fullscreen-modal" id="camera-modal" tabindex="-1" aria-labelledby="cameraModalLabel" aria-hidden="true" (hidden.bs.modal)="cerrarCamara()">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header custom-modal-header2 p-2">
+        <button type="button" class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Close" (click)="cerrarCamara()"></button>
+      </div>
+
+      <div class="modal-body p-0">
+        <video #videoElement autoplay style="width: 100%; height: 100%;"></video>
+      </div>
+      <div class="modal-footer custom-modal-footer">
+        <button class="btn btn-secondary" (click)="alternarCamara()">
+          <i class="bi bi-arrow-repeat"></i> <!-- Ícono de invertir cámara -->
+        </button>
+        <button class="btn btn-primary" (click)="tomarFoto()">
+          <i class="bi bi-camera"></i> <!-- Ícono de cámara -->
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal para Elemento Secuestrado -->
+<div class="modal-personalizado" id="modalSecuestrado" *ngIf="modalElementoSecuestradoAbierto">
+  <div class="modal-contenido">
+    <!-- Encabezado del modal -->
+    <div class="modal-encabezado">
+      <h5 class="text-white">Agregar Elemento Secuestrado</h5>
+      <button (click)="cerrarModalElementoSecuestrado()"  class="btn-close btn-close-red position-absolute end-0 me-2">×</button>
+    </div>
+
+    <!-- Cuerpo del modal -->
+    <div class="modal-cuerpo">
+      <div class="form-group">
+        <label class="titulo" for="elementoBienNoRecuperado">Elemento:</label>
+        <select id="elementoBienNoRecuperado" [(ngModel)]="nuevoElementoSecuestrado.descripcion" class="form-control" (change)="onElementoSecuestradoChange()">
+          <option value="ARMA BLANCA">ARMA BLANCA</option>
+          <option value="ARMA DE FUEGO">ARMA DE FUEGO</option>
+          <option value="ELEMENTO CONTUNDENTE">ELEMENTO CONTUNDENTE</option>
+          <option value="SUSTANCIAS">SUSTANCIAS</option>
+          <option >Elemento de dudosa procedencia</option>
+        </select>
+      </div>
+      
+      <!-- Mostrar ng-select solo si se elige "Elemento de dudosa procedencia" -->
+      <div class="col-md-12" *ngIf="mostrarSelectorDudoso">
+        <label class="titulo">Seleccione un elemento:</label>
+        <div class="form-group d-flex align-items-center">
+          <ng-select
+            [items]="elementos"
+            bindLabel="elemento_nombre"
+            bindValue="elemento_nombre"
+            [typeahead]="searchText$"
+            [(ngModel)]="nuevoElementoSecuestrado.descripcion"
+            (ngModelChange)="cargarCategoriaPorElementoSecuestrado(nuevoElementoSecuestrado.descripcion)"
+            dropdownPosition="bottom"
+            appendTo="body"
+            class="form-control flex-grow-1">
+          </ng-select>
+          <i class="bi bi-search ml-2" style="font-size: 1.2rem; color: #6c757d;"></i>
+        </div>
+      </div>
+
+      <!-- Mostrar la categoría si hay una seleccionada -->
+      <div *ngIf="categoriaSeleccionada">
+        <p>La categoría del elemento seleccionado es: {{ categoriaSeleccionada }}</p>
+      </div>
+
+      <!-- Campo de descripción -->
+      <div class="col-md-12">
+        <label class="titulo">Descripción:</label>
+        <textarea id="elementoBienNoRecuperado"
+          [(ngModel)]="nuevoElementoSecuestrado.caracteristicas"
+          class="form-control">
+        </textarea>
+      </div>
+    </div>
+
+    <!-- Pie del modal -->
+    <div class="modal-pie">
+      <button (click)="cerrarModalElementoSecuestrado()" class="btn btn-secundario">Cerrar</button>
+      <button (click)="agregarElementoSecuestrado()" class="btn btn-primario">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal con los elementos -->
+<div class="modal-personalizado" id="modalBienNoRecuperado" *ngIf="modalBienRecuperadoAbierto">
+  <div class="modal-contenido">
+    <!-- Encabezado del modal -->
+    <div class="modal-encabezado">
+      <h5 class="text-white">{{ elementoRecuperado ? 'Agregar Bien Recuperado' : 'Agregar Bien No Recuperado' }}</h5>
+      <button (click)="cerrarModal()"  class="btn-close btn-close-red position-absolute end-0 me-2">×</button>
+    </div>
+
+    <!-- Cuerpo del modal -->
+    <div class="modal-cuerpo">
+      <div class="checkbox-container">
+        <label for="miCheckbox">Elemento recuperado:</label>
+        <input type="checkbox" id="miCheckbox" [(ngModel)]="elementoRecuperado" (ngModelChange)="cambiarDescripcion()" (ngModelChange)="cambiarDescripcion()" (ngModelChange)="cargarCategoriaPorElemento(descripcionSeleccionada)">
+      </div>
+      <div class="form-group">
+        <label class="titulo" for="elemento">Elemento:</label>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group d-flex align-items-center">
+            <ng-select
+              [items]="elementos"
+              bindLabel="elemento_nombre"
+              bindValue="elemento_nombre"
+              [typeahead]="searchText$"
+              [(ngModel)]="descripcionSeleccionada"
+              (ngModelChange)="cargarCategoriaPorElemento(descripcionSeleccionada)" 
+              dropdownPosition="bottom"
+              appendTo="body"
+              class="form-control flex-grow-1">
+            </ng-select>
+            <i class="bi bi-search ml-2" style="font-size: 1.2rem; color: #6c757d;"></i>
+            </div>
+          </div>
+        </div>
+
+    
+        <br>
+      </div>
+   <!-- Descripción -->
+<div class="col-md-12">
+  <label class="titulo" for="descripcionBien">Descripción:</label>
+  <textarea id="descripcionBien"
+    [(ngModel)]="descripcionActual"
+    (input)="guardarDescripcion($event)"
+   class="form-control">
+  </textarea>
+</div>
+
+      
+
+      <!-- Mostrar la categoría -->
+      <div *ngIf="categoriaSeleccionada">
+        <p>La categoría del elemento seleccionado es: {{ categoriaSeleccionada }}</p>
+      </div>
+    </div>
+    
+    
+    <!-- que incomodo es estar eb nemdi -->
+    <!-- Pie del modal -->
+    <div class="modal-pie">
+      <button (click)="cerrarModal()" class="btn btn-secundario">Cerrar</button>
+      <button (click)="agregarElemento()" class="btn btn-primario">{{ elementoRecuperado ? 'Agregar Bien Recuperado' : 'Agregar Bien No Recuperado' }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- tengo un formulario de novedades como te habaras dado cuenta con varios datos que pueden servirme para completar actas, puedes hacerme un boton para eeditar que documento o  -->
+<div class="modal fade" id="modalPolicia" tabindex="-1" aria-labelledby="modalPoliciaLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header custom-modal-header p-2">
+        <h5 class="modal-title" id="modalPoliciaLabel">Gestión de Personal</h5>
+        <button type="button" class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+      
+           
+              <div class="row">
+                             <div class="col-6 col-md-6"> 
+                              <label for="legajo" class="form-label">Busque el efectivo a agregar:</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="legajo" name="legajo" placeholder="Buscar por legajo"
+                      (click)="resetFormularioPersonal()" [(ngModel)]="nuevaPersonal.legajo">
+                    <button class="btn btn-primary" type="button" (click)="buscarPersonalPorLegajo(nuevaPersonal.legajo)" [disabled]="isEditing">
+                      <i class="bi bi-search"></i>
+                    </button>
+                  </div>
+                </div>
+                 <div class="col-6 mb-3">
+                <label for="dni" class="form-label">DNI:</label>
+                <input type="text" class="form-control" id="dni" name="dni" [(ngModel)]="nuevaPersonal.dni" disabled>
+              </div>
+              
+              <div class="col-6 mb-3">
+                <label for="jerarquia" class="form-label">Jerarquía:</label>
+                <input type="text" class="form-control" id="jerarquia" name="jerarquia" [(ngModel)]="nuevaPersonal.jerarquia" disabled>
+              </div>
+                <div class="col-6 ">
+                  <label for="nombre" class="form-label">Nombre:</label>
+                  <input type="text" class="form-control" id="nombre" name="nombre" [(ngModel)]="nuevaPersonal.nombre" disabled>
+                </div>
+            
+                <div class="col-6 ">
+                  <label for="apellido" class="form-label">Apellido:</label>
+                  <input type="text" class="form-control" id="apellido" name="apellido" [(ngModel)]="nuevaPersonal.apellido" disabled>
+                </div>
+
+            </div>
+
+          
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"(click)="resetFormularioPersonal()">Cancelar</button>
+        <button type="button" class="btn btn-primary"(click)="agregarPersonalTemporal()">Agregar a efectivo</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="involucradoModal" tabindex="-1" aria-labelledby="involucradoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title titulo" id="involucradoModalLabel">SELECCIONA EL TIPO DE INVOLUCRADO:</h5>
+        <button type="button" class="btn-close btn-close-red position-absolute end-0 me-2" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+ <div class="modal-body text-center">
+  <p><strong>Recordatorio:</strong></p>
+  <ul class="text-start">
+    <li>
+      <strong><u>Protagonista</u></strong>: Persona que denuncia o informa sobre un hecho delictivo. 
+      Este rol también debe asignarse a los involucrados en <strong>accidentes de tránsito</strong>, 
+      ya que en estos casos no siempre se pueden identificar claramente a una víctima o un victimario.
+    </li>
+    <li>
+      <strong><u>Victimario</u></strong>: Presunto autor del delito.
+    </li>
+    <li>
+      <strong><u>Víctima</u></strong>: Persona que ha resultado afectada por el hecho delictivo.
+    </li>
+    <li>
+      <strong><u>Testigo</u></strong>: Persona que presencia el hecho y puede aportar información relevante sobre lo ocurrido.
+    </li>
+  </ul>
+</div>
+
+        <div class="modal-footer d-flex justify-content-between flex-nowrap">
+        <button type="button" class="btn btn-warning flex-fill mx-1" (click)="onElegir('victimario')" data-bs-dismiss="modal">VICTIMARIO</button>
+        <button type="button" class="btn btn-danger flex-fill mx-1" (click)="onElegir('victima')" data-bs-dismiss="modal">VICTIMA</button>
+        <button type="button" class="btn btn-secondary flex-fill mx-1" (click)="onElegir('protagonista')" data-bs-dismiss="modal">PROTAGONISTA</button>
+        <button type="button" class="btn btn-primary flex-fill mx-1" (click)="onElegir('testigo')" data-bs-dismiss="modal">TESTIGO</button>
+      </div>
+    </div>
+  </div>
+</div>

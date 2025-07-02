@@ -1,0 +1,171 @@
+  <link href="https://fonts.googleapis.com/css?family=Josefin+Sans" rel="stylesheet">
+
+<!-- Background & animion & navbar & title -->
+<div class="container-fluid">
+<!-- Background animtion-->
+    <div class="background">
+       <div class="cube"></div>
+       <div class="cube"></div>
+       <div class="cube"></div>
+       <div class="cube"></div>
+      <div class="cube"></div>
+      <div class="cube"></div>
+       <div class="cube"></div>
+       <div class="cube"></div>
+       <div class="cube"></div>
+      <div class="cube"></div>
+    </div>
+<!-- header -->
+   <header>
+<!-- navbar -->
+     
+<!-- logo -->
+       <div class="logo"><span>      <img class="img" src="./assets/minseg.png" alt="">
+      </span></div> 
+<!-- title & content -->
+      <section class="header-content ">
+       
+          <c-container breakpoint="md">
+            <c-row class="justify-content-center">
+              <c-col lg="5" xl="5">
+                <c-card-group>
+                  <c-card class="p-4">
+                    <c-card-body class="custom-card-body p-4">
+                      <form cForm>
+                        <div class="headercard">
+                        <h5 class="text-center" style="font-size: 20px;">INICIO DE SESIÓN</h5></div>
+                        <!-- Sección de mensajes-->
+                        @if (message) {
+                          <div class="alert alert-{{type}}" role="alert">
+                            {{message}}
+                          </div>
+                        }
+                        <!---------------------->
+            
+                        <c-input-group class="mb-3">
+                          <span cInputGroupText>
+                            <svg cIcon name="cilUser"></svg>
+                          </span>
+                          <input autoComplete="email" cFormControl placeholder="Email" name="email" [(ngModel)]="email"/>
+                        </c-input-group>
+                        <c-input-group class="mb-4">
+                          <span cInputGroupText>
+                            <svg cIcon name="cilLockLocked"></svg>
+                          </span>
+                          <input
+                            autoComplete="current-password"
+                            cFormControl
+                            placeholder="Contraseña"
+                            type="password"
+                            name="password"
+                            [(ngModel)]="password"
+                          />
+                        </c-input-group>
+                        <c-row>
+                          <c-col xs="4">
+                            <button cButton class="px-1" color="primary" (click)="login()" style="font-size: 12px;">
+                              @if (loadinglogin) {
+                                <c-spinner aria-hidden="false" size="sm"></c-spinner> Cargando...
+                              }
+                              @else {
+                                Ingresar
+                              }
+                            </button>
+                          </c-col>
+                        
+                          <c-col class="text-right" xs="4">
+                            <button cButton class="px-0" color="link" (click)="verificarCorreo()" style="font-size: 12px;">
+                              Reenviar correo de verificación
+                            </button>
+                          </c-col>
+                        
+                          <c-col class="text-right" xs="4">
+                            <button cButton class="px-0" color="link" (click)="toggleModal()" style="font-size: 12px;">
+                              Olvidaste tu contraseña?
+                            </button>
+                          </c-col>
+                        
+                          <c-col class="text-center" xs="12">
+                            <p class="text-body" style="font-size: 18px;">
+                              No tienes cuenta? <a routerLink="/register">Registrate</a>
+                            </p>
+                          </c-col>
+                        </c-row>
+                        
+                        <!-- NO ME ESTA DIRIGIENDO AL REGISTER -->
+                      </form>
+                    </c-card-body>
+                  </c-card>
+                  <!-- <c-card [ngStyle]="{'minWidth.%': 44}" class="text-white bg-primary py-5">
+                    <c-card-body class="text-center ">
+                      <div>
+                        <h2>Registro</h2>
+                        <p>
+                          Si aun no tienes un usuario registrado deberas hacerlo para poder iniciar sesion o solicitarlo al area administrativa de tu dependencia y pronto te mandaremos un correo de confirmacion.
+                        </p>
+                      </div>
+                    </c-card-body>
+                  </c-card> -->
+                </c-card-group>
+              </c-col>
+            </c-row>
+        
+        
+          </c-container>
+       
+        
+      </section>
+  </header>
+</div>
+
+            <!-- Modal Forgot Password -->
+            <c-modal id="modalForgot" [visible]="visible" (visibleChange)="handleLiveDemoChange($event)">
+              <c-modal-header>
+                <h5 cModalTitle>Olvide mi contraseña</h5>
+                <button (click)="toggleModal()" cButtonClose></button>
+              </c-modal-header>
+              <c-modal-body>
+                <!-- Sección de mensajes del modal-->
+                @if (messagemodal) {
+                  <div class="alert alert-{{typemodal}}" role="alert">
+                    {{messagemodal}}
+                  </div>
+                }
+                <!---------------------->
+                <input type="email" [(ngModel)]="emailforgot" name="emailforgot" placeholder="ingrese el gmail registrado" cFormControl autoComplete="email">
+              </c-modal-body>
+              <c-modal-footer>
+                <button (click)="toggleModal()" cButton color="secondary">
+                  Cerrar
+                </button>
+                <button cButton color="primary" (click)="forgotpassword()">
+                  @if (loadingforgot) {
+                    <c-spinner aria-hidden="false" size="sm"></c-spinner>Loading...
+                  }
+                  @else {
+                    Email enviado
+                  }
+                </button>
+              </c-modal-footer>
+            </c-modal>
+                        <!-- Modal para restablecer contraseña -->
+            <c-modal id="modalResetPassword" [visible]="resetMode" (visibleChange)="resetMode = $event">
+              <c-modal-header>
+                <h5 cModalTitle>Restablecer contraseña</h5>
+                <button (click)="resetMode = false" cButtonClose></button>
+              </c-modal-header>
+              <c-modal-body>
+                <form (ngSubmit)="resetPassword()">
+                  <input
+                    type="password"
+                    [(ngModel)]="newPassword"
+                    name="newPassword"
+                    placeholder="Nueva contraseña"
+                    required
+                    cFormControl
+                    class="form-control mb-2"
+                  />
+                  <button type="submit" class="btn btn-primary w-100">Cambiar contraseña</button>
+                </form>
+              </c-modal-body>
+            </c-modal>
