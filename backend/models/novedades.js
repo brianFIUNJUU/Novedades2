@@ -180,61 +180,7 @@ operativo_nombre: {
   },
   estado: {
     type: DataTypes.BOOLEAN,
-  },
-  archivo: {
-    type: DataTypes.TEXT,
-  },
-  archivo1: {
-    type: DataTypes.TEXT,
-  },
-  archivo2: {
-    type: DataTypes.TEXT,
-  },
-  archivo3: {
-    type: DataTypes.TEXT,
-  },
-  archivo4: {
-    type: DataTypes.TEXT,
-  },
-  archivo5: {
-    type: DataTypes.TEXT,
-  },
-  tipoArchivo: {
-    type: DataTypes.STRING,
-  },
-  tipoArchivo1: {
-    type: DataTypes.STRING,
-  },
-  tipoArchivo2: {
-    type: DataTypes.STRING,
-  },
-  tipoArchivo3: {
-    type: DataTypes.STRING,
-  },
-  tipoArchivo4: {
-    type: DataTypes.STRING,
-  },
-  tipoArchivo5: {
-    type: DataTypes.STRING,
-  },
-  nombreArchivo: {
-    type: DataTypes.STRING,
-  },
-  nombreArchivo1: {
-    type: DataTypes.STRING,
-  },
-  nombreArchivo2: {
-    type: DataTypes.STRING,
-  },
-  nombreArchivo3: {
-    type: DataTypes.STRING,
-  },
-  nombreArchivo4: {
-    type: DataTypes.STRING,
-  },
-  nombreArchivo5: {
-    type: DataTypes.STRING,
-  },
+  }
 }, {
   tableName: 'novedades',
   timestamps: false

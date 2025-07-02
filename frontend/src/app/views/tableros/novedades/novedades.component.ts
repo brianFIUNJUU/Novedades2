@@ -53,6 +53,8 @@ import { ChangeDetectorRef } from '@angular/core';
 import { ArchivoPersona } from '../../../models/archivo_persona'; // Importa el modelo de ArchivoPersona
 import { ArchivoPersonaService } from '../../../services/archivo_persona.service'; // Importa el servicio de ArchivoPersona
 import { environment } from '../../../environments/environment'; 
+import { ArchivoNovedad } from '../../../models/archivo_novedad'; // Importa el modelo de ArchivoNovedad
+import { ArchivoNovedadService } from '../../../services/archivo_novedad.services'; // Importa el servicio de ArchivoNovedad
 // Configurar Leaflet para usar las imágenes desde la carpeta de activos
 L.Icon.Default.imagePath = 'assets/leaflet/';
 @Component({
@@ -149,9 +151,17 @@ availableCamerasN: MediaDeviceInfo[] = []; // Lista de cámaras disponibles
 currentCameraIndexN: number = 0; // Índice de la cámara actual
 
   ubicacionEditable: boolean = false;
-  archivos: { file: File | null, base64: string, mimeType: string, fileName: string }[] = [
-    { file: null, base64: '', mimeType: '', fileName: '' }
-  ];
+  // Declaración en el componente:
+archivosNovedad: {
+  file: File | null,
+  mimeType: string,
+  fileName: string,
+  url?: string,
+  previewUrl?: string
+}[] = [
+  { file: null, mimeType: '', fileName: '' }
+];
+
 
  archivosPersonas: {
     file: File | null,
@@ -208,6 +218,7 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     private operativoService: OperativoService, // Inyectar el servicio de Operativo
     private cdr: ChangeDetectorRef,
     private archivoPersonaService: ArchivoPersonaService,
+    private archivoNovedadService: ArchivoNovedadService // Inyectar el servicio de ArchivoNovedad
 
     
     
@@ -236,7 +247,7 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     this.cargarCategorias();
     this.setDefaultTime();
     this.cargarModusOperandi();
-    this.inicializarArchivos();
+    // this.inicializarArchivos();
     this.configurarFiltradoModusOperandi();
     const today = new Date();
 
@@ -1292,43 +1303,20 @@ eliminarElemento(index: number): void {
       return;
     }
   
-    this.nuevaNovedad.archivo = this.archivos[0]?.base64 || '';
-    this.nuevaNovedad.archivo1 = this.archivos[1]?.base64 || '';
-    this.nuevaNovedad.archivo2 = this.archivos[2]?.base64 || '';
-    this.nuevaNovedad.archivo3 = this.archivos[3]?.base64 || '';
-    this.nuevaNovedad.archivo4 = this.archivos[4]?.base64 || '';
-    this.nuevaNovedad.archivo5 = this.archivos[5]?.base64 || '';
-    this.nuevaNovedad.tipoArchivo = this.archivos[0]?.mimeType || '';
-    this.nuevaNovedad.tipoArchivo1 = this.archivos[1]?.mimeType || '';
-    this.nuevaNovedad.tipoArchivo2 = this.archivos[2]?.mimeType || '';
-    this.nuevaNovedad.tipoArchivo3 = this.archivos[3]?.mimeType || '';
-    this.nuevaNovedad.tipoArchivo4 = this.archivos[4]?.mimeType || '';
-    this.nuevaNovedad.tipoArchivo5 = this.archivos[5]?.mimeType || '';
-    this.nuevaNovedad.nombreArchivo = this.archivos[0]?.fileName || '';
-    this.nuevaNovedad.nombreArchivo1 = this.archivos[1]?.fileName || '';
-    this.nuevaNovedad.nombreArchivo2 = this.archivos[2]?.fileName || '';
-    this.nuevaNovedad.nombreArchivo3 = this.archivos[3]?.fileName || '';
-    this.nuevaNovedad.nombreArchivo4 = this.archivos[4]?.fileName || '';
-    this.nuevaNovedad.nombreArchivo5 = this.archivos[5]?.fileName || '';
+
   
     // Incluir las personas temporales en la nueva novedad
     this.nuevaNovedad.personas = this.personasIds;
     this.nuevaNovedad.policias = this.policiasIds;
-  // Convertir campos vacíos a null para los campos enteros
-  // const camposEnteros = ['unidad_regional_id', 'cuadrante_id', 'personal_autor_id', 'oficial_cargo_id'];
-  // camposEnteros.forEach(campo => {
-  //   if ((this.nuevaNovedad as any)[campo] === '') {
-  //     (this.nuevaNovedad as any)[campo] = null;
-  //   }
-  // });
-
+ 
 
     this.novedadesService.createNovedad(this.nuevaNovedad).subscribe(
       res => {
-        console.log('Novedad creada', res);
+        console.log('Nocvedad reada', res);
         this.novedadGuardadaId = res.id; // Asigna el ID de la novedad guardada
         
       // console.log('Antes de vincular, personasTemporales:', this.personasTemporales);
+     
       this.vincularPersonasANovedad(this.novedadGuardadaId);
       this.vincularPersonalANovedad(this.novedadGuardadaId);
         // Guardar los estados de las personas temporales
@@ -1349,9 +1337,9 @@ eliminarElemento(index: number): void {
           );
         });
         // Vincular personas a la novedad
-      
+       this.subirArchivosNovedad(this.novedadGuardadaId);
         this.getAllNovedades();
-        this.resetForm();
+        // this.resetFormNov();
         Swal.fire('Éxito', 'Novedad guardada con éxito', 'success');
         this.router.navigate(['/tableros/novedades-list']); // Redirigir a la lista de novedades
       },
@@ -1398,24 +1386,6 @@ updateNovedad(): void {
     Swal.fire('Formulario incompleto', 'Por favor, completa todos los campos requeridos.', 'warning');
     return;
   }
-  this.nuevaNovedad.archivo = this.archivos[0]?.base64 || '';
-  this.nuevaNovedad.archivo1 = this.archivos[1]?.base64 || '';
-  this.nuevaNovedad.archivo2 = this.archivos[2]?.base64 || '';
-  this.nuevaNovedad.archivo3 = this.archivos[3]?.base64 || '';
-  this.nuevaNovedad.archivo4 = this.archivos[4]?.base64 || '';
-  this.nuevaNovedad.archivo5 = this.archivos[5]?.base64 || '';
-  this.nuevaNovedad.tipoArchivo = this.archivos[0]?.mimeType || '';
-  this.nuevaNovedad.tipoArchivo1 = this.archivos[1]?.mimeType || '';
-  this.nuevaNovedad.tipoArchivo2 = this.archivos[2]?.mimeType || '';
-  this.nuevaNovedad.tipoArchivo3 = this.archivos[3]?.mimeType || '';
-  this.nuevaNovedad.tipoArchivo4 = this.archivos[4]?.mimeType || '';
-  this.nuevaNovedad.tipoArchivo5 = this.archivos[5]?.mimeType || '';
-  this.nuevaNovedad.nombreArchivo = this.archivos[0]?.fileName || '';
-  this.nuevaNovedad.nombreArchivo1 = this.archivos[1]?.fileName || '';
-  this.nuevaNovedad.nombreArchivo2 = this.archivos[2]?.fileName || '';
-  this.nuevaNovedad.nombreArchivo3 = this.archivos[3]?.fileName || '';
-  this.nuevaNovedad.nombreArchivo4 = this.archivos[4]?.fileName || '';
-  this.nuevaNovedad.nombreArchivo5 = this.archivos[5]?.fileName || '';
 
   // console.log('Datos enviados:', JSON.stringify(this.nuevaNovedad, null, 2)); // Agregar un log para ver los datos enviados 
   this.novedadesService.updateNovedad(this.nuevaNovedad.id.toString(), this.nuevaNovedad).subscribe(
@@ -1432,7 +1402,9 @@ updateNovedad(): void {
       });
       this.actualizarElementosAgregados(); // Llamar a actualizarElementosAgregados
       this.getAllNovedades();
-      this.resetForm();
+      // this.resetFormNov();
+       this.subirArchivosNovedad(this.nuevaNovedad.id); // Subir archivos de la novedad actualizada
+
       Swal.fire('Éxito', 'Novedad actualizada con éxito', 'success');
       this.router.navigate(['/tableros/novedades-list']); // Redirigir a la lista de novedades
     },
@@ -1683,78 +1655,135 @@ actualizarRelacionesPersonal(): void {
     }
 ///////////////////////////////////////////////////////////////////
 // Método para inicializar los archivos al crear una nueva novedad
-inicializarArchivos(): void {
-  this.archivos = [
-    { file: null, base64: '', mimeType: '', fileName: '' },
-    { file: null, base64: '', mimeType: '', fileName: '' },
-    { file: null, base64: '', mimeType: '', fileName: '' },
-    { file: null, base64: '', mimeType: '', fileName: '' },
-    { file: null, base64: '', mimeType: '', fileName: '' },
-    { file: null, base64: '', mimeType: '', fileName: '' }
+
+// ViewChild para la cámara de novedades
+@ViewChild('videoElementNovedad', { static: false }) videoElementNovedad!: ElementRef<HTMLVideoElement>;
+
+// 1. Inicializar archivos de novedades (máximo 6)
+resetArchivosNovedad(): void {
+  this.archivosNovedad = [
+    { file: null, mimeType: '', fileName: '' },
+    { file: null, mimeType: '', fileName: '' },
+    { file: null, mimeType: '', fileName: '' },
+    { file: null, mimeType: '', fileName: '' },
+    { file: null, mimeType: '', fileName: '' },
+    { file: null, mimeType: '', fileName: '' }
   ];
 }
 
-  cargarArchivosNovedad(): void {
-    this.archivos = [
-      { file: null, base64: this.nuevaNovedad.archivo || '', mimeType: this.nuevaNovedad.tipoArchivo || '', fileName: this.nuevaNovedad.nombreArchivo || '' },
-      { file: null, base64: this.nuevaNovedad.archivo1 || '', mimeType: this.nuevaNovedad.tipoArchivo1 || '', fileName: this.nuevaNovedad.nombreArchivo1 || '' },
-      { file: null, base64: this.nuevaNovedad.archivo2 || '', mimeType: this.nuevaNovedad.tipoArchivo2 || '', fileName: this.nuevaNovedad.nombreArchivo2 || '' },
-      { file: null, base64: this.nuevaNovedad.archivo3 || '', mimeType: this.nuevaNovedad.tipoArchivo3 || '', fileName: this.nuevaNovedad.nombreArchivo3 || '' },
-      { file: null, base64: this.nuevaNovedad.archivo4 || '', mimeType: this.nuevaNovedad.tipoArchivo4 || '', fileName: this.nuevaNovedad.nombreArchivo4 || '' },
-      { file: null, base64: this.nuevaNovedad.archivo5 || '', mimeType: this.nuevaNovedad.tipoArchivo5 || '', fileName: this.nuevaNovedad.nombreArchivo5 || '' }
-    ];
-  }
-getArchivosNovedad(novedad: Novedades): { base64: string; mimeType: string; fileName: string }[] {
-    return [
-      { base64: novedad.archivo || '', mimeType: novedad.tipoArchivo || 'application/octet-stream', fileName: novedad.nombreArchivo || 'Archivo 1' },
-      { base64: novedad.archivo1 || '', mimeType: novedad.tipoArchivo1 || 'application/octet-stream', fileName: novedad.nombreArchivo1 || 'Archivo 2' },
-      { base64: novedad.archivo2 || '', mimeType: novedad.tipoArchivo2 || 'application/octet-stream', fileName: novedad.nombreArchivo2 || 'Archivo 3' },
-      { base64: novedad.archivo3 || '', mimeType: novedad.tipoArchivo3 || 'application/octet-stream', fileName: novedad.nombreArchivo3 || 'Archivo 4' },
-      { base64: novedad.archivo4 || '', mimeType: novedad.tipoArchivo4 || 'application/octet-stream', fileName: novedad.nombreArchivo4 || 'Archivo 5' },
-      { base64: novedad.archivo5 || '', mimeType: novedad.tipoArchivo5 || 'application/octet-stream', fileName: novedad.nombreArchivo5 || 'Archivo 6' } // Añadir más archivos si es necesario
-    ];
-  }
-  resetForm(): void {
-    this.nuevaNovedad = new Novedades();
-    this.inicializarArchivos();
-    this.mensajeError = '';
-  }
-   ampliarImagen(event: any): void {
-    const img = event.target;
-    if (img.style.maxWidth === '600px') {
-      img.style.maxWidth = '100%';
-      img.style.maxHeight = '100%';
-    } else {
-      img.style.maxWidth = '600px';
-      img.style.maxHeight = '600px';
+// 2. Cargar archivos de una novedad desde la API
+cargarArchivosNovedad(novedadId?: number): void {
+  this.archivosNovedad = [];
+  const id = novedadId ?? this.nuevaNovedad.id;
+  if (!id) return;
+  this.archivoNovedadService.listarArchivosPorNovedad(id).subscribe(
+    (archivos: ArchivoNovedad[]) => {
+      this.archivosNovedad = archivos.map(a => ({
+        file: null,
+        mimeType: a.tipo,
+        fileName: a.nombre,
+        url: `${environment.apiUrl.replace('/api', '')}/${a.ruta.replace(/\\/g, '/')}`
+      }));
     }
-  }
-// Método para manejar la selección de archivos
+  );
+}
+
+// 3. Manejar selección de archivo para novedad
 onFileSelectedNovedad(event: any, index: number): void {
   const file: File = event.target.files[0];
   if (file) {
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      this.archivos[index] = {
-        file: file,
-        base64: e.target.result.split(',')[1],
-        mimeType: file.type,
-        fileName: file.name
-      };
-      console.log('Archivo cargado:', this.archivos[index]);
+    // Libera el blob anterior si existe
+    if (typeof this.archivosNovedad[index]?.previewUrl === 'string') {
+      URL.revokeObjectURL(this.archivosNovedad[index].previewUrl!);
+    }
+    this.archivosNovedad[index] = {
+      file: file,
+      mimeType: file.type,
+      fileName: file.name,
+      previewUrl: URL.createObjectURL(file)
     };
-    reader.readAsDataURL(file);
+    this.cdr.detectChanges();
   }
 }
 
-// Método para abrir el sistema de archivos
+// 4. Agregar slot para archivo de novedad
+agregarArchivoNovedad(): void {
+  if (this.archivosNovedad.length < 6) {
+    this.archivosNovedad.push({ file: null, mimeType: '', fileName: '' });
+  } else {
+    Swal.fire('Límite alcanzado', 'No puedes agregar más de 6 archivos.', 'warning');
+  }
+}
+
+// 5. Subir archivos de novedad (al guardar o actualizar)
+subirArchivosNovedad(novedadId: number): void {
+  this.archivosNovedad.forEach((archivo) => {
+    if (archivo.file) {
+      const formData = new FormData();
+      formData.append('archivo', archivo.file, archivo.fileName);
+      this.archivoNovedadService.subirArchivo(novedadId, formData).subscribe({
+        next: (res) => console.log('Archivo de novedad subido:', res),
+        error: (err) => console.error('Error al subir archivo de novedad:', err)
+      });
+    }
+  });
+}
+
+// 6. Eliminar archivo de novedad
+eliminarArchivoCargadoN(index: number, novedadId?: number): void {
+  const archivo = this.archivosNovedad[index];
+  if (!archivo) return;
+
+  // Libera el blob local si existe
+  if (archivo.previewUrl) {
+    URL.revokeObjectURL(archivo.previewUrl);
+  }
+
+  // Si la novedad NO tiene id, solo elimina del array local
+  const id = novedadId ?? this.nuevaNovedad.id;
+  if (!id) {
+    this.archivosNovedad[index] = { file: null, mimeType: '', fileName: '' };
+    return;
+  }
+
+  // Si la novedad tiene id, elimina del backend si corresponde
+  if (archivo.url && archivo.fileName) {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'El archivo será eliminado permanentemente.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.archivoNovedadService.listarArchivosPorNovedad(id).subscribe(archivos => {
+          const archivoBD = archivos.find(a => a.nombre === archivo.fileName);
+          if (archivoBD) {
+            this.archivoNovedadService.borrarArchivo(archivoBD.id).subscribe(() => {
+              this.cargarArchivosNovedad(id); // Refresca la lista
+              Swal.fire('Eliminado', 'El archivo ha sido eliminado.', 'success');
+            });
+          } else {
+            // Si no se encuentra en BD, limpia del array local
+            this.archivosNovedad[index] = { file: null, mimeType: '', fileName: '' };
+          }
+        });
+      }
+    });
+  } else {
+    // Si es un archivo nuevo (no subido aún), solo límpialo del array
+    this.archivosNovedad[index] = { file: null, mimeType: '', fileName: '' };
+  }
+}
+
+// 7. Abrir sistema de archivos para novedad
 abrirSistemaArchivosNovedad(): void {
   const index = this.obtenerIndiceDisponibleNovedad();
   if (index !== -1) {
     const inputElement = document.getElementById('archivoNovedad') as HTMLInputElement;
     if (inputElement) {
       inputElement.setAttribute('accept', '*/*');
-      inputElement.onchange = (event: any) => this.onFileSelectedNovedad(event, index);
       inputElement.click();
     }
   } else {
@@ -1762,38 +1791,67 @@ abrirSistemaArchivosNovedad(): void {
   }
 }
 
-// Método para obtener el índice disponible
+
+
+// 8. Obtener índice disponible para archivo de novedad
 obtenerIndiceDisponibleNovedad(): number {
-  for (let i = 0; i < this.archivos.length; i++) {
-    if (!this.archivos[i].file && !this.archivos[i].base64) {
+  for (let i = 0; i < this.archivosNovedad.length; i++) {
+    if (!this.archivosNovedad[i].file && !this.archivosNovedad[i].url) {
       return i;
     }
+  }
+  if (this.archivosNovedad.length < 6) {
+    this.archivosNovedad.push({ file: null, mimeType: '', fileName: '' });
+    return this.archivosNovedad.length - 1;
   }
   return -1;
 }
 
-// Método para abrir la cámara
-// ✅ Correcto (abrir el modal directamente)
-// Método para abrir la cámara de Novedad
-// Variables para manejar la cámara de novedades
 
-// Método para abrir la cámara de novedades
+
+// 9. Obtener preview de archivo de novedad
+getFilePreviewUrlNovedad(file: File | null): string | null {
+  return file ? URL.createObjectURL(file) : null;
+}
+
+// 10. Tomar foto desde cámara y agregar como archivo de novedad
+tomarFotoN(): void {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (context && this.videoElementNovedad) {
+    canvas.width = this.videoElementNovedad.nativeElement.videoWidth;
+    canvas.height = this.videoElementNovedad.nativeElement.videoHeight;
+    context.drawImage(this.videoElementNovedad.nativeElement, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const index = this.obtenerIndiceDisponibleNovedad();
+        if (index !== -1) {
+          const file = new File([blob], `foto_novedad_${index + 1}.png`, { type: 'image/png' });
+          this.archivosNovedad[index] = {
+            file: file,
+            mimeType: 'image/png',
+            fileName: `foto_novedad_${index + 1}.png`,
+            previewUrl: URL.createObjectURL(file)
+          };
+          this.cerrarCamaraN();
+        } else {
+          Swal.fire('Límite alcanzado', 'No puedes agregar más de 6 archivos.', 'warning');
+        }
+      }
+    }, 'image/png');
+  }
+}
+
+// 11. Métodos de cámara (abrir, cerrar, alternar, iniciar)
 abrirCamaraN(): void {
-  const index = this.obtenerIndiceDisponibleN();
+  const index = this.obtenerIndiceDisponibleNovedad();
   if (index !== -1) {
-    // Mostrar el modal de la cámara
-    const modalElement = document.getElementById('camera-modal-N');
-    if (modalElement) {
-      const modal = new bootstrap.Modal(modalElement);
-      modal.show();
-    }
-
-    // Listar los dispositivos de cámara disponibles
+    this.openModalCamaraN();
     navigator.mediaDevices.enumerateDevices()
       .then((devices) => {
         this.availableCamerasN = devices.filter(device => device.kind === 'videoinput');
         if (this.availableCamerasN.length > 0) {
-          // Iniciar con la primera cámara disponible
           this.iniciarCamaraN(this.availableCamerasN[0].deviceId);
         } else {
           Swal.fire('Error', 'No se encontraron cámaras disponibles.', 'error');
@@ -1810,25 +1868,28 @@ abrirCamaraN(): void {
   }
 }
 
-// Método para iniciar la cámara de novedades con un dispositivo específico
+openModalCamaraN(): void {
+  const modalElement = document.getElementById('camera-modal-N');
+  if (modalElement) {
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+  }
+}
+
 iniciarCamaraN(deviceId: string): void {
   if (this.streamNovedad) {
-    this.streamNovedad.getTracks().forEach(track => track.stop()); // Detener la cámara actual
+    this.streamNovedad.getTracks().forEach(track => track.stop());
   }
-
   const constraints = {
     video: {
-      deviceId: deviceId ? { ideal: deviceId } : undefined, // Usar "ideal" en lugar de "exact"
+      deviceId: deviceId ? { ideal: deviceId } : undefined,
       width: { ideal: 1280 },
       height: { ideal: 720 }
     }
   };
-
   navigator.mediaDevices.getUserMedia(constraints)
     .then((stream) => {
       this.streamNovedad = stream;
-
-      // Asignar el stream al elemento de video
       if (this.videoElementNovedad) {
         this.videoElementNovedad.nativeElement.srcObject = stream;
         this.videoElementNovedad.nativeElement.play();
@@ -1841,49 +1902,19 @@ iniciarCamaraN(deviceId: string): void {
     });
 }
 
-// Método para alternar entre cámaras de novedades
 alternarCamaraN(): void {
   if (this.availableCamerasN.length > 1) {
     this.currentCameraIndexN = (this.currentCameraIndexN + 1) % this.availableCamerasN.length;
     const nextCamera = this.availableCamerasN[this.currentCameraIndexN];
     this.iniciarCamaraN(nextCamera.deviceId);
   } else {
-    // Mostrar un mensaje si solo hay una cámara disponible
     Swal.fire('Advertencia', 'Solo hay una cámara disponible.', 'warning');
   }
 }
 
-// Método para tomar foto en Novedad
-tomarFotoN(): void {
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-
-  if (context && this.videoElementNovedad) {
-    canvas.width = this.videoElementNovedad.nativeElement.videoWidth;
-    canvas.height = this.videoElementNovedad.nativeElement.videoHeight;
-    context.drawImage(this.videoElementNovedad.nativeElement, 0, 0, canvas.width, canvas.height);
-
-    const base64Image = canvas.toDataURL('image/png').split(',')[1];
-    const index = this.obtenerIndiceDisponibleN();
-    if (index !== -1) {
-      this.archivos[index] = {
-        file: null,
-        base64: base64Image,
-        mimeType: 'image/png',
-        fileName: `foto_novedad_${index + 1}.png`
-      };
-      this.cerrarCamaraN();
-    } else {
-      Swal.fire('Límite alcanzado', 'No puedes agregar más de 6 archivos.', 'warning');
-    }
-  }
-}
-
-// // Método para cerrar la cámara de Novedad
 cerrarCamaraN(): void {
   if (this.streamNovedad) {
     this.streamNovedad.getTracks().forEach(track => track.stop());
-   
   }
   const modalElement = document.getElementById('camera-modal-N');
   if (modalElement) {
@@ -1893,42 +1924,16 @@ cerrarCamaraN(): void {
     }
   }
 }
-
-
-// Método para obtener índice disponible en Novedad
-obtenerIndiceDisponibleN(): number {
-  for (let i = 0; i < this.archivos.length; i++) {
-    if (!this.archivos[i].base64) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-// Método para abrir el modal de la cámara
-openModalCamaraN(): void {
-  const modalElement = document.getElementById('camera-modal-novedad');
-  if (modalElement) {
-    const modal = new bootstrap.Modal(modalElement);
-    modal.show();
+ampliarImagen(event: any): void {
+  const img = event.target;
+  if (img.style.maxWidth === '600px') {
+    img.style.maxWidth = '100%';
+    img.style.maxHeight = '100%';
+  } else {
+    img.style.maxWidth = '600px';
+    img.style.maxHeight = '600px';
   }
 }
-
-// Método para eliminar un archivo cargado
-eliminarArchivoCargadoN(index: number): void {
-  if (index >= 0 && index < this.archivos.length) {
-    this.archivos[index] = { file: null, base64: '', mimeType: '', fileName: '' };
-  }
-}
-
-// Método para obtener la URL de un archivo en Novedad
-getFileUrlNovedad(base64: string, mimeType: string): SafeUrl {
-  const url = `data:${mimeType};base64,${base64}`;
-  return this.domSanitizer.bypassSecurityTrustUrl(url);
-}
-
-// ✅ Correcto (acceso directo)
-@ViewChild('videoElementNovedad', { static: false }) videoElementNovedad!: ElementRef<HTMLVideoElement>;
   ///////////////////////////////////////////////////////
   OpenModalPolicia(): void {
     const modalElement = document.getElementById('modalPolicia');
@@ -2662,9 +2667,7 @@ resetFormNov(): void {
   
   this.personasIds = [];
   this.personasTemporales = [];
-  this.archivos = [
-    { file: null, base64: '', mimeType: '', fileName: '' }
-  ];
+  this.resetArchivosNovedad();
   this.isUpdating = false;
 }
   ///////////////////////////////////////////////////////
@@ -2923,7 +2926,8 @@ eliminarArchivoCargadoP(index: number, persona: Persona): void {
             this.archivosPersonas[index] = {
               file: file,
               mimeType: 'image/png',
-              fileName: `foto_${index + 1}.png`
+              fileName: `foto_${index + 1}.png`,
+              previewUrl: URL.createObjectURL(file) // Guarda la URL del blob
             };
             this.cerrarCamara();
           } else {

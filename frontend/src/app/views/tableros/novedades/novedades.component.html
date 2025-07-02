@@ -477,35 +477,48 @@
     <hr />
         
           <!-- Mostrar la lista de archivos cargados -->
-<div class="md-12">
-  <h5 class="titulo">Archivos vinculados al hecho:</h5>
-  <ul *ngIf="archivos.length > 0" class="list-unstyled">
-    <li *ngFor="let archivo of archivos; let i = index">
-      <div *ngIf="archivo.base64 && archivo.fileName" class="file-info">
-        <p class="mb-1">
-          <a [href]="getFileUrlNovedad(archivo.base64, archivo.mimeType)" [download]="archivo.fileName" target="_blank">{{ archivo.fileName }}</a>
-        </p>
-        <div *ngIf="archivo.mimeType.startsWith('image/')">
-          <img [src]="getFileUrlNovedad(archivo.base64, archivo.mimeType)" alt="{{ archivo.fileName }}" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
-        </div>
-        <button   [disabled]="readonlyMode" type="button" class="btn btn-danger btn-sm mt-2" (click)="eliminarArchivoCargadoN(i)">Eliminar</button>
-      </div>
-    </li>
-  </ul>
-</div>
-
-<!-- Input de archivo oculto -->
 <div>
-  <input type="file" id="archivoNovedad" style="display: none;" (change)="onFileSelectedNovedad($event, obtenerIndiceDisponibleN())">
-</div>
+  <h5 class="titulo">Archivos vinculados al hecho:</h5>
+  <div class="form-group md-12 d-flex align-items-center">
+    <div class="md-12">
+      <ul *ngIf="archivosNovedad.length > 0" class="list-unstyled">
+        <li *ngFor="let archivo of archivosNovedad; let i = index">
+          <!-- Si el archivo ya está subido y tiene url -->
+          <div *ngIf="archivo.url && archivo.fileName" class="file-info">
+            <p class="mb-1">
+              <a [href]="archivo.url" [download]="archivo.fileName" target="_blank">{{ archivo.fileName }}</a>
+            </p>
+            <div *ngIf="archivo.mimeType && archivo.mimeType.startsWith('image/')">
+              <img [src]="archivo.url" alt="{{ archivo.fileName }}" class="img-thumbnail"
+                   style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
+            </div>
+            <button [disabled]="readonlyMode" type="button" class="btn btn-danger btn-sm mt-2"
+                    (click)="eliminarArchivoCargadoN(i, nuevaNovedad.id)">Eliminar</button>
+          </div>
+          <!-- Si el archivo es nuevo (no subido aún), muestra la vista previa local -->
+          <div *ngIf="!archivo.url && archivo.file && archivo.fileName" class="file-info">
+            <p class="mb-1">{{ archivo.fileName }}</p>
+            <div *ngIf="archivo.mimeType && archivo.mimeType.startsWith('image/')">
+              <img *ngIf="archivo.previewUrl" [src]="archivo.previewUrl" alt="{{ archivo.fileName }}"
+                   class="img-thumbnail" style="max-width: 200px; max-height: 200px;" (click)="ampliarImagen($event)">
+            </div>
+            <button [disabled]="readonlyMode" type="button" class="btn btn-danger btn-sm mt-2"
+                    (click)="eliminarArchivoCargadoN(i)">Eliminar</button>
+          </div>
+        </li>
+      </ul>
+    </div>
+ <input type="file" id="archivoNovedad" style="display: none;" (change)="onFileSelectedNovedad($event, obtenerIndiceDisponibleNovedad())">
 
-<div  *ngIf="nuevaNovedad.personal_autor_id && !readonlyMode"class="form-group d-flex align-items-center">
-  <button type="button" class="btn btn-success me-3" (click)="abrirCamaraN()">
-    <i class="bi bi-camera"></i> Cámara
-  </button>
-  <button type="button" class="btn btn-warning text-dark" (click)="abrirSistemaArchivosNovedad()">
-    <i class="bi bi-folder2-open"></i> Archivos
-  </button>
+  </div>
+  <div class="form-group d-flex align-items-center">
+    <button type="button" class="btn btn-success me-3" (click)="abrirCamaraN()">
+      <i class="bi bi-camera"></i> Cámara
+    </button>
+    <button type="button" class="btn btn-warning text-dark" (click)="abrirSistemaArchivosNovedad()">
+      <i class="bi bi-folder2-open"></i> Archivos
+    </button>
+  </div>
 </div>
 <!-- Modal de Novedad -->
 <!-- Modal de Novedad -->
@@ -530,52 +543,7 @@
   </div>
 </div>
 </div>
-        <!-- AQUI COMIENZA DATOS DEL HECHO -->
-        <!-- <div class="container-fluid p-0">
-          <div class="card text-white  custom-card2">
-            <div class="card-body text-center p-2">
-              <h6 class="card-title font-weight-bold mb-0">Unidad Actuante</h6>
-             
-            </div>
-            
-          </div>
-          <br/>
-        </div>
-        <br/>
-        <form>
-          
-           <div class="row">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group d-flex align-items-center">
-                  <label for="legajo" class="mr-2">Oficial a Cargo:</label>
-                  <input type="text" id="legajo" name="legajo" [(ngModel)]="nuevoLegajo" class="form-control" placeholder="Buscar Legajo">
-                  <button type="button" class="btn btn-warning btn-sm" (click)="actualizarOficialCargo(nuevoLegajo)">
-                  <i class="bi bi-search"></i>
-                  </button>
-                  <br/>
-                </div>
-                <div *ngIf="mensajeError" class="text-danger mt-2">
-                  {{ mensajeError }}
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div *ngIf="oficialCargo">
-                  <p>{{oficialCargo.jerarquia}}: {{ oficialCargo.nombre }} {{ oficialCargo.apellido }} ({{ oficialCargo.legajo }})</p>
-                </div>
-                <br/>
-              </div>
-              <div class="col-md-12">
-                <div class="form-group d-flex align-items-center">
-                  <label for="unidad_actuante" class="mr-2">Unidad Actuante : {{ nuevaNovedad.unidad_actuante }} </label>
-                </div>
-              </div>
-              
-            </div>
-          </div>
-          <hr>
-      </form> -->
-
+        
   </form>
   <hr>
             <div class="d-flex justify-content-end">

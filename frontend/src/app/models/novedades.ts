@@ -41,24 +41,6 @@ export class Novedades {
   oficial_cargo_id: number | null;  
 
   estado!: boolean;
-  archivo!: string;
-  archivo1!: string;
-  archivo2!: string;
-  archivo3!: string;
-  archivo4!: string;
-  archivo5!: string;
-  tipoArchivo!: string;
-  tipoArchivo1!: string;
-  tipoArchivo2!: string;
-  tipoArchivo3!: string;
-  tipoArchivo4!: string;
-  tipoArchivo5!: string;
-  nombreArchivo!: string;
-  nombreArchivo1!: string;
-  nombreArchivo2!: string;
-  nombreArchivo3!: string;
-  nombreArchivo4!: string;
-  nombreArchivo5!: string;
   personas!: number[]; // Array de números para la vinculación con la base de datos
   policias!: number[]; // Array de números para la vinculación con la base de datos
   personaEstado!: { id: number, estado: string }[]; // Array de objetos con ID y estado de personas
@@ -98,24 +80,7 @@ export class Novedades {
     this.estado = false;
     this.unidad_regional_nombre = '';
     this.cuadrante_nombre = '';
-    this.archivo = '';
-    this.archivo1 = '';
-    this.archivo2 = '';
-    this.archivo3 = '';
-    this.archivo4 = '';
-    this.archivo5 = '';
-    this.tipoArchivo = '';
-    this.tipoArchivo1 = '';
-    this.tipoArchivo2 = '';
-    this.tipoArchivo3 = '';
-    this.tipoArchivo4 = '';
-    this.tipoArchivo5 = '';
-    this.nombreArchivo = '';
-    this.nombreArchivo1 = '';
-    this.nombreArchivo2 = '';
-    this.nombreArchivo3 = '';
-    this.nombreArchivo4 = '';
-    this.nombreArchivo5 = '';
+   
     this.personas = [];
     this.personaEstado = []; // Inicializa el nuevo array
     this.personasDetalles = [];

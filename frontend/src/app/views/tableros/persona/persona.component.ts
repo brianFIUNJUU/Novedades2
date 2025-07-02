@@ -22,6 +22,7 @@ import { Novedades } from '../../../models/novedades'; // Importa el modelo de N
 import { ArchivoPersona } from '../../../models/archivo_persona'; // Importa el modelo de ArchivoPersona
 import { ArchivoPersonaService } from '../../../services/archivo_persona.service'; // Importa el servicio de ArchivoPersona
 import { environment } from '../../../environments/environment'; 
+
 @Component({
   selector: 'app-persona',
    standalone: true,
@@ -72,6 +73,7 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     private cdr: ChangeDetectorRef,
           private router: Router,
     private archivoPersonaService: ArchivoPersonaService,
+      private excelExportService: ExcelExportService,
       
   ) { }
 
@@ -501,6 +503,30 @@ editarPersona(persona: Persona): void {
   limpiarDni(event: any) {
     this.persona.dni = event.target.value.replace(/[^0-9]/g, '');
   }
+    exportarVictimariosAExcel(): void {
+    const data = this.victimarios.map((item: any) => ({
+      'ID Persona': item.persona_id,
+      'Nombre': item.persona?.nombre || '',
+      'Apellido': item.persona?.apellido || '',
+      'DNI': item.persona?.dni || '',
+      'Sexo': item.persona?.sexo || '',
+      'Genero': item.persona?.genero || '',
+      'Edad': item.persona?.edad ||'',
+      'Departamento': item.persona?.departamento_nombre || '',
+      'Localidad': item.persona?.localidad_nombre || '',
+      'Domicilio': item.persona?.domicilio || '',
+      'Teléfono': item.persona?.telefono || '',
+      'EXTRANJERO': item.persona?.extranjero ? 'Sí' : 'No',
+      'Provincia': item.persona?.provincia || '',
+      'Nacionalidad': item.persona?.nacionalidad || '',
+      'Comparendo': item.persona?.comparendo ? 'Sí tiene' : 'No se sabe',
+      'Demorado': item.persona?.demorado ? 'Sí' : 'No',
+      'Cantidad de Novedades': item.cantidad || '',
+      'IDs de Novedades': item.novedades_ids || ''
+    }));
+  
+    this.excelExportService.exportAsExcelFile(data, 'victimarios');
+  }
   ///////////////////////////////////////////////////////
   subirArchivosPersona(personaId: number): void {
   this.archivosPersonas.forEach((archivo) => {
@@ -718,7 +744,7 @@ eliminarArchivoCargadoP(index: number): void {
       modal.show();
     }
   }
-   tomarFoto(): void {
+    tomarFoto(): void {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
   
@@ -735,7 +761,8 @@ eliminarArchivoCargadoP(index: number): void {
             this.archivosPersonas[index] = {
               file: file,
               mimeType: 'image/png',
-              fileName: `foto_${index + 1}.png`
+              fileName: `foto_${index + 1}.png`,
+              previewUrl: URL.createObjectURL(file) // <-- AGREGA ESTA LÍNEA
             };
             this.cerrarCamara();
           } else {
