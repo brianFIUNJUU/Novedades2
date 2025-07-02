@@ -298,7 +298,7 @@ exports.getNovedadesByLegajoByToday = async (req, res) => {
         { model: Subtipo_hecho, as: 'subtipoHecho' },
         { model: Descripcion_hecho, as: 'descripcionHecho' },
         { model: Modus_operandi, as: 'modus_operandi' },
-            { model: Operativo, as: 'operativo' } // <-- Agrega esto en todos los métodos que retornan novedades
+        { model: Operativo, as: 'operativo' } // <-- Agrega esto en todos los métodos que retornan novedades
 
       ]
     });
@@ -517,4 +517,28 @@ exports.getNovedadesByNIncidencia = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener novedades por n_incidencia' });
   }
 };
-// ...existing code...
+
+// Obtener novedades por origen_novedad
+exports.getNovedadesByOrigen = async (req, res) => {
+  try {
+    const { origen } = req.params;
+    const novedades = await Novedades.findAll({
+      where: { origen_novedad: origen },
+      include: [
+        { model: Unidad_regional, as: 'unidad_regional' },
+        { model: Persona, as: 'personas' },
+        { model: Personal, as: 'personal_autor' },
+        { model: Personal, as: 'oficial_cargo' },
+        { model: Tipo_hecho, as: 'tipoHecho' },
+        { model: Subtipo_hecho, as: 'subtipoHecho' },
+        { model: Descripcion_hecho, as: 'descripcionHecho' },
+        { model: Modus_operandi, as: 'modus_operandi' },
+        { model: Operativo, as: 'operativo' }
+      ]
+    });
+    res.json(novedades);
+  } catch (error) {
+    console.error('Error al obtener novedades por origen:', error);
+    res.status(500).json({ error: 'Error al obtener novedades por origen' });
+  }
+};
