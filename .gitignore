@@ -4,6 +4,7 @@ frontend/src/ssl
 backend/node_modules/
 backend/config/
 backend/ssl
+frontend/.angular/cache/
 # Otros archivos o carpetas que desees excluir
 .vscode/
 .idea/
