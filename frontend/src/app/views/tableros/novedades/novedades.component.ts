@@ -50,6 +50,9 @@ import {  ReactiveFormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { ChangeDetectorRef } from '@angular/core';
+import { ArchivoPersona } from '../../../models/archivo_persona'; // Importa el modelo de ArchivoPersona
+import { ArchivoPersonaService } from '../../../services/archivo_persona.service'; // Importa el servicio de ArchivoPersona
+import { environment } from '../../../environments/environment'; 
 
 // Configurar Leaflet para usar las imágenes desde la carpeta de activos
 L.Icon.Default.imagePath = 'assets/leaflet/';
@@ -196,8 +199,9 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     private descripcionHechoService: DescripcionHechoService,// Inyectar el servicio de DescripcionHecho
     private novedadesPersonalService: NovedadesPersonalService, // Inyectar el servicio de NovedadPersonal,
     private operativoService: OperativoService, // Inyectar el servicio de Operativo
-    private cdr: ChangeDetectorRef
-    
+    private cdr: ChangeDetectorRef,
+        private archivoPersonaService: ArchivoPersonaService,
+
     
   ) {
     
@@ -2659,6 +2663,19 @@ resetFormNov(): void {
   ];
   this.isUpdating = false;
 }
+onExtranjeroChange(valor: boolean) {
+  if (!valor) {
+    this.victima.nacionalidad = '';
+    this.victima.provincia = '';
+    this.victimario.nacionalidad = '';
+    this.victimario.provincia = '';
+    this.protagonista.nacionalidad = '';
+    this.protagonista.provincia = '';
+    this.testigo.nacionalidad = '';
+    this.testigo.provincia = '';
+
+  }
+}
   ///////////////////////////////////////////////////////
 // Manejo de archivos para personas
 
@@ -2872,19 +2889,7 @@ tomarFoto(): void {
     this.videoElementRef = element.nativeElement;
   }
 }
-onExtranjeroChange(valor: boolean) {
-  if (!valor) {
-    this.victima.nacionalidad = '';
-    this.victima.provincia = '';
-    this.victimario.nacionalidad = '';
-    this.victimario.provincia = '';
-    this.protagonista.nacionalidad = '';
-    this.protagonista.provincia = '';
-    this.testigo.nacionalidad = '';
-    this.testigo.provincia = '';
 
-  }
-}
 
 
 }

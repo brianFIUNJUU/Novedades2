@@ -3,6 +3,7 @@ const router = express.Router();
 const novedadesController = require('../controllers/novedades.controllers'); // Asegúrate de que la ruta sea correcta
 
 // Definir las rutas para la gestión de novedades
+router.get('/n_incidencia/:n_incidencia', novedadesController.getNovedadesByNIncidencia);
 router.get('/today', novedadesController.getNovedadByToday);
 router.get('/rango-fecha', novedadesController.getNovedadByRangoFecha);
 router.get('/legajo/:legajo/rango-fecha', novedadesController.getNovedadByLegajoByRangoFecha);
@@ -21,4 +22,5 @@ router.get('/:id/personal', novedadesController.getPersonalByNovedadId); // Nuev
 router.delete('/:novedadId/personas/:personaId', novedadesController.deletePersonaFromNovedad); // Nueva ruta
 router.get('/personal_autor/:legajo', novedadesController.getNovedadByPersonalAutorByLegajo);
 router.get('/legajo/:legajo/today', novedadesController.getNovedadesByLegajoByToday);
+
 module.exports = router;

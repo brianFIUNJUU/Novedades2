@@ -58,7 +58,7 @@ const authenticateFirebaseToken = async (req, res, next) => {
 
 // Middlewares
 app.use(cors({
-  origin: "https://10.0.10.233:4200",
+  origin: "https://10.0.10.131:4200",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true, // Permite el uso de cookies o autenticación si es necesario
@@ -302,8 +302,8 @@ app.set('port', process.env.PORT || 3000);
 
 // HTTPS configuration (update paths)
 const sslOptions = {
-  key: fs.readFileSync(path.join(__dirname, 'ssl/10.0.10.233-key.pem')),
-  cert: fs.readFileSync(path.join(__dirname, 'ssl/10.0.10.233.pem'))
+  key: fs.readFileSync(path.join(__dirname, 'ssl/10.0.10.131-key.pem')),
+  cert: fs.readFileSync(path.join(__dirname, 'ssl/10.0.10.131.pem'))
 };
 
 // Crear el servidor HTTPS y asociarlo a Socket.IO
@@ -311,7 +311,7 @@ const server = https.createServer(sslOptions, app);
 const io = socketIo(server, {
   cors: {
   methods: ["GET", "POST", "PUT", "DELETE"],
-  origin: "https://10.0.10.233:4200", // URL del frontend  cambiar la ip luego de todo 
+  origin: "https://10.0.10.131:4200", // URL del frontend  cambiar la ip luego de todo 
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
     credentials: true, // Permite autenticación si usas cookies o tokens
@@ -333,5 +333,5 @@ configurarSocket(io);  // Configura los eventos de socket en el servidor
 
 // Iniciar el servidor con HTTPS y Socket.IO
 server.listen(app.get('port'), '0.0.0.0', () => {
-console.log(`🚀 Servidor HTTPS con Socket.IO corriendo en https://10.0.10.233:${app.get('port')}`);
+console.log(`🚀 Servidor HTTPS con Socket.IO corriendo en https://10.0.10.131:${app.get('port')}`);
 });

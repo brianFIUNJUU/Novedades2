@@ -498,7 +498,11 @@ editarPersona(persona: Persona): void {
     this.persona.provincia = '';
   }
 }
-subirArchivosPersona(personaId: number): void {
+  limpiarDni(event: any) {
+    this.persona.dni = event.target.value.replace(/[^0-9]/g, '');
+  }
+  ///////////////////////////////////////////////////////
+  subirArchivosPersona(personaId: number): void {
   this.archivosPersonas.forEach((archivo) => {
     if (archivo.file) {
       const formData = new FormData();
@@ -525,8 +529,7 @@ cargarArchivosPersona(persona: Persona): void {
     }
   );
 }
-  ///////////////////////////////////////////////////////
-  
+
    onFileSelectedPersona(event: any, index: number): void {
     const file: File = event.target.files[0];
     if (file) {
@@ -709,6 +712,7 @@ eliminarArchivoCargadoP(index: number): void {
       }
     }
   }
+
   openModalCamara() {
     const modalElement = document.getElementById('camera-modal');
     if (modalElement) {
@@ -751,10 +755,8 @@ eliminarArchivoCargadoP(index: number): void {
 getFilePreviewUrl(file: File | null): string | null {
   return file ? URL.createObjectURL(file) : null;
 }
-  limpiarDni(event: any) {
-    this.persona.dni = event.target.value.replace(/[^0-9]/g, '');
-  }
-   ampliarImagen(event: any): void {
+
+ampliarImagen(event: any): void {
     const img = event.target;
     if (img.style.maxWidth === '600px') {
       img.style.maxWidth = '100%';

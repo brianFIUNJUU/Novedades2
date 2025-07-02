@@ -501,4 +501,20 @@ exports.getNovedadesByOperativo = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener novedades por operativo' });
   }
 };
+// 9111 es la incidencia que debe buscar ´pr n de incidncia dependiendo la incidencia que fue guardada, quizas podria hacer obligatorio el campo de incidencia para que no se pueda guardar una novedad sin una incidencia
+
+// Obtener novedades por n_incidencia
+exports.getNovedadesByNIncidencia = async (req, res) => {
+  try {
+    const { n_incidencia } = req.params;
+    const novedades = await Novedades.findAll({
+      where: { n_incidencia },
+     
+    });
+    res.json(novedades);
+  } catch (error) {
+    console.error('Error al obtener novedades por n_incidencia:', error);
+    res.status(500).json({ error: 'Error al obtener novedades por n_incidencia' });
+  }
+};
 // ...existing code...
