@@ -34,7 +34,7 @@ import { Localidad } from '../../../models/localidad';
 import { Departamento } from '../../../models/departamento';
 import { LocalidadService } from '../../../services/localidad.service'
 import { Validator } from '@angular/forms';
-
+import { ArchivoNovedadService } from '../../../services/archivo_novedad.services';
 // Tipo para los códigos de novedad 
 type CodigoNovedad = 'R' | 'A' | 'V';
 type FontStyleType = 'normal' | 'bold' | 'italic' ;
@@ -82,6 +82,12 @@ personasParaActa: Persona[] = [];
   mostrarFiltroIdAdmin = false;
   mostrarFiltroUnidadAdmin = false;
   mostrarFiltroFechaUnid = false;
+    mostrarFiltroOrigenTorre911 = false;
+  fechaFiltroOrigenInicio = '';
+  fechaFiltroOrigenFin = ''; 
+mostrarFiltroNIncidencia = false;
+nIncidenciaFiltro = '';
+
 idFiltro: string = '';
   unidadFiltro: string = '';
 
@@ -99,6 +105,7 @@ idFiltro: string = '';
     private fb: FormBuilder,
     private departamentoService: DepartamentoService,
     private localidadService: LocalidadService,
+    private archivoNovedadService: ArchivoNovedadService
     
   ) {
     this.actaForm = this.fb.group({
@@ -248,6 +255,8 @@ filtrarNovedadesUnidadPorFecha() {
     this.mostrarFiltroLegajoAdmin = false;
     this.mostrarFiltroIdAdmin = false;
     this.mostrarFiltroUnidadAdmin = false;
+    this.mostrarFiltroOrigenTorre911 = false; // Resetear el filtro de origen Torre 911
+    this.mostrarFiltroNIncidencia = false; // Resetear el filtro de N_incidencia
     if (valor === 'todas') {
       this.getAllNovedades();
     } else if (valor === 'hoy') {
@@ -262,6 +271,14 @@ filtrarNovedadesUnidadPorFecha() {
     else if (valor === 'porUnidad') {
       this.mostrarFiltroUnidadAdmin = true;
     }
+     else if (valor === 'TORRE 911') {
+      this.mostrarFiltroOrigenTorre911 = true;
+    } 
+    else if (valor === 'por N_incidencia') {
+    this.mostrarFiltroNIncidencia = true;
+  // Oculta otros filtros si es necesario
+    } 
+
   }
     filtrarporUnidadAdmin() {
        Swal.fire({
@@ -286,6 +303,27 @@ filtrarNovedadesUnidadPorFecha() {
       );
     }
   }
+filtrarPorOrigenTorre911() {
+  this.novedadesService.getNovedadesByOrigenNovedadYRangoFecha(
+    'TORRE 911',
+    this.fechaFiltroOrigenInicio,
+    this.fechaFiltroOrigenFin
+  ).subscribe((data: Novedades[]) => {
+    this.novedades = data;
+    this.filteredNovedades = [...this.novedades];
+    this.filtrarNovedadesC();
+  });
+}
+
+filtrarPorNIncidencia() {
+  if (this.nIncidenciaFiltro) {
+    this.novedadesService.getNovedadesByNIncidencia(this.nIncidenciaFiltro).subscribe((data: Novedades[]) => {
+      this.novedades = data;
+      this.filteredNovedades = [...this.novedades];
+      this.filtrarNovedadesC();
+    });
+  }
+}
   filtrarporIdAdmin() {
     if (this.idFiltro) {
       this.novedadesService.getNovedadById(this.idFiltro).subscribe(
@@ -1305,6 +1343,8 @@ actualizarMapa(): void {
   }
   
   deleteNovedad(id: string): void {
+      this.eliminarArchivosDeNovedad(id);
+
     this.novedadesService.deleteNovedad(id).subscribe(
       res => {
         console.log('Novedad eliminada', res);
@@ -1314,6 +1354,17 @@ this.getNovedadesByLegajoByToday();
       error => {
         console.error('Error al eliminar novedad', error);
         Swal.fire('Error', 'Error al eliminar la novedad', 'error');
+      }
+    );
+  }
+    // Elimina todos los archivos asociados a la novedad
+  eliminarArchivosDeNovedad(novedadId: string): void {
+    this.archivoNovedadService.eliminarArchivosByNovedad(Number(novedadId)).subscribe(
+      res => {
+        console.log('Archivos eliminados para la novedad', novedadId);
+      },
+      error => {
+        console.error('Error al eliminar archivos de la novedad', error);
       }
     );
   }

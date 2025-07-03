@@ -1,0 +1,23 @@
+const express = require('express');
+const router = express.Router();
+const controller = require('../controllers/novedad_elemento.controller');
+
+// Obtener todos los elementos de una novedad
+router.get('/novedad/:novedad_id', controller.getElementosByNovedad);
+
+// Agregar múltiples elementos a una novedad
+router.post('/multiples', controller.agregarElementosMultiplesANovedad);
+
+// Modificar un elemento de una novedad
+router.put('/:id', controller.modificarElemento);
+
+// Borrar un elemento de una novedad
+router.delete('/:id', controller.borrarElemento);
+
+// Borrar todos los elementos de una novedad
+router.delete('/novedad/:novedad_id', controller.borrarElementosByNovedad);
+
+// Modificar múltiples elementos de una novedad
+router.put('/multiples', controller.modificarElementosMultiples);
+
+module.exports = router;

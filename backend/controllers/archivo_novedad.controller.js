@@ -97,3 +97,28 @@ exports.listarArchivosPorNovedad = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener los archivos.' });
   }
 };
+exports.eliminarArchivosByNovedad = async (req, res) => {
+  try {
+    const novedadId = req.params.novedadId;
+    const archivos = await ArchivoNovedad.findAll({ where: { novedad_id: novedadId } });
+
+    // Eliminar archivos físicos
+    for (const archivo of archivos) {
+      if (fs.existsSync(archivo.ruta)) {
+        try {
+          fs.unlinkSync(archivo.ruta);
+        } catch (err) {
+          console.warn(`No se pudo borrar el archivo físico: ${archivo.ruta}`);
+        }
+      }
+    }
+
+    // Eliminar registros en la base de datos
+    await ArchivoNovedad.destroy({ where: { novedad_id: novedadId } });
+
+    res.json({ mensaje: 'Todos los archivos de la novedad fueron eliminados correctamente.' });
+  } catch (error) {
+    console.error('Error al eliminar archivos por novedad:', error);
+    res.status(500).json({ error: 'Error al eliminar archivos por novedad.' });
+  }
+};

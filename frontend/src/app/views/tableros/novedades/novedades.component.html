@@ -433,6 +433,7 @@
         <table class="table table-bordered border-primary table-sm table-custom">
     <thead>
       <tr>
+        <th  class="text-center text-small">Cantidad</th>
         <th  class="text-center text-small">Elemento</th>
         <th  class="text-center text-small">Descripción</th>
         <th  class="text-center text-small">Tipo</th>
@@ -442,6 +443,7 @@
     </thead>
     <tbody>
       <tr *ngFor="let item of elementosAgregados; let i = index">
+        <td class="text-center text-small">{{ item.cantidad }}</td>
         <td class="text-center text-small">{{ item.descripcion }}</td>
         <td class="text-center text-small">{{ item.caracteristicas}}</td>
         <td class="text-center text-small">{{ item.tipo }}</td>
@@ -1361,23 +1363,38 @@
 <div class="modal-personalizado" id="modalSecuestrado" *ngIf="modalElementoSecuestradoAbierto">
   <div class="modal-contenido">
     <!-- Encabezado del modal -->
-    <div class="modal-encabezado">
+    <div class="modal-encabezado ">
       <h5 class="text-white">Agregar Elemento Secuestrado</h5>
       <button (click)="cerrarModalElementoSecuestrado()"  class="btn-close btn-close-red position-absolute end-0 me-2">×</button>
     </div>
+    
+    
 
     <!-- Cuerpo del modal -->
     <div class="modal-cuerpo">
-      <div class="form-group">
-        <label class="titulo" for="elementoBienNoRecuperado">Elemento:</label>
-        <select id="elementoBienNoRecuperado" [(ngModel)]="nuevoElementoSecuestrado.descripcion" class="form-control" (change)="onElementoSecuestradoChange()">
+      <div class="row">
+          <div class="col-6 d-flex align-items-center">
+            <label class="titulo mb-0 me-2" for="cantidadSecuestrado">Cantidad:</label>
+            <input type="number" min="1" [(ngModel)]="nuevoElementoSecuestrado.cantidad" id="cantidadSecuestrado" class="form-control" style="max-width: 120px;" />
+          </div>
+  
+      <!-- Selector de elemento -->
+           <div class="col-6 form-group d-flex align-items-center">
+        <label class="titulo mb-0 me-2" for="elementoBienNoRecuperado">Elemento:</label>
+        <select id="elementoBienNoRecuperado"
+                [(ngModel)]="nuevoElementoSecuestrado.descripcion"
+                class="form-control"
+                (change)="onElementoSecuestradoChange()"
+                style="max-width: 250px;">
           <option value="ARMA BLANCA">ARMA BLANCA</option>
           <option value="ARMA DE FUEGO">ARMA DE FUEGO</option>
           <option value="ELEMENTO CONTUNDENTE">ELEMENTO CONTUNDENTE</option>
           <option value="SUSTANCIAS">SUSTANCIAS</option>
-          <option >Elemento de dudosa procedencia</option>
+          <option>Elemento de dudosa procedencia</option>
         </select>
       </div>
+      </div>  
+               
       
       <!-- Mostrar ng-select solo si se elige "Elemento de dudosa procedencia" -->
       <div class="col-md-12" *ngIf="mostrarSelectorDudoso">
@@ -1427,39 +1444,54 @@
     <!-- Encabezado del modal -->
     <div class="modal-encabezado">
       <h5 class="text-white">{{ elementoRecuperado ? 'Agregar Bien Recuperado' : 'Agregar Bien No Recuperado' }}</h5>
-      <button (click)="cerrarModal()"  class="btn-close btn-close-red position-absolute end-0 me-2">×</button>
+      <button (click)="cerrarModal()"  class="btn-close btn-close-red end-0 me-2">×</button>
     </div>
 
     <!-- Cuerpo del modal -->
     <div class="modal-cuerpo">
-      <div class="checkbox-container">
-        <label for="miCheckbox">Elemento recuperado:</label>
-        <input type="checkbox" id="miCheckbox" [(ngModel)]="elementoRecuperado" (ngModelChange)="cambiarDescripcion()" (ngModelChange)="cambiarDescripcion()" (ngModelChange)="cargarCategoriaPorElemento(descripcionSeleccionada)">
-      </div>
-      <div class="form-group">
-        <label class="titulo" for="elemento">Elemento:</label>
-        <div class="row">
-          <div class="col-md-12">
-            <div class="form-group d-flex align-items-center">
-            <ng-select
-              [items]="elementos"
-              bindLabel="elemento_nombre"
-              bindValue="elemento_nombre"
-              [typeahead]="searchText$"
-              [(ngModel)]="descripcionSeleccionada"
-              (ngModelChange)="cargarCategoriaPorElemento(descripcionSeleccionada)" 
-              dropdownPosition="bottom"
-              appendTo="body"
-              class="form-control flex-grow-1">
-            </ng-select>
-            <i class="bi bi-search ml-2" style="font-size: 1.2rem; color: #6c757d;"></i>
+            <div class="checkbox-">
+                           <div class="d-flex align-items-center">
+                <label for="miCheckbox" class="titulo mb-0 me-2">¿Fue recuperado?si/no:</label>
+                <input type="checkbox" id="miCheckbox" [(ngModel)]="elementoRecuperado"
+                  (ngModelChange)="cambiarDescripcion()"
+                  (ngModelChange)="cambiarDescripcion()"
+                  (ngModelChange)="cargarCategoriaPorElemento(descripcionSeleccionada)">
+                <p class="mb-0 ms-4 d-flex align-items-center">
+                  
+                  <strong><i class="bi bi-arrow-left me-2"></i>Marcar solo si el elemento fue recuperado</strong>
+                </p>            
+                </div>
+                <br>
             </div>
-          </div>
-        </div>
-
-    
-        <br>
-      </div>
+      <!-- aqui definimos la cantida deelementos recuoperado ya sea si es un bien recuperado como no recuperado -->
+                                 <div class="row mb-3 ">
+                        <!-- Cantidad -->
+                        <div class="col-md-4 d-flex align-items-center mb-1 mb-md-0">
+                          <label class="titulo mb-0 me-2" for="cantidadBien" style="white-space: nowrap;">Cantidad:</label>
+                          <!-- Para Bien Recuperado -->
+                          <input *ngIf="elementoRecuperado" type="number" min="1" [(ngModel)]="nuevoBienRecuperado.cantidad" id="cantidadBien" class="form-control" style="max-width: 100px;" />
+                          <!-- Para Bien No Recuperado -->
+                          <input *ngIf="!elementoRecuperado" type="number" min="1" [(ngModel)]="nuevoBienNoRecuperado.cantidad" id="cantidadBien" class="form-control" style="max-width: 100px;" />
+                        </div>
+                      
+                        <!-- Elemento -->
+                        <div class=" col-md-8 d-flex align-items-center">
+                          <label class="titulo mb-0 me-2" for="elemento">Elemento:</label>
+                          <ng-select
+                            [items]="elementos"
+                            bindLabel="elemento_nombre"
+                            bindValue="elemento_nombre"
+                            [typeahead]="searchText$"
+                            [(ngModel)]="descripcionSeleccionada"
+                            (ngModelChange)="cargarCategoriaPorElemento(descripcionSeleccionada)" 
+                            dropdownPosition="bottom"
+                            appendTo="body"
+                            class="form-control flex-grow-1"
+                            style="max-width: 300px;">
+                          </ng-select>
+                          <i class="bi bi-search ms-2" style="font-size: 1.2rem; color: #6c757d;"></i>
+                        </div>
+                      </div>
    <!-- Descripción -->
 <div class="col-md-12">
   <label class="titulo" for="descripcionBien">Descripción:</label>

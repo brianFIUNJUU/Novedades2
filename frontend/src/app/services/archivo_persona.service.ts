@@ -53,4 +53,11 @@ export class ArchivoPersonaService {
       this.getHttpOptions()
     );
   }
+  // eliminar archivos de una persona teniendo en cuenta que puede tener varios archivos
+    eliminarArchivosByPersona(personaId: number): Observable<any> {
+    return this._http.delete(
+      `${this.hostBase}/persona/${personaId}`,
+      this.getHttpOptions()
+    );
+  }
 }

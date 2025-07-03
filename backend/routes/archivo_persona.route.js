@@ -3,6 +3,9 @@ const router = express.Router();
 const controller = require('../controllers/archivo_persona.controller.js');
 const upload = require('../middleware/upload');
 
+
+
+router.delete('/persona/:personaId', controller.eliminarArchivosByPersona);
 // Subir archivo para una persona
 router.post('/:id/archivo', upload.single('archivo'), controller.subirArchivo);
 // Borrar archivo por ID

@@ -147,6 +147,9 @@ operativo_nombre: {
     allowNull: true,
     defaultValue: []
   },
+
+
+  // tipos de elementos
   elemento_secuestrado: {
     type: DataTypes.JSONB,
     allowNull: true,
@@ -162,6 +165,7 @@ operativo_nombre: {
     allowNull: true,
     defaultValue: []
   },
+  // 
   observaciones: {
     type: DataTypes.STRING,
   },

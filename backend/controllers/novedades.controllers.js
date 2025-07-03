@@ -501,4 +501,63 @@ exports.getNovedadesByOperativo = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener novedades por operativo' });
   }
 };
-// ...existing code...
+exports.getNovedadesByNIncidencia = async (req, res) => {
+  try {
+    const { n_incidencia } = req.params;
+
+    const novedades = await Novedades.findAll({
+      where: { n_incidencia },
+      include: [
+        { model: Unidad_regional, as: 'unidad_regional' },
+        { model: Persona, as: 'personas' },
+        { model: Personal, as: 'personal_autor' },
+        { model: Personal, as: 'oficial_cargo' },
+        { model: Tipo_hecho, as: 'tipoHecho' },
+        { model: Subtipo_hecho, as: 'subtipoHecho' },
+        { model: Descripcion_hecho, as: 'descripcionHecho' },
+        { model: Modus_operandi, as: 'modus_operandi' },
+        { model: Operativo, as: 'operativo' }
+      ]
+    });
+
+    res.json(novedades);
+  } catch (error) {
+    console.error('Error al obtener novedades por n_incidencia:', error);
+    res.status(500).json({ error: 'Error al obtener novedades por n_incidencia' });
+  }
+};
+
+exports.getNovedadesByOrigenNovedadYRangoFecha = async (req, res) => {
+  try {
+    const { origen_novedad } = req.params;
+    const { fechaInicio, fechaFin } = req.query;
+
+    // Construir el filtro
+    let where = { origen_novedad };
+    if (fechaInicio && fechaFin) {
+      where.fecha = {
+        [require('sequelize').Op.between]: [fechaInicio, fechaFin]
+      };
+    }
+
+    const novedades = await Novedades.findAll({
+      where,
+      include: [
+        { model: Unidad_regional, as: 'unidad_regional' },
+        { model: Persona, as: 'personas' },
+        { model: Personal, as: 'personal_autor' },
+        { model: Personal, as: 'oficial_cargo' },
+        { model: Tipo_hecho, as: 'tipoHecho' },
+        { model: Subtipo_hecho, as: 'subtipoHecho' },
+        { model: Descripcion_hecho, as: 'descripcionHecho' },
+        { model: Modus_operandi, as: 'modus_operandi' },
+        { model: Operativo, as: 'operativo' }
+      ]
+    });
+
+    res.json(novedades);
+  } catch (error) {
+    console.error('Error al obtener novedades por origen_novedad y rango de fecha:', error);
+    res.status(500).json({ error: 'Error al obtener novedades por origen_novedad y rango de fecha' });
+  }
+};

@@ -13,13 +13,19 @@
                                 <button (click)="getPersonasExtranjeras()" class="badge bg-danger">Extranjero</button>
                                 <button (click)="getVictimarios()" class="badge bg-primary">Todos</button>
                               </div>
+
+                                                          <div class="col-auto d-flex gap-2 mb-2" *ngIf="userInfo.perfil === 'administrador'">
+                                <button class="badge bg-secondary" (click)="getPersonasSinNovedad()">Personas sin novedades</button>
+                                <button class="badge bg-warning" (click)="getVictimarios()">Victimarios con novedades</button>
+                              </div>
+
                               <div class="col-auto ms-auto mb-2">
                                 <button class="badge bg-success" (click)="exportarVictimariosAExcel()">Exportar victimarios a Excel</button>
                               </div>
                             </div>
                           </div>
     </div>
-    <div *ngIf="userType === 'administrador'" class="table-responsive ">
+   
  
     <div class="table-responsive" style="overflow: auto; max-height: 56vh;"> <!-- Menos altura -->
         <table class="table table-bordered border-primary table-sm table-custom">
@@ -62,20 +68,24 @@
               class="badge bg-success">Residente</span>
            
           </td>
-                    <td class="text-center text-small"> <span class="badge bg-primary">{{ victimario.cantidad || 0 }}</span> </td>
+          <td class="text-center text-small"> <span class="badge bg-primary">{{ victimario.cantidad || 0 }}</span> </td>
 
           <td class="text-center text-small">
            
             <button class="btn btn-info btn-sm" (click)="verVictimario(victimario)">Ver ficha</button>
             <button *ngIf="userInfo.perfil !== 'usuario'" class="btn btn-warning btn-sm" (click)="verPersona(victimario.persona)"><i class="bi-pencil"></i></button>
-
+            
+                        <!-- ...otras acciones... -->
+            <button *ngIf="mostrandoPersonasSinNovedad" class="btn btn-danger btn-sm" (click)="eliminarPersona(victimario.persona.id)">
+              <i class="bi bi-trash"></i> Eliminar
+            </button>
             <!-- este botón es solo para el usuario userInfo= usuario -->
           </td>
         </tr>
       </tbody>
     </table>
     </div>
-    </div>
+   
 </div>
 <!-- Modal para Persona -->
 <div class="modal fade" id="modalPersona" tabindex="-1" aria-labelledby="modalPersonaLabel" aria-hidden="true">

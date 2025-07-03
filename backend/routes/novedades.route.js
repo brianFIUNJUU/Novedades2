@@ -10,6 +10,8 @@ router.get('/unidad-regional/:unidad_regional_id', novedadesController.getNoveda
 router.get('/unidad-regional/:unidad_regional_id/today', novedadesController.getNovedadByUnidadRegionalByToday);
 router.get('/unidad-regional/:unidad_regional_id/rango-fecha', novedadesController.getNovedadByUnidadRegionalByRangoFecha);
 router.get('/operativo/:operativo_id', novedadesController.getNovedadesByOperativo);
+router.get('/novedades/n_incidencia/:n_incidencia', novedadesController.getNovedadesByNIncidencia);
+router.get('/origen/:origen_novedad/rango-fecha', novedadesController.getNovedadesByOrigenNovedadYRangoFecha);
 router.get('/', novedadesController.getAllNovedades);
 router.get('/:id', novedadesController.getNovedadById);
 router.post('/', novedadesController.createNovedad);

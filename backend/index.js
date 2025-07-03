@@ -101,7 +101,7 @@ app.use('/api/operativo-personal', require ('./routes/operativoPersonalRoutes.js
 app.use('/api/operativo-cuadrante', require ('./routes/operativo_cuadrante.route.js')); // Agregar esta línea para la nueva ruta
 app.use('/api/archivo-persona', require('./routes/archivo_persona.route.js'));
 app.use('/api/archivo-novedad', require('./routes/archivo_novedad.routes.js'));
-
+app.use('/api/novedad_elemento', require('./routes/novedad_elemento.route'));
 // Endpoint para obtener usuarios
 app.get('/api/users', async (req, res) => {
   try {

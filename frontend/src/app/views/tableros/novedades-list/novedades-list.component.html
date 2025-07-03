@@ -6,7 +6,7 @@
 </div>
 <div class="row g-2">
   <!-- admin y dop -->
-  <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP'" class="col-12 col-md-3 d-flex align-items-center gap-2">
+  <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP'" class="col-12 col-md-2 d-flex align-items-center gap-2">
     <label for="filtroAdmin" class="form-label mb-0">Novedades:</label>
     <select id="filtroAdmin" class="form-select form-select-sm" (change)="onFiltroAdminChange($event)">
       <option value="hoy">Del Día</option>
@@ -15,9 +15,12 @@
       <option value="porLegajo">Por legajo</option>
       <option value="porId">Por N° ID</option>
       <option value="porUnidad">Por U.R.</option>
+      <option value="TORRE 911">Del 911</option>
+      <option value="por N_incidencia">N°incidencia(911) </option>
+      <!-- GETBYORIGEN DE LA NOVEDAD PARA HACER EL FILTRO POR ORIGEN LE PASO POR PARAMETRO "TORRE 911" -->
     </select>
   </div>
-  <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP'" class="col-12 col-md-3 d-flex align-items-center gap-2">
+  <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP'|| userInfo.perfil === 'usuario911' " class="col-12 col-md-4 d-flex align-items-center gap-2">
     <!-- byfecha -->
     <div *ngIf="mostrarFiltroFechaAdmin" class="d-flex flex-column w-100">
       <div class="d-flex gap-2">
@@ -53,6 +56,21 @@
         <option value="7">Unidad Regional 7</option>
         <option value="8">Unidad Regional 8</option>
       </select>
+    </div>
+        <!-- Filtro por origen de novedad TORRE 911 y rango de fechas -->
+    <div *ngIf="mostrarFiltroOrigenTorre911" class="col-12 col-md-4 d-flex align-items-center gap-2">
+      <label class="form-label mb-0">TORRE 911:</label>
+      <input type="date" class="form-control form-control-sm" [(ngModel)]="fechaFiltroOrigenInicio" placeholder="Desde" />
+      <input type="date" class="form-control form-control-sm" [(ngModel)]="fechaFiltroOrigenFin" placeholder="Hasta" />
+      <button class="btn btn-primary btn-sm" (click)="filtrarPorOrigenTorre911()">Filtrar</button>
+    </div>
+
+        <!-- Filtro por N°incidencia(911) -->
+    <div *ngIf="mostrarFiltroNIncidencia" class="d-flex align-items-center gap-2 w-100">
+      <input type="text" class="form-control form-control-sm" [(ngModel)]="nIncidenciaFiltro" placeholder="Ingrese N° incidencia" />
+      <button class="btn btn-primary btn-sm" (click)="filtrarPorNIncidencia()">
+        <i class="bi bi-search"></i>
+      </button>
     </div>
   </div>
   <!--usuario Unidad  -->
@@ -138,19 +156,19 @@
         <td class=" text-center text-small">{{novedad.personal_autor_nombre}}</td>
         <td class=" text-center text-small">
             <button 
-            *ngIf="isEditable(novedad) && userInfo.perfil !== 'usuarioDOP'" 
+            *ngIf="isEditable(novedad) && userInfo.perfil !== 'usuarioDOP'|| userInfo.perfil !== 'usuario911'" 
             (click)="navigateToUpdateForm(novedad.id.toString())" 
             class="btn btn-warning btn-sm">
             <i class="bi bi-pencil"></i>
           </button>
           <button 
-            *ngIf="userInfo.perfil !== 'usuarioDOP'" 
+            *ngIf="userInfo.perfil !== 'usuarioDOP'|| userInfo.perfil !== 'usuario911'" 
             (click)="openDocumentOptions(novedad)" 
             class="btn btn-primary btn-sm">
             <i class="bi bi-file-earmark-text"></i>
           </button>
           <button
-            *ngIf="isEditable(novedad) && userInfo.perfil !== 'usuarioDOP'"
+            *ngIf="isEditable(novedad) && userInfo.perfil !== 'usuarioDOP'|| userInfo.perfil !== 'usuario911'"
             (click)="deleteNovedad(novedad.id.toString())"
             class="btn btn-danger btn-sm align-middle">
             <i class="bi bi-x-lg"></i>

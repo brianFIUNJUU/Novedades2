@@ -42,9 +42,7 @@ export class PersonaService {
         ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       }),
     };
-    return this._http.get<Persona[]>(this.hostBase + '/', httpOptions).pipe(
-      tap(data => this.personasCache = data)
-    );
+    return this._http.get<Persona[]>(this.hostBase + '/', httpOptions);
   }
 
   // Obtener una persona por DNI (con cache)
@@ -72,9 +70,8 @@ export class PersonaService {
       }),
     };
     const body: any = JSON.stringify(persona);
-    return this._http.post(this.hostBase + '/', body, httpOptions).pipe(
-      tap(() => this.clearCache())
-    );
+    return this._http.post(this.hostBase + '/', body, httpOptions);
+    
   }
 
   // Obtener una persona por ID (con cache)
@@ -106,8 +103,6 @@ export class PersonaService {
       this.hostBase + '/' + persona.id,
       body,
       httpOptions
-    ).pipe(
-      tap(() => this.clearCache())
     );
   }
 
@@ -120,9 +115,7 @@ export class PersonaService {
         ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       }),
     };
-    return this._http.delete(this.hostBase + '/' + id, httpOptions).pipe(
-      tap(() => this.clearCache())
-    );
+    return this._http.delete(this.hostBase + '/' + id, httpOptions);
   }
     getPersonasResidentes(): Observable<Persona[]> {
     const token = this.getAuthToken();
@@ -144,5 +137,15 @@ export class PersonaService {
       }),
     };
     return this._http.get<Persona[]>(this.hostBase + '/extranjeras', httpOptions);
+  }
+    getPersonasSinNovedad(): Observable<Persona[]> {
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this._http.get<Persona[]>(this.hostBase + '/sin-novedad', httpOptions);
   }
 }

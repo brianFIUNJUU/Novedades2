@@ -2,6 +2,7 @@ const Persona = require('../models/persona');
 const Departamento = require('../models/departamento');
 const Localidad = require('../models/localidad');
 const Novedades = require('../models/novedades');
+const { sequelize } = require('../models');
 const personaCtrl = {};
 
 // Obtener todas las personas
@@ -173,4 +174,29 @@ personaCtrl.getPersonasExtranjeras = async (req, res) => {
         });
     }
 };
+
+// Obtener todas las personas que NO están relacionadas a ninguna novedad
+personaCtrl.getPersonasSinNovedad = async (req, res) => {
+    try {
+        const personas = await Persona.findAll({
+            include: [{
+                model: Novedades,
+                as: 'novedades',
+                required: false, // LEFT OUTER JOIN
+                through: { attributes: [] }
+            }],
+            where: sequelize.literal('"novedades"."id" IS NULL')
+        });
+        res.json(personas);
+    } catch (error) {
+        console.error('Error al obtener personas sin novedad:', error);
+        res.status(400).json({
+            'status': '0',
+            'msg': 'Error al obtener personas sin novedad.'
+        });
+    }
+};
+
+
+
 module.exports = personaCtrl;

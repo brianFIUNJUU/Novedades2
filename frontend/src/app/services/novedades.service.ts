@@ -271,4 +271,29 @@ export class NovedadesService {
   }
   return this.http.get<Novedades[]>(`${this.apiUrl}/operativo/${operativo_id}`, { headers })
 }
+
+// Obtener novedades por n_incidencia
+getNovedadesByNIncidencia(n_incidencia: string): Observable<Novedades[]> {
+  const token = this.getAuthToken();
+  let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+  if (token) {
+    headers = headers.set('Authorization', `Bearer ${token}`);
+  }
+  return this.http.get<Novedades[]>(`${this.apiUrl}/novedades/n_incidencia/${n_incidencia}`, { headers });
+}
+
+// Obtener novedades por origen_novedad y rango de fecha (rango opcional)
+getNovedadesByOrigenNovedadYRangoFecha(origen_novedad: string, fechaInicio?: string, fechaFin?: string): Observable<Novedades[]> {
+  const token = this.getAuthToken();
+  let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+  if (token) {
+    headers = headers.set('Authorization', `Bearer ${token}`);
+  }
+  let url = `${this.apiUrl}/origen/${origen_novedad}/rango-fecha`;
+  if (fechaInicio && fechaFin) {
+    url += `?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+  }
+  return this.http.get<Novedades[]>(url, { headers });
+}
+
 }

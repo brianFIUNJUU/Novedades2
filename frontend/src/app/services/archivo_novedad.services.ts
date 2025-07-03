@@ -52,4 +52,11 @@ export class ArchivoNovedadService {
       this.getHttpOptions()
     );
   }
+
+    eliminarArchivosByNovedad(novedadId: number): Observable<any> {
+    return this._http.delete(
+      `${this.hostBase}/novedad/${novedadId}`,
+      this.getHttpOptions()
+    );
+  }
 }

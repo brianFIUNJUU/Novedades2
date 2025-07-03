@@ -55,7 +55,7 @@ filteredNovedades: any[] = []; // Agrega esta propiedad arriba
     { file: null, mimeType: '', fileName: '' }
   ];
   mostrarCamara: boolean = false;
-
+mostrandoPersonasSinNovedad :boolean =false;
 streamNovedad!: MediaStream;
 stream!: MediaStream;
 videoElementRef!: HTMLVideoElement;
@@ -138,12 +138,16 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     this.novedadesPersonaService.getVictimarios().subscribe(
       (data) => {
         this.victimarios = data;
+        this.mostrandoPersonasSinNovedad = false;
       },
       (error) => {
         console.error('Error al obtener victimarios:', error);
       }
     );
   }
+
+  
+
   getPersonas(): void {
     this.personaService.getPersonas().subscribe(
       (data: Persona[]) => {
@@ -190,6 +194,22 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
       );
     }
 
+              getPersonasSinNovedad(): void {
+          this.personaService.getPersonasSinNovedad().subscribe(
+            (data: any[]) => {
+              this.victimarios = data.map(persona => ({
+                persona: persona,
+                cantidad: 0 // No tienen novedades asociadas
+              }));
+              this.mostrandoPersonasSinNovedad = true; // <--- Marca que estás mostrando este listado
+            },
+            (error) => {
+              console.error('Error al obtener personas sin novedades:', error);
+              Swal.fire('Error', 'Error al obtener personas sin novedades.', 'error');
+              this.mostrandoPersonasSinNovedad = false;
+            }
+          );
+        }
 
  cargarDepartamentos(): void {
     this.departamentoService.getDepartamentos().subscribe(
@@ -459,10 +479,12 @@ editarPersona(persona: Persona): void {
       cancelButtonText: 'No, cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
+              this.eliminarArchivosDePersona(id); // <--- Llama aquí primero
+
         this.personaService.deletePersona(id).subscribe(
           (response) => {
             Swal.fire('Eliminado', 'La persona ha sido eliminada.', 'success');
-            this.getPersonas();
+            this.getPersonasSinNovedad
           },
           (error) => {
             console.error('Error al eliminar persona:', error);
@@ -472,6 +494,19 @@ editarPersona(persona: Persona): void {
       }
     });
   }
+  // metdo para eliminmar archivo
+    eliminarArchivosDePersona(personaId: string): void {
+    this.archivoPersonaService.eliminarArchivosByPersona(Number(personaId)).subscribe(
+      res => {
+        console.log('Archivos de persona eliminados', personaId);
+      },
+      error => {
+        console.error('Error al eliminar archivos de persona', error);
+      }
+    );
+  }
+
+
 
   verPersona(persona: Persona): void {
     this.persona = { ...persona };

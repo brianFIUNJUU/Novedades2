@@ -55,6 +55,9 @@ import { ArchivoPersonaService } from '../../../services/archivo_persona.service
 import { environment } from '../../../environments/environment'; 
 import { ArchivoNovedad } from '../../../models/archivo_novedad'; // Importa el modelo de ArchivoNovedad
 import { ArchivoNovedadService } from '../../../services/archivo_novedad.services'; // Importa el servicio de ArchivoNovedad
+import { NovedadElemento } from '../../../models/novedad_elemento';
+import { NovedadElementoService } from '../../../services/novedad_elemento.service';
+
 // Configurar Leaflet para usar las imágenes desde la carpeta de activos
 L.Icon.Default.imagePath = 'assets/leaflet/';
 @Component({
@@ -110,15 +113,18 @@ export class NovedadesComponent implements OnInit {
   elementosOriginales: any[] = []; // Lista original de elementos
   elemento: any[] = []; // Lista de elementos filtrados
   descripcionSeleccionada: string = ''; // Para el ngModel del ng-select
-  nuevoElementoSecuestrado: { elemento: string, descripcion: string, caracteristicas: string } = { elemento: '', descripcion: '', caracteristicas: '' };
-  nuevoBienRecuperado: { elemento: string, descripcion: string, caracteristicas: string } = { elemento: '', descripcion: '', caracteristicas: '' };
-  nuevoBienNoRecuperado: { elemento: string, descripcion: string, caracteristicas: string } = { elemento: '', descripcion: '', caracteristicas: '' };
+  nuevoElementoSecuestrado: { elemento: string, descripcion: string, caracteristicas: string, cantidad: number } = { elemento: '', descripcion: '', caracteristicas: '', cantidad: 1 };
+  nuevoBienRecuperado: { elemento: string, descripcion: string, caracteristicas: string, cantidad: number } = { elemento: '', descripcion: '', caracteristicas: '', cantidad: 1 };
+  nuevoBienNoRecuperado: { elemento: string, descripcion: string, caracteristicas: string, cantidad: number } = { elemento: '', descripcion: '', caracteristicas: '', cantidad: 1 };
   mostrarSelectorDudoso: boolean = false;  categoriaSeleccionada: string = '';
-  elementosAgregados: { elemento: string, descripcion: string, caracteristicas:string, tipo: string }[] = [];
+  elementosAgregados: { elemento: string, descripcion: string, caracteristicas:string, tipo: string ,cantidad:number}[] = [];
   modalBienRecuperadoAbierto: boolean = false;
   elementoRecuperado: boolean = false;
   elementoRecuperadoAnterior: boolean = false; // Añadido para controlar el estado anterior
   modalElementoSecuestradoAbierto: boolean = false;
+
+  elementosTemporales: NovedadElemento[] = [];
+
 
   tiposHecho: TipoHecho[] = [];
   subtiposHecho: SubtipoHecho[] = [];
@@ -218,9 +224,8 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     private operativoService: OperativoService, // Inyectar el servicio de Operativo
     private cdr: ChangeDetectorRef,
     private archivoPersonaService: ArchivoPersonaService,
-    private archivoNovedadService: ArchivoNovedadService // Inyectar el servicio de ArchivoNovedad
-
-    
+    private archivoNovedadService: ArchivoNovedadService, // Inyectar el servicio de ArchivoNovedad
+    private novedadElementoService: NovedadElementoService, // Inyectar el servicio de NovedadElemento
     
   ) {
     
@@ -336,8 +341,8 @@ getOperativosPorLegajo(legajo: string): void {
         modal.hide();
       }
     }
-    this.modalBienRecuperadoAbierto = false; // Cerrar el modal
-    this.desbloquearScroll(); // Desbloquear el scroll al cerrar el modal
+    this.modalBienRecuperadoAbierto = false; // Cerrar el 
+    this.desbloquearScroll(); // Desbloquear el scroll del body
   }
   // Bloquear el scroll del body
   bloquearScroll() {
@@ -355,7 +360,7 @@ getOperativosPorLegajo(legajo: string): void {
     document.body.style.position = '';
     document.body.style.top = '';
     document.body.style.width = '';
-    window.scrollTo(0, this.scrollPosition);
+    window.scrollTo(0, this.scrollPosition); // <-- Esto devuelve el scroll a la posición previa
   }
 
    cargarJuridiccionNombre(personal: Personal): void {
@@ -781,6 +786,8 @@ onElegir(tipo: string) {
       break;
   }
 }
+
+// aquie empiedza el manejo de elementos
   showSwalElemento() {
     Swal.fire({
       html: `
@@ -843,7 +850,7 @@ onElegir(tipo: string) {
       );
     } else {
       this.categoriaSeleccionada = '';
-      this.nuevoElementoSecuestrado = { elemento: '', descripcion: '', caracteristicas: '' };
+      this.nuevoElementoSecuestrado = { elemento: '', descripcion: '', caracteristicas: '',cantidad: 1 }; // Reiniciar el objeto si no hay elemento seleccionado
     }
   }
   
@@ -858,26 +865,26 @@ onElegir(tipo: string) {
       this.nuevoBienRecuperado = {
         elemento: elemento.elemento,
         descripcion: elemento.descripcion,
-        caracteristicas: elemento.caracteristicas || ''
+        caracteristicas: elemento.caracteristicas || '',
+        cantidad: elemento.cantidad || 1 // Asegurar que la cantidad esté presente
       };
-      this.descripcionSeleccionada = elemento.descripcion;
-  
-      // Asegurar que el modal correcto se abra
-      this.modalBienRecuperadoAbierto = false;
-      setTimeout(() => {
-        this.modalBienRecuperadoAbierto = true;
-      }, 100);
+    this.descripcionSeleccionada = elemento.descripcion;
+    this.descripcionActual = elemento.caracteristicas || '';
+    this.modalBienRecuperadoAbierto = false;
+    setTimeout(() => {
+      this.modalBienRecuperadoAbierto = true;
+    }, 100);
     } 
     else if (elemento.tipo === 'Bien No Recuperado') {
       this.elementoRecuperado = false;
       this.nuevoBienNoRecuperado = {
         elemento: elemento.elemento,
         descripcion: elemento.descripcion,
-        caracteristicas: elemento.caracteristicas || ''
+        caracteristicas: elemento.caracteristicas || '',
+        cantidad: elemento.cantidad || 1 // Asegurar que la cantidad esté presente
       };
       this.descripcionSeleccionada = elemento.descripcion;
-  
-      // Asegurar que el modal correcto se abra
+      this.descripcionActual = elemento.caracteristicas || '';
       this.modalBienRecuperadoAbierto = false;
       setTimeout(() => {
         this.modalBienRecuperadoAbierto = true;
@@ -887,14 +894,15 @@ onElegir(tipo: string) {
       this.nuevoElementoSecuestrado = {
         elemento: elemento.elemento,
         descripcion: elemento.descripcion,
-        caracteristicas: elemento.caracteristicas || ''
+        caracteristicas: elemento.caracteristicas || '',
+        cantidad: elemento.cantidad // Asegurar que la cantidad esté presente
       };
   
       // Asegurar que se abre el modal de Elemento Secuestrado
       this.openModalSecuestrado();
     }
   }
-  
+  // 
   
 
  // Método para eliminar un elemento
@@ -931,9 +939,9 @@ eliminarElemento(index: number): void {
 
   resetFormularioE(): void {
     // Restablece los valores a los objetos originales vacíos
-    this.nuevoElementoSecuestrado = { elemento: '', descripcion: '', caracteristicas: '' };
-    this.nuevoBienRecuperado = { elemento: '', descripcion: '', caracteristicas: '' };
-    this.nuevoBienNoRecuperado = { elemento: '', descripcion: '', caracteristicas: '' };
+    this.nuevoElementoSecuestrado = { elemento: '', descripcion: '', caracteristicas: '' ,cantidad: 1 }; // Asegurar que la cantidad esté presente
+    this.nuevoBienRecuperado = { elemento: '', descripcion: '', caracteristicas: '' ,cantidad: 1 }; // Asegurar que la cantidad esté presente
+    this.nuevoBienNoRecuperado = { elemento: '', descripcion: '', caracteristicas: '',cantidad: 1 }; // Asegurar que la cantidad esté presente
     this.elementoRecuperado = false; // Restablece el valor del checkbox
     // Restablece otras propiedades como las que manejan el estado del modal
     this.mostrarSelectorDudoso = false;
@@ -956,7 +964,9 @@ eliminarElemento(index: number): void {
       ...this.nuevoElementoSecuestrado,
       tipo: 'Elemento Secuestrado',
       elementos: this.nuevoElementoSecuestrado.elemento,
-      caracteristicas: this.nuevoElementoSecuestrado.caracteristicas || '' // Asegurar que existe
+      caracteristicas: this.nuevoElementoSecuestrado.caracteristicas || '' ,// Asegurar que existe
+      cantidad: this.nuevoElementoSecuestrado.cantidad // <--- importante
+
     };
     if (this.editIndex !== null) {
       this.elementosAgregados[this.editIndex] = nuevoElemento;
@@ -966,7 +976,7 @@ eliminarElemento(index: number): void {
       this.nuevaNovedad.elemento_secuestrado.push(nuevoElemento);
       this.elementosAgregados.push(nuevoElemento);
     }
-    this.nuevoElementoSecuestrado = { elemento: '', descripcion: '', caracteristicas: '' }; // Restablece el formulario
+    this.nuevoElementoSecuestrado = { elemento: '', descripcion: '', caracteristicas: '', cantidad:1}; // Restablece el formulario
     this.cerrarModalElementoSecuestrado();
   }
   
@@ -975,7 +985,8 @@ eliminarElemento(index: number): void {
       ...this.nuevoBienRecuperado,
       tipo: 'Bien Recuperado',
       elementos: this.nuevoBienRecuperado.elemento,
-      caracteristicas: this.nuevoBienRecuperado.caracteristicas || '' // Asegurar que existe
+      caracteristicas: this.nuevoBienRecuperado.caracteristicas || '', // Asegurar que existe
+      cantidad: this.nuevoBienRecuperado.cantidad // <--- importante
     };
     if (this.editIndex !== null) {
       this.elementosAgregados[this.editIndex] = nuevoElemento;
@@ -985,7 +996,7 @@ eliminarElemento(index: number): void {
       this.nuevaNovedad.bien_recuperado.push(nuevoElemento);
       this.elementosAgregados.push(nuevoElemento);
     }
-    this.nuevoBienRecuperado = { elemento: '', descripcion: '', caracteristicas: '' }; 
+    this.nuevoBienRecuperado = { elemento: '', descripcion: '', caracteristicas: '' ,cantidad:1}; // Restablece el formulario
     this.cerrarModal();
     this.resetFormularioE();
   }
@@ -995,7 +1006,8 @@ eliminarElemento(index: number): void {
       ...this.nuevoBienNoRecuperado,
       tipo: 'Bien No Recuperado',
       elementos: this.nuevoBienNoRecuperado.elemento,
-      caracteristicas: this.nuevoBienNoRecuperado.caracteristicas || '' // Asegurar que existe
+      caracteristicas: this.nuevoBienNoRecuperado.caracteristicas || '', // Asegurar que 
+      cantidad: this.nuevoBienNoRecuperado.cantidad // <--- importante
     };
     if (this.editIndex !== null) {
       this.elementosAgregados[this.editIndex] = nuevoElemento;
@@ -1005,8 +1017,9 @@ eliminarElemento(index: number): void {
       this.nuevaNovedad.bien_recuperado_no.push(nuevoElemento);
       this.elementosAgregados.push(nuevoElemento);
     }
-    this.nuevoBienNoRecuperado = { elemento: '', descripcion: '', caracteristicas: '' };
+    this.nuevoBienNoRecuperado = { elemento: '', descripcion: '', caracteristicas: '', cantidad:1 }; // Restablece el formulario
     this.resetFormularioE();
+    this.cerrarModal();
   }
   
   
@@ -1067,8 +1080,8 @@ eliminarElemento(index: number): void {
       );
     } else {
       this.categoriaSeleccionada = '';
-      this.nuevoBienRecuperado = { elemento: '', descripcion: '', caracteristicas: '' };
-      this.nuevoBienNoRecuperado = { elemento: '', descripcion: '', caracteristicas: '' };
+      this.nuevoBienRecuperado = { elemento: '', descripcion: '', caracteristicas: '', cantidad: 1 };
+      this.nuevoBienNoRecuperado = { elemento: '', descripcion: '', caracteristicas: '' , cantidad: 1 };
       this.actualizarDescripcion();
     }
   }
@@ -1107,6 +1120,7 @@ eliminarElemento(index: number): void {
   cerrarModalElementoSecuestrado() {
     this.modalElementoSecuestradoAbierto = false;
   }
+
   openModalSecuestrado() {
     this.modalElementoSecuestradoAbierto = true; // Para el *ngIf
     const modalElement = document.getElementById('modalSecuestrado');
@@ -1141,6 +1155,11 @@ eliminarElemento(index: number): void {
   
     return of(resultados); // Retorna los resultados filtrados como un observable
   }
+
+
+
+// aqui empieza el manejo de mapas
+
    initMap(): void {
     // Inicializa el mapa centrado en una ubicación predeterminada
     this.map = L.map('map').setView([-24.18769889437684, -65.29709953331486], 15);

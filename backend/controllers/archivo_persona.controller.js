@@ -90,3 +90,28 @@ exports.listarArchivosPorPersona = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener los archivos.' });
   }
 };
+exports.eliminarArchivosByPersona = async (req, res) => {
+  try {
+    const personaId = req.params.personaId;
+    const archivos = await ArchivoPersona.findAll({ where: { persona_id: personaId } });
+
+    // Eliminar archivos físicos
+    for (const archivo of archivos) {
+      if (fs.existsSync(archivo.ruta)) {
+        try {
+          fs.unlinkSync(archivo.ruta);
+        } catch (err) {
+          console.warn(`No se pudo borrar el archivo físico: ${archivo.ruta}`);
+        }
+      }
+    }
+
+    // Eliminar registros en la base de datos
+    await ArchivoPersona.destroy({ where: { persona_id: personaId } });
+
+    res.json({ mensaje: 'Todos los archivos de la persona fueron eliminados correctamente.' });
+  } catch (error) {
+    console.error('Error al eliminar archivos por persona:', error);
+    res.status(500).json({ error: 'Error al eliminar archivos por persona.' });
+  }
+};
