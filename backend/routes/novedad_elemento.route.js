@@ -5,6 +5,8 @@ const controller = require('../controllers/novedad_elemento.controller');
 // Obtener todos los elementos de una novedad
 router.get('/novedad/:novedad_id', controller.getElementosByNovedad);
 
+router.post('/novedad/:novedad_id/elemento/:elemento_id', controller.agregarElementoANovedad);
+
 // Agregar múltiples elementos a una novedad
 router.post('/multiples', controller.agregarElementosMultiplesANovedad);
 

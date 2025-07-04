@@ -429,6 +429,13 @@ video {
   filter: brightness(1.2);
 }
 
+.text-truncate-custom {
+  white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+  overflow: hidden; /* Oculta el contenido que excede el ancho */
+  text-overflow: ellipsis; /* Muestra puntos suspensivos (...) cuando el texto se trunca */
+  max-width: 100px; /* Limita el ancho máximo de la celda */
+}
+
 @media (max-width: 767.98px) {
   .custom-modal-footer {
     bottom: 5rem; /* Sube más el footer en móvil */

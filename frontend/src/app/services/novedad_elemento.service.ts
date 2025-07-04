@@ -72,4 +72,12 @@ export class NovedadElementoService {
       this.getHttpOptions()
     );
   }
+    agregarElementoANovedad(novedad_id: number, elemento_id: number, elemento: NovedadElemento): Observable<NovedadElemento> {
+    return this._http.post<NovedadElemento>(
+      `${this.hostBase}/novedad/${novedad_id}/elemento/${elemento_id}`,
+      elemento,
+      this.getHttpOptions()
+    );
+  }
+  
 }

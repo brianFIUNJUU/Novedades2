@@ -124,7 +124,7 @@ export class NovedadesComponent implements OnInit {
   modalElementoSecuestradoAbierto: boolean = false;
 
   elementosTemporales: NovedadElemento[] = [];
-
+  elementosCargadosDeBackend: NovedadElemento[] = [];
 
   tiposHecho: TipoHecho[] = [];
   subtiposHecho: SubtipoHecho[] = [];
@@ -151,7 +151,7 @@ edad_unidad: string = 'años'; // por defecto
   personalAutor:Personal | null = null
   usuarioNombre: string = '';
   usuarioLegajo: string = '';
-  
+    editElementoId: number | null = null;
 // Variables para manejar la cámara de novedades
 availableCamerasN: MediaDeviceInfo[] = []; // Lista de cámaras disponibles
 currentCameraIndexN: number = 0; // Índice de la cámara actual
@@ -346,21 +346,11 @@ getOperativosPorLegajo(legajo: string): void {
   }
   // Bloquear el scroll del body
   bloquearScroll() {
-    // Guarda la posición actual del scroll
-    this.scrollPosition = window.scrollY;
-    // Aplica estilos para bloquear el scroll
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${this.scrollPosition}px`;
-    document.body.style.width = '100%';
+    document.body.classList.add('modal-open');
   }
-
-  // Desbloquear el scroll del body
+  
   desbloquearScroll() {
-    // Restaura la posición del scroll
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    window.scrollTo(0, this.scrollPosition); // <-- Esto devuelve el scroll a la posición previa
+    document.body.classList.remove('modal-open');
   }
 
    cargarJuridiccionNombre(personal: Personal): void {
@@ -502,10 +492,23 @@ getOperativosPorLegajo(legajo: string): void {
       this.novedadesService.getNovedadById(id).subscribe(
         (data: Novedades) => {
           this.nuevaNovedad = data;
+          this.novedadGuardadaId = data.id; // <-- Asegúrate de esto
           this.isUpdating = true; // Cambiar a modo de actualización
           this.cargarArchivosNovedad();
           this.actualizarMapaDesdeFormulario();
           this.actualizarElementosAgregados(); // Llamar a actualizarElementosAgregados
+        if (this.novedadGuardadaId) {
+        this.novedadElementoService.getElementosByNovedad(this.novedadGuardadaId).subscribe(
+          (elementos: NovedadElemento[]) => {
+            console.log('Elementos recibidos del backend:', elementos); // <-- Agrega este log
+            this.elementosCargadosDeBackend = elementos;
+          },
+          (error) => {
+            console.error('Error al cargar elementos de la novedad:', error);
+            this.elementosCargadosDeBackend = [];
+          }
+        );
+      }
           if (this.nuevaNovedad.fecha) {
         this.nuevaNovedad.fecha = this.nuevaNovedad.fecha.split('T')[0];
       }
@@ -826,108 +829,78 @@ onElegir(tipo: string) {
   }
   
 
-  onElementoSecuestradoChange(): void {
-    this.mostrarSelectorDudoso = this.nuevoElementoSecuestrado.descripcion === "Elemento de dudosa procedencia";
-  
-    // Si el usuario cambia a otra opción, limpiar la selección previa
-    if (!this.mostrarSelectorDudoso) {
-      this.nuevoElementoSecuestrado.caracteristicas = '';
-    }
+cargarCategoriaPorElementoSecuestrado(elementoNombre: string): void {
+  console.log("Elemento seleccionado (Secuestrado):", elementoNombre);
+
+  if (elementoNombre) {
+    this.elementoService.getCategoriaByElemento(elementoNombre).subscribe(
+      (data) => {
+        this.categoriaSeleccionada = data.categoria_nombre;
+        this.nuevoElementoSecuestrado.descripcion = elementoNombre;
+        this.nuevoElementoSecuestrado.elemento = elementoNombre;
+      },
+      (error) => {
+        console.error('Error al cargar la categoría:', error);
+      }
+    );
+  } else {
+    this.categoriaSeleccionada = '';
+    this.nuevoElementoSecuestrado = { elemento: '', descripcion: '', caracteristicas: '', cantidad: 1 };
   }
-  cargarCategoriaPorElementoSecuestrado(elementoNombre: string): void {
-    console.log("Elemento seleccionado (Secuestrado):", elementoNombre);
-  
-    if (elementoNombre) {
-      this.elementoService.getCategoriaByElemento(elementoNombre).subscribe(
-        (data) => {
-          this.categoriaSeleccionada = data.categoria_nombre;
-          this.nuevoElementoSecuestrado.descripcion = elementoNombre;
-          this.nuevoElementoSecuestrado.elemento = data.categoria_nombre;
-        },
-        (error) => {
-          console.error('Error al cargar la categoría:', error);
-        }
-      );
-    } else {
-      this.categoriaSeleccionada = '';
-      this.nuevoElementoSecuestrado = { elemento: '', descripcion: '', caracteristicas: '',cantidad: 1 }; // Reiniciar el objeto si no hay elemento seleccionado
-    }
-  }
-  
+}
   
   editarElemento(index: number): void {
-    const elemento = this.elementosAgregados[index];
+    let elemento: NovedadElemento;
+    if (this.novedadGuardadaId) {
+      // Modo edición: elemento ya guardado en backend
+      elemento = this.elementosCargadosDeBackend[index];
+    } else {
+      // Modo creación: elemento temporal
+      elemento = this.elementosTemporales[index];
+    }
     this.editIndex = index;
+    this.editElementoId = elemento.id || null; // <-- Guarda el id si existe
   
-    // Verificar qué tipo de elemento es
-    if (elemento.tipo === 'Bien Recuperado') {
-      this.elementoRecuperado = true;
-      this.nuevoBienRecuperado = {
-        elemento: elemento.elemento,
-        descripcion: elemento.descripcion,
-        caracteristicas: elemento.caracteristicas || '',
-        cantidad: elemento.cantidad || 1 // Asegurar que la cantidad esté presente
+    if (elemento.estado === 'secuestrado') {
+      this.nuevoElementoSecuestrado = {
+        elemento: elemento.elemento_nombre ?? '',
+        descripcion: elemento.elemento_nombre ?? '',
+        caracteristicas: elemento.descripcion || '',
+        cantidad: elemento.cantidad || 1
       };
-    this.descripcionSeleccionada = elemento.descripcion;
-    this.descripcionActual = elemento.caracteristicas || '';
-    this.modalBienRecuperadoAbierto = false;
-    setTimeout(() => {
-      this.modalBienRecuperadoAbierto = true;
-    }, 100);
-    } 
-    else if (elemento.tipo === 'Bien No Recuperado') {
-      this.elementoRecuperado = false;
-      this.nuevoBienNoRecuperado = {
-        elemento: elemento.elemento,
-        descripcion: elemento.descripcion,
-        caracteristicas: elemento.caracteristicas || '',
-        cantidad: elemento.cantidad || 1 // Asegurar que la cantidad esté presente
-      };
-      this.descripcionSeleccionada = elemento.descripcion;
-      this.descripcionActual = elemento.caracteristicas || '';
+      this.categoriaSeleccionada = elemento.categoria_nombre || '';
+      this.openModalSecuestrado();
+    } else {
+      this.elementoRecuperado = elemento.estado === 'recuperado';
+      this.descripcionSeleccionada = elemento.elemento_nombre ?? '';
+      this.categoriaSeleccionada = elemento.categoria_nombre || '';
+      this.descripcionActual = elemento.descripcion || '';
+      if (this.elementoRecuperado) {
+        this.nuevoBienRecuperado = {
+          elemento: elemento.categoria_nombre || '',
+          descripcion: elemento.elemento_nombre ?? '',
+          caracteristicas: elemento.descripcion || '',
+          cantidad: elemento.cantidad || 1
+        };
+      } else {
+        this.nuevoBienNoRecuperado = {
+          elemento: elemento.categoria_nombre || '',
+          descripcion: elemento.elemento_nombre ?? '',
+          caracteristicas: elemento.descripcion || '',
+          cantidad: elemento.cantidad || 1
+        };
+      }
       this.modalBienRecuperadoAbierto = false;
       setTimeout(() => {
         this.modalBienRecuperadoAbierto = true;
       }, 100);
-    } 
-    else if (elemento.tipo === 'Elemento Secuestrado') {
-      this.nuevoElementoSecuestrado = {
-        elemento: elemento.elemento,
-        descripcion: elemento.descripcion,
-        caracteristicas: elemento.caracteristicas || '',
-        cantidad: elemento.cantidad // Asegurar que la cantidad esté presente
-      };
-  
-      // Asegurar que se abre el modal de Elemento Secuestrado
-      this.openModalSecuestrado();
     }
   }
-  // 
-  
+ 
 
  // Método para eliminar un elemento
 // Método para eliminar un elemento
-eliminarElemento(index: number): void {
-  const elemento = this.elementosAgregados[index];
-  if (elemento.tipo === 'Elemento Secuestrado') {
-    const indexInArray = this.nuevaNovedad.elemento_secuestrado.findIndex((el: any) => el.elemento === elemento.elemento && el.descripcion === elemento.descripcion);
-    if (indexInArray !== -1) {
-      this.nuevaNovedad.elemento_secuestrado.splice(indexInArray, 1);
-    }
-  } else if (elemento.tipo === 'Bien Recuperado') {
-    const indexInArray = this.nuevaNovedad.bien_recuperado.findIndex((el: any) => el.elemento === elemento.elemento && el.descripcion === elemento.descripcion);
-    if (indexInArray !== -1) {
-      this.nuevaNovedad.bien_recuperado.splice(indexInArray, 1);
-    }
-  } else if (elemento.tipo === 'Bien No Recuperado') {
-    const indexInArray = this.nuevaNovedad.bien_recuperado_no.findIndex((el: any) => el.elemento === elemento.elemento && el.descripcion === elemento.descripcion);
-    if (indexInArray !== -1) {
-      this.nuevaNovedad.bien_recuperado_no.splice(indexInArray, 1);
-    }
-  }
-  this.elementosAgregados.splice(index, 1);
-  this.actualizarElementosAgregados(); // Llamar a actualizarElementosAgregados después de eliminar
-}
+
   actualizarElementosAgregados(): void {
     this.elementosAgregados = [
       ...this.nuevaNovedad.elemento_secuestrado.map((item: any) => ({ ...item, tipo: 'Elemento Secuestrado' })),
@@ -948,82 +921,151 @@ eliminarElemento(index: number): void {
     this.categoriaSeleccionada = ''; // Limpiar la categoría
     this.descripcionSeleccionada = ''; // Limpiar la descripción seleccionada
   }
-  
-    agregarElemento(): void {
-    console.log("Estado antes de agregar:", this.elementoRecuperado, this.nuevoBienRecuperado, this.nuevoBienNoRecuperado);
-  
-    // Dependiendo de elementoRecuperado, se agrega al objeto adecuado
-    if (this.elementoRecuperado) {
-      this.agregarBienRecuperado(); // Si el checkbox está marcado
-    } else {
-      this.agregarBienNoRecuperado(); // Si el checkbox no está marcado
+         agregarElemento(): void {
+      const elementoBase = this.elementos.find(e => e.elemento_nombre === this.descripcionSeleccionada);
+      if (!elementoBase) {
+        Swal.fire('Error', 'Debes seleccionar un elemento válido.', 'error');
+        return;
+      }
+      const elemento: NovedadElemento = {
+        novedad_id: this.novedadGuardadaId || 0,
+        elemento_id: elementoBase.id,
+        elemento_nombre: this.descripcionSeleccionada,
+        categoria_nombre: this.categoriaSeleccionada,
+        cantidad: this.elementoRecuperado ? this.nuevoBienRecuperado.cantidad : this.nuevoBienNoRecuperado.cantidad,
+        estado: this.elementoRecuperado ? 'recuperado' : 'no recuperado',
+        descripcion: this.descripcionActual,
+        tipo: 'Sustraido a la victima',
+      };
+    
+      if (this.novedadGuardadaId) {
+        // Si estamos editando un elemento existente
+        if (this.editElementoId) {
+          this.novedadElementoService.modificarElemento(this.editElementoId, elemento).subscribe(() => {
+            this.novedadElementoService.getElementosByNovedad(this.novedadGuardadaId!).subscribe(
+              (elementos: NovedadElemento[]) => {
+                this.elementosCargadosDeBackend = elementos;
+              }
+            );
+            this.resetFormularioE();
+            this.cerrarModal();
+            this.editElementoId = null;
+          });
+        } else {
+          // Nuevo elemento
+          this.novedadElementoService.agregarElementoANovedad(
+            this.novedadGuardadaId,
+            elemento.elemento_id,
+            elemento
+          ).subscribe(() => {
+            this.novedadElementoService.getElementosByNovedad(this.novedadGuardadaId!).subscribe(
+              (elementos: NovedadElemento[]) => {
+                this.elementosCargadosDeBackend = elementos;
+              }
+            );
+            this.resetFormularioE();
+            this.cerrarModal();
+          });
+        }
+      } else {
+        // Modo creación: solo en temporales
+        if (this.editIndex !== null) {
+          this.elementosTemporales[this.editIndex] = elemento;
+          this.editIndex = null;
+        } else {
+          this.elementosTemporales.push(elemento);
+        }
+        this.resetFormularioE();
+        this.cerrarModal();
+      }
     }
-  }
-  agregarElementoSecuestrado() {
-    const nuevoElemento = {
-      ...this.nuevoElementoSecuestrado,
-      tipo: 'Elemento Secuestrado',
-      elementos: this.nuevoElementoSecuestrado.elemento,
-      caracteristicas: this.nuevoElementoSecuestrado.caracteristicas || '' ,// Asegurar que existe
-      cantidad: this.nuevoElementoSecuestrado.cantidad // <--- importante
 
-    };
+agregarElementoSecuestrado() {
+  const elementoBase = this.elementos.find(e => e.elemento_nombre === this.nuevoElementoSecuestrado.descripcion);
+  if (!elementoBase) {
+    Swal.fire('Error', 'Debes seleccionar un elemento válido.', 'error');
+    return;
+  }
+  const elemento: NovedadElemento = {
+    novedad_id: this.novedadGuardadaId || 0,
+    elemento_id: elementoBase.id,
+    elemento_nombre: this.nuevoElementoSecuestrado.descripcion,
+    categoria_nombre: this.categoriaSeleccionada,
+    cantidad: this.nuevoElementoSecuestrado.cantidad,
+    estado: 'secuestrado',
+    descripcion: this.nuevoElementoSecuestrado.caracteristicas,
+    tipo: 'Procedencia dudosa'
+  };
+
+  if (this.novedadGuardadaId) {
+    // Si estamos editando un elemento existente
+    if (this.editElementoId) {
+      this.novedadElementoService.modificarElemento(this.editElementoId, elemento).subscribe(() => {
+        this.novedadElementoService.getElementosByNovedad(this.novedadGuardadaId!).subscribe(
+          (elementos: NovedadElemento[]) => {
+            this.elementosCargadosDeBackend = elementos;
+          }
+        );
+        this.resetFormularioE();
+        this.cerrarModalElementoSecuestrado();
+        this.editElementoId = null;
+      });
+    } else {
+      // Nuevo elemento
+      this.novedadElementoService.agregarElementoANovedad(
+        this.novedadGuardadaId,
+        elemento.elemento_id,
+        elemento
+      ).subscribe(() => {
+        this.novedadElementoService.getElementosByNovedad(this.novedadGuardadaId!).subscribe(
+          (elementos: NovedadElemento[]) => {
+            this.elementosCargadosDeBackend = elementos;
+          }
+        );
+        this.resetFormularioE();
+        this.cerrarModalElementoSecuestrado();
+      });
+    }
+  } else {
+    // Modo creación: solo en temporales
     if (this.editIndex !== null) {
-      this.elementosAgregados[this.editIndex] = nuevoElemento;
-      this.nuevaNovedad.elemento_secuestrado[this.editIndex] = nuevoElemento;
+      this.elementosTemporales[this.editIndex] = elemento;
       this.editIndex = null;
     } else {
-      this.nuevaNovedad.elemento_secuestrado.push(nuevoElemento);
-      this.elementosAgregados.push(nuevoElemento);
+      this.elementosTemporales.push(elemento);
     }
-    this.nuevoElementoSecuestrado = { elemento: '', descripcion: '', caracteristicas: '', cantidad:1}; // Restablece el formulario
+    this.resetFormularioE();
     this.cerrarModalElementoSecuestrado();
   }
-  
-  agregarBienRecuperado() {
-    const nuevoElemento = {
-      ...this.nuevoBienRecuperado,
-      tipo: 'Bien Recuperado',
-      elementos: this.nuevoBienRecuperado.elemento,
-      caracteristicas: this.nuevoBienRecuperado.caracteristicas || '', // Asegurar que existe
-      cantidad: this.nuevoBienRecuperado.cantidad // <--- importante
-    };
-    if (this.editIndex !== null) {
-      this.elementosAgregados[this.editIndex] = nuevoElemento;
-      this.nuevaNovedad.bien_recuperado[this.editIndex] = nuevoElemento;
-      this.editIndex = null;
-    } else {
-      this.nuevaNovedad.bien_recuperado.push(nuevoElemento);
-      this.elementosAgregados.push(nuevoElemento);
-    }
-    this.nuevoBienRecuperado = { elemento: '', descripcion: '', caracteristicas: '' ,cantidad:1}; // Restablece el formulario
-    this.cerrarModal();
-    this.resetFormularioE();
+}
+
+ // En el componente
+  get elementosParaMostrar() {
+    return this.novedadGuardadaId ? this.elementosCargadosDeBackend : this.elementosTemporales;
   }
-  
-  agregarBienNoRecuperado() {
-    const nuevoElemento = {
-      ...this.nuevoBienNoRecuperado,
-      tipo: 'Bien No Recuperado',
-      elementos: this.nuevoBienNoRecuperado.elemento,
-      caracteristicas: this.nuevoBienNoRecuperado.caracteristicas || '', // Asegurar que 
-      cantidad: this.nuevoBienNoRecuperado.cantidad // <--- importante
-    };
-    if (this.editIndex !== null) {
-      this.elementosAgregados[this.editIndex] = nuevoElemento;
-      this.nuevaNovedad.bien_recuperado_no[this.editIndex] = nuevoElemento;
-      this.editIndex = null;
-    } else {
-      this.nuevaNovedad.bien_recuperado_no.push(nuevoElemento);
-      this.elementosAgregados.push(nuevoElemento);
+  // Método para eliminar un elemento
+eliminarElemento(index: number): void {
+  if (this.novedadGuardadaId) {
+    // Modo edición: eliminar del backend
+    const elemento = this.elementosCargadosDeBackend[index];
+    if (elemento && elemento.id) {
+      this.novedadElementoService.borrarElemento(elemento.id).subscribe(() => {
+        // Recargar la lista desde el backend
+        this.novedadElementoService.getElementosByNovedad(this.novedadGuardadaId!).subscribe(
+          (elementos: NovedadElemento[]) => {
+            this.elementosCargadosDeBackend = elementos;
+          }
+        );
+      });
     }
-    this.nuevoBienNoRecuperado = { elemento: '', descripcion: '', caracteristicas: '', cantidad:1 }; // Restablece el formulario
-    this.resetFormularioE();
-    this.cerrarModal();
+  } else {
+    // Modo creación: eliminar del array temporal
+    this.elementosTemporales.splice(index, 1);
   }
-  
-  
-  cargarElementosPorCategoria(categoriaNombre: string): void {
+}
+
+       
+cargarElementosPorCategoria(categoriaNombre: string): void {
     this.elementoService.getElementosByCategoria(categoriaNombre).subscribe(
       data => {
         this.elementos = data;
@@ -1117,8 +1159,9 @@ eliminarElemento(index: number): void {
     }
   }
  
-  cerrarModalElementoSecuestrado() {
+   cerrarModalElementoSecuestrado() {
     this.modalElementoSecuestradoAbierto = false;
+    this.desbloquearScroll(); // <-- Agrega esto
   }
 
   openModalSecuestrado() {
@@ -1334,8 +1377,20 @@ eliminarElemento(index: number): void {
         console.log('Nocvedad reada', res);
         this.novedadGuardadaId = res.id; // Asigna el ID de la novedad guardada
         
-      // console.log('Antes de vincular, personasTemporales:', this.personasTemporales);
-     
+           if (this.novedadGuardadaId && this.elementosTemporales.length > 0) {
+        this.novedadElementoService.agregarElementosMultiplesANovedad(
+          this.novedadGuardadaId,
+          this.elementosTemporales.map(e => ({
+            ...e,
+            novedad_id: this.novedadGuardadaId as number // <-- Forzamos que nunca sea null
+          }))
+        ).subscribe(
+          res => {
+            this.elementosTemporales = [];
+            // Si quieres, recarga los elementos desde el backend aquí
+          }
+        );
+      }
       this.vincularPersonasANovedad(this.novedadGuardadaId);
       this.vincularPersonalANovedad(this.novedadGuardadaId);
         // Guardar los estados de las personas temporales

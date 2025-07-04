@@ -92,7 +92,22 @@ exports.borrarElementosByNovedad = async (req, res) => {
     res.status(500).json({ error: 'Error al borrar elementos.' });
   }
 };
-
+// POST /api/novedad_elemento/:novedad_id
+// POST /api/novedad_elemento/novedad/:novedad_id
+exports.agregarElementoANovedad = async (req, res) => {
+  try {
+    const { novedad_id } = req.params;
+    const elemento = req.body;
+    if (!novedad_id || !elemento) {
+      return res.status(400).json({ error: 'Datos inválidos.' });
+    }
+    const nuevo = await NovedadElemento.create({ ...elemento, novedad_id });
+    // Opcional: traer el elemento con include si quieres devolverlo completo
+    res.status(201).json(nuevo);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al agregar elemento.' });
+  }
+};
 // Modificar múltiples elementos de una novedad
 exports.modificarElementosMultiples = async (req, res) => {
   try {

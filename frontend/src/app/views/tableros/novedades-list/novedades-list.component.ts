@@ -35,6 +35,8 @@ import { Departamento } from '../../../models/departamento';
 import { LocalidadService } from '../../../services/localidad.service'
 import { Validator } from '@angular/forms';
 import { ArchivoNovedadService } from '../../../services/archivo_novedad.services';
+import { NovedadElemento } from  '../../../models/novedad_elemento';
+import { NovedadElementoService } from  '../../../services/novedad_elemento.service';
 // Tipo para los códigos de novedad 
 type CodigoNovedad = 'R' | 'A' | 'V';
 type FontStyleType = 'normal' | 'bold' | 'italic' ;
@@ -105,8 +107,8 @@ idFiltro: string = '';
     private fb: FormBuilder,
     private departamentoService: DepartamentoService,
     private localidadService: LocalidadService,
-    private archivoNovedadService: ArchivoNovedadService
-    
+    private archivoNovedadService: ArchivoNovedadService,
+    private novedadElementoService: NovedadElementoService
   ) {
     this.actaForm = this.fb.group({
       departamento: ['', Validators.required],
@@ -211,7 +213,10 @@ getNovedadesByUnidadRegionalUsuario(): void {
       }
     );
   }
-}
+} 
+
+
+
 getNovedadesByUnidadRegionalUsuarioTodas(): void {
   if (this.usuarioUnidad) {
     this.novedadesService.getNovedadesByUnidadRegional(this.usuarioUnidad).subscribe(
@@ -1344,6 +1349,7 @@ actualizarMapa(): void {
   
   deleteNovedad(id: string): void {
       this.eliminarArchivosDeNovedad(id);
+      this.borrarElementosPorNovedad(Number(id)); // <-- Aquí llamas al método
 
     this.novedadesService.deleteNovedad(id).subscribe(
       res => {
@@ -1354,6 +1360,17 @@ this.getNovedadesByLegajoByToday();
       error => {
         console.error('Error al eliminar novedad', error);
         Swal.fire('Error', 'Error al eliminar la novedad', 'error');
+      }
+    );
+  }
+
+    borrarElementosPorNovedad(novedadId: number): void {
+    this.novedadElementoService.borrarElementosByNovedad(novedadId).subscribe(
+      res => {
+        console.log('Elementos de la novedad eliminados', novedadId);
+      },
+      error => {
+        console.error('Error al eliminar elementos de la novedad', error);
       }
     );
   }

@@ -51,7 +51,7 @@ export const navItems: INavData[] = [
     children: [
  
       {
-        name: 'persona',
+        name: 'Victimarios',
         url: '/tableros/persona',
         icon: 'nav-icon-bullet',
         attributes: { style: 'font-size: 14px;' }
