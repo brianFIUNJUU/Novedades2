@@ -120,10 +120,39 @@ export const routes: Routes = [
          },
       },
       {
+        path:'elemento',
+        loadComponent: () => import('./elemento/elemento.component').then(m => m.ElementoComponent),
+        data: {
+          title: 'Elemento'
+        }
+      },
+      {
+        path: 'partes-diarios',
+        loadComponent: () => import('./partes-diarios/partes-diarios.component').then(m => m.PartesDiariosComponent),
+        data: {
+          title: 'Partes Diarios'
+        }
+      },
+      {
+        path: 'partes-diarios/:id',
+        loadComponent: () => import('./partes-diarios/partes-diarios.component').then(m => m.PartesDiariosComponent),
+        data: {
+          title: 'Actualizar Parte Diario'
+        }
+      },
+      {
+        path : 'partes-diarios-list',
+        loadComponent: () => import('./partes-diarios-list/partes-diarios-list.component').then(m => m.PartesDiariosListComponent),
+        data: {
+          title: 'Partes Diarios List'
+
+        }
+      },
+      {
         path: '**',
         redirectTo: 'novedades'
       },
-     
+
       
       
     

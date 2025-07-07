@@ -1,0 +1,116 @@
+<div class="card text-white custom-card">
+  <div class="card-body text-center p-2">
+    <h6 class="card-title font-weight-bold mb-0">Datos del Parte Diario</h6>
+  </div>
+</div>
+
+<form>
+  <br>
+  <div class="row">
+    <!-- Tipo de Hora -->
+    <div class="col-sm-4">
+      <div class="form-group">
+        <label for="tipoHora">Tipo de Hora:</label>
+        <input id="tipoHora" name="tipoHora" type="text" class="form-control"
+          placeholder="Ingrese tipo de hora" [(ngModel)]="parteDiario.tipoHora" />
+      </div>
+    </div>
+
+    <!-- Unidad Regional -->
+    <div class="col-sm-4">
+      <div class="form-group">
+        <label for="unidad_regional">Unidad Regional:</label>
+        <select id="unidad_regional" name="unidad_regional" class="form-select"
+          [(ngModel)]="parteDiario.unidad_regional_id" (change)="onUnidadRegionalChange()">
+          <option value="" disabled selected>Seleccione unidad regional</option>
+          <option *ngFor="let unidad of unidadRegionales" [value]="unidad.id">{{ unidad.unidad_regional }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Dependencia -->
+    <div class="col-sm-4">
+      <div class="form-group">
+        <label for="dependencia">Dependencia:</label>
+        <select id="dependencia" name="dependencia" class="form-select"
+          [(ngModel)]="parteDiario.dependencia_id" (change)="onDependenciaChange()">
+          <option value="" disabled selected>Seleccione dependencia</option>
+          <option *ngFor="let dep of dependencias" [value]="dep.id">{{ dep.juridiccion }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Remitente -->
+    <div class="col-sm-4">
+      <div class="form-group">
+        <label for="remitente">Remitente:</label>
+        <input id="remitente" name="remitente" type="text" class="form-control"
+          placeholder="Ingrese remitente" [(ngModel)]="parteDiario.remitente" />
+      </div>
+    </div>
+
+    <!-- Remitente -->
+    <div class="col-sm-4">
+      <div class="form-group">
+        <label for="remitente">Remitente:</label>
+        <input id="remitente" name="remitente" type="text" class="form-control"
+          placeholder="Ingrese remitente" [(ngModel)]="parteDiario.remitente" />
+      </div>
+    </div>
+
+    <!-- Hora desde -->
+    <div class="col-sm-2">
+      <div class="form-group">
+        <label for="hora_desde">Hora desde:</label>
+        <input type="time" id="hora_desde" name="hora_desde" [(ngModel)]="parteDiario.hora_desde"
+          class="form-control">
+      </div>
+    </div>
+
+    <!-- Hora hasta -->
+    <div class="col-sm-2">
+      <div class="form-group">
+        <label for="hora_hasta">Hora hasta:</label>
+        <input type="time" id="hora_hasta" name="hora_hasta" [(ngModel)]="parteDiario.hora_hasta"
+          class="form-control">
+      </div>
+    </div>
+
+    <!-- Lapso -->
+    <div class="col-sm-2">
+      <div class="form-group">
+        <label for="lapso">Lapso:</label>
+        <input id="lapso" name="lapso" type="text" class="form-control"
+          placeholder="Ingrese lapso" [(ngModel)]="parteDiario.lapso" />
+      </div>
+    </div>
+
+    <!-- Jefe -->
+    <div class="col-sm-2">
+      <div class="form-group">
+        <label for="jefe">Jefe:</label>
+        <input id="jefe" name="jefe" type="text" class="form-control"
+          placeholder="Ingrese jefe" [(ngModel)]="parteDiario.jefe" />
+      </div>
+    </div>
+
+    <!-- Jefe Operativo -->
+    <div class="col-sm-2">
+      <div class="form-group">
+        <label for="jefe_op">Jefe Operativo:</label>
+        <input id="jefe_op" name="jefe_op" type="text" class="form-control"
+          placeholder="Ingrese jefe operativo" [(ngModel)]="parteDiario.jefe_op" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Botones de acción -->
+  <div class="row mt-4">
+    <div class="col">
+      <button class="btn btn-primary" type="button" (click)="editando ? modificarParteDiario() : crearParteDiario()">
+        {{ editando ? 'Modificar' : 'Guardar' }}
+      </button>
+      <button class="btn btn-danger ml-2" type="button" (click)="limpiarFormulario()">Cancelar</button>
+    </div>
+  </div>
+</form>

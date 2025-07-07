@@ -2,8 +2,17 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/novedad_elemento.controller');
 
+
+router.get('/estado/:estado', controller.getAllElementosByEstado);
+
+router.get('/tipo/:tipo', controller.getAllElementosByTipo);
+
+
+router.get('/por-fecha', controller.getElementosByFecha);
 // Obtener todos los elementos de una novedad
 router.get('/novedad/:novedad_id', controller.getElementosByNovedad);
+
+router.get('/todos', controller.getAllElementos);
 
 router.post('/novedad/:novedad_id/elemento/:elemento_id', controller.agregarElementoANovedad);
 

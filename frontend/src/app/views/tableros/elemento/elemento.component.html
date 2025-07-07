@@ -1,0 +1,93 @@
+<div class="container-fluid p-0">
+  <div class="card text-white custom-card">
+    <div class="card-body text-center p-2">
+      <h6 class="card-title font-weight-bold mb-0">ELEMENTOS ASOCIADOS A REPORTES RECIENTES:</h6>
+    </div>
+  </div>
+        <!-- sección de filtros de elementos -->
+      <!-- sección de filtros de elementos -->
+      <div class="mb-3">
+        <div class="d-flex align-items-center flex-wrap gap-2">
+          <!-- Selector de filtro -->
+          <select class="form-select form-select-sm w-auto" [(ngModel)]="opcionFiltro" (change)="onFiltroChange($event)">
+            <option value="">Seleccionar filtro...</option>
+            <option value="ultimos 3 meses">Últimos 3 meses</option>
+            <option value="fecha">Por fecha</option>
+          <!-- para estos utilizare el getelementobytipo -->
+            <option value="Procedencia dudosa">Procedencia dudosa</option>
+            <option value="Sustraido a la victima">Sustraido a la victima</option>
+            <!-- paa esto ultizare el getelementobyestado -->
+            <option value="recuperado">Recuperado</option>
+            <option value="no recuperado">No recuperado</option>  
+            <option value="secuestrado">Secuestrado</option>
+          </select>
+          
+          <!-- Inputs de fecha y botón, en línea -->
+          <div *ngIf="mostrarFiltroFecha" class="d-flex align-items-center gap-2">
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="fechaFiltroUsuarioInicio" placeholder="Desde" />
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="fechaFiltroUsuarioFin" placeholder="Hasta" />
+            <button class="btn btn-primary btn-sm" (click)="filtrarElementosPorFecha()">Filtrar</button>
+          </div>
+      
+          <!-- Botón de exportar alineado a la derecha -->
+          <div class="ms-auto">
+            <button class="badge bg-success" (click)="exportarElementosAExcel()">Exportar Elementos a Excel</button>
+          </div>
+        </div>
+      </div>
+  
+    <div class="table-responsive" style="overflow: auto; max-height: 56vh;"> <!-- Menos altura -->
+        <table class="table table-bordered border-primary table-sm table-custom">
+      <thead>
+        <tr>
+            <!-- elemento resultante de las novedades cargadas  -->
+        <th class="text-small text-center">Id</th>
+        <th class="text-small text-center">Elemento</th>
+        <th class="text-small text-center ">Categoria</th>
+        <th class="text-small text-center">Cantidad</th>
+        <th class="text-center text-small">Estado</th>
+        <th class="text-center text-small">Tipo</th>
+        <th class="text-center text-small">Fecha</th>
+        <th class="text-center text-small">Novedad Id</th>
+         
+        </tr>
+      </thead>
+
+
+
+          <tbody>
+        <tr *ngFor="let item of elementosCargados">
+          <td class="text-center text-small">{{ item.id }}</td>
+          <td class="text-center text-small">{{ item.elemento_nombre }}</td>
+          <td class="text-center text-small text-truncate-custom" [title]="item.categoria_nombre">{{ item.categoria_nombre }}</td>
+          <td class="text-center text-small"> <span class="badge bg-primary">{{ item.cantidad }}</span></td>
+
+                    <td class="text-center text-small">
+            <span 
+              [ngClass]="{
+                'badge bg-danger': item.estado === 'no recuperado',
+                'badge bg-warning': item.estado === 'secuestrado',
+                'badge bg-success': item.estado === 'recuperado'
+              }">
+              {{ item.estado }}
+            </span>
+          </td>
+
+          <td class="text-center text-small">
+            <span 
+              [ngClass]="{
+                'badge bg-info': item.tipo === 'Sustraido a la victima',
+                'badge bg-secondary': item.tipo === 'Procedencia dudosa'
+              }">
+       {{ item.tipo }}
+            </span>
+          </td>
+          <td class="text-center text-small">{{item.novedad.fecha}}</td>
+          <td class="text-center text-small">{{ item.novedad_id }}</td>
+        </tr>
+      </tbody>
+
+    </table>
+   
+   
+</div>

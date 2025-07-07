@@ -79,5 +79,34 @@ export class NovedadElementoService {
       this.getHttpOptions()
     );
   }
+  // get de lementos
+    // Obtener todos los elementos por estado
+  getElementosByEstado(estado: string): Observable<NovedadElemento[]> {
+    return this._http.get<NovedadElemento[]>(
+      `${this.hostBase}/estado/${estado}`,
+      this.getHttpOptions()
+    );
+  }
   
+  // Obtener todos los elementos por tipo
+  getElementosByTipo(tipo: string): Observable<NovedadElemento[]> {
+    return this._http.get<NovedadElemento[]>(
+      `${this.hostBase}/tipo/${tipo}`,
+      this.getHttpOptions()
+    );
+  }
+    // Obtener todos los elementos
+  getTodosElementos(): Observable<NovedadElemento[]> {
+    return this._http.get<NovedadElemento[]>(
+      `${this.hostBase}/todos`,
+      this.getHttpOptions()
+    );
+  }
+    // Obtener elementos por rango de fechas
+  getElementosByFecha(fechaInicio: string, fechaFin: string): Observable<NovedadElemento[]> {
+    return this._http.get<NovedadElemento[]>(
+      `${this.hostBase}/por-fecha?inicio=${fechaInicio}&fin=${fechaFin}`,
+      this.getHttpOptions()
+    );
+  }
 }

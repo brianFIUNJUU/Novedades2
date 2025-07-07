@@ -9,7 +9,7 @@ export const navItems: INavData[] = [
   
   
   {
-    name: 'Gestión de Novedades',
+    name: 'Gestión Operativa',
     url: '/tableros',
     iconComponent: { name: 'cil-notes' },
     children: [
@@ -39,24 +39,52 @@ export const navItems: INavData[] = [
         icon: 'nav-icon-bullet',
         attributes: { style: 'font-size: 14px;' }
 
+      },
+      {
+        name: 'Formulario de Partes Diarios',
+        url: '/tableros/partes-diarios',
+        icon: 'nav-icon-bullet',
+        attributes: { style: 'font-size: 14px;' }
+      },
+      {
+        name:'Listado de Partes Diarios',
+        url: '/tableros/partes-diarios-list',
+        icon: 'nav-icon-bullet',
+        attributes: { style: 'font-size: 14px;' }
       }
       
+    ]
+  },
+   {
+    name: 'Resultados  las intervenciones',
+    attributes: { style: 'font-size: 14px; ; white-space: normal;' },
+    url: '/tableros',
+    iconComponent: { name: 'cil-chart' },
+    children: [
+      {
+        name: 'Elemento',
+        url: '/tableros/elemento',
+        icon: 'nav-icon-bullet',
+        attributes: { style: 'font-size: 14px;' }
+      },
+        {
+        name: 'Victimarios',
+        url: '/tableros/persona',
+        icon: 'nav-icon-bullet',
+        attributes: { style: 'font-size: 14px;' }
+
+      }
+   
     ]
   },
 
   {
     name: 'Base de datos',
     url: '/tableros',
-    iconComponent: { name: 'cil-chart' },
+    iconComponent: { name: 'cil-file' },
     children: [
  
-      {
-        name: 'Victimarios',
-        url: '/tableros/persona',
-        icon: 'nav-icon-bullet',
-        attributes: { style: 'font-size: 14px;' }
-
-      },
+    
       {
         name: 'personal',
         url: '/tableros/personal',
@@ -81,7 +109,8 @@ export const navItems: INavData[] = [
   },
   
 
-  
+ 
+
   {
     name: 'Gestion de Usuarios',
     url: '/login',

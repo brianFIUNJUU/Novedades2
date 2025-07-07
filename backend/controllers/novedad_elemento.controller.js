@@ -1,6 +1,7 @@
 const NovedadElemento = require('../models/novedad_elemento');
 const Elemento = require('../models/elementos');
 const Novedades = require('../models/novedades');
+const { Op } = require('sequelize');
 
 // Obtener todos los elementos de una novedad (con include)
 exports.getElementosByNovedad = async (req, res) => {
@@ -134,5 +135,98 @@ exports.modificarElementosMultiples = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al modificar elementos.' });
+  }
+};
+
+exports.getAllElementos = async (req, res) => {
+  try {
+    const fechaLimite = new Date();
+    fechaLimite.setMonth(fechaLimite.getMonth() - 3);
+
+    const elementos = await NovedadElemento.findAll({
+      include: [
+        {
+          model: Novedades,
+          as: 'novedad',
+          where: {
+            fecha: {
+              [Op.gte]: fechaLimite
+            }
+          }
+        },
+        {
+          model: Elemento,
+          as: 'elemento'
+        }
+      ]
+    });
+    res.json(elementos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener todos los elementos.' });
+  }
+};
+
+exports.getAllElementosByEstado = async (req, res) => {
+  try {
+    const { estado } = req.params;
+    const elementos = await NovedadElemento.findAll({
+      where: { estado },
+      include: [
+        { model: Elemento, as: 'elemento' },
+        { model: Novedades, as: 'novedad' }
+      ]
+
+    });
+    res.json(elementos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener elementos por estado.' });
+  }
+};
+
+exports.getAllElementosByTipo = async (req, res) => {
+  try {
+    const { tipo } = req.params;
+    const elementos = await NovedadElemento.findAll({
+      where: { tipo },
+      include: [
+        { model: Elemento, as: 'elemento' },
+        { model: Novedades, as: 'novedad' }
+      ]
+    });
+    res.json(elementos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener elementos por tipo.' });
+  }
+};
+
+
+
+exports.getElementosByFecha = async (req, res) => {
+  try {
+    const { inicio, fin } = req.query;
+    if (!inicio || !fin) {
+      return res.status(400).json({ error: 'Debe enviar las fechas "inicio" y "fin".' });
+    }
+    const elementos = await NovedadElemento.findAll({
+      include: [
+        {
+          model: Novedades,
+          as: 'novedad',
+          where: {
+            fecha: {
+              [Op.between]: [inicio, fin]
+            }
+          }
+        },
+        { model: Elemento, as: 'elemento' }
+      ]
+    });
+    res.json(elementos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener elementos por fecha.' });
   }
 };

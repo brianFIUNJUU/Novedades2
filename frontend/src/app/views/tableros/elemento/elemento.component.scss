@@ -1,0 +1,139 @@
+/* Ejemplo: Eliminar márgenes y paddings globales */
+body, html {
+  margin: 0;
+  padding: 0;
+}
+.table-custom {
+  width: 100%;
+}
+.text-small {
+  font-size: 0.875rem; /* Tamaño de texto más pequeño */
+}
+.custom-card {
+  background-color: #081a2e; /* Color azul */
+  color: white; /* Color del texto */
+}
+.custom-card2 {
+  background-color: #0f2f53; /* Color azul */
+  color: white; /* Color del texto */
+}
+
+.table td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.custom-modal-header {
+  background-color: #0f2f53; /* Color azul */
+  color: white; /* Color del texto */
+}
+
+/* Aumentar la especificidad de las clases CSS personalizadas */
+.table-custom tr.rojo td {
+  background-color: rgba(236, 7, 7, 0.407) !important;
+}
+
+.table-custom tr.amarillo td {
+  background-color: rgba(255, 255, 0, 0.434) !important;
+}
+
+.table-custom tr.verde td {
+  background-color: rgba(0, 128, 0, 0.355) !important;
+}
+.btn-close-red {
+  background-color: red;
+  border: none;
+  opacity: 1;
+}
+
+.btn-close-red:hover {
+  background-color: darkred;
+}
+
+.custom-modal-header2 {
+  background-color: #0f2f53; /* Color azul */
+  color: white; /* Color del texto */
+}
+.text-truncate-custom {
+  white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+  overflow: hidden; /* Oculta el contenido que excede el ancho */
+  text-overflow: ellipsis; /* Muestra puntos suspensivos (...) cuando el texto se trunca */
+  max-width:100px; /* Limita el ancho máximo de la celda */
+}
+   h5, h6{
+    font-size:1rem; /* Reducir el tamaño de fuente de encabezados */
+  }
+
+  /* Media query para pantallas de celular (ancho máximo de 768px) */
+  @media (max-width: 768px) {
+    .form-control, .form-select, .btn {
+      font-size: 12px; /* Reducir el tamaño de fuente en celulares */
+      padding: 5px; /* Reducir el padding */
+    }
+  
+    label, p {
+      font-size: 12px; /* Reducir el tamaño de fuente de etiquetas y texto */
+    }
+    h5, h6{
+      font-size: 16px; /* Reducir el tamaño de fuente de encabezados */
+    }
+  
+  
+    .col-md-4, .col-md-6, .col-md-12 {
+      width: 100%; /* Las columnas ocupan todo el ancho en celulares */
+    }
+  
+  
+    .form-group.d-flex label {
+      margin-bottom: 5px; /* Agregar margen inferior a las etiquetas */
+    }
+  
+  
+  
+    .table-responsive {
+      overflow-x: auto; /* Permitir scroll horizontal en tablas */
+    }
+  }
+  
+  /* Media query para pantallas aún más pequeñas (ancho máximo de 480px) */
+  @media (max-width: 480px) {
+    .form-control, .form-select, .btn {
+      font-size: 12px; /* Reducir aún más el tamaño de fuente */
+    }
+  
+    label, p {
+      font-size: 12px; /* Reducir el tamaño de fuente de etiquetas y texto */
+    }
+  
+
+    
+  }
+/* Estilos generales para la tabla (pueden estar ya definidos) */
+.table-responsive {
+  overflow-x: auto;
+  max-width: 100%;
+  max-height: 56vh;
+}
+
+.table-bordered {
+  border: 1px solid #dee2e6; /* Ejemplo de borde */
+}
+
+.table-sm td, .table-sm th {
+  padding: 0.1rem; /* Padding base, puedes ajustarlo */
+}
+
+.text-small {
+  font-size: 0.7rem; /* Tamaño de fuente base, puedes ajustarlo */
+}
+
+/* Estilos específicos para pantallas de celular */
+@media (max-width: 768px) { /* Ajusta el breakpoint según necesites */
+
+
+
+  /* Opcional: Si necesitas reducir aún más el espacio entre columnas */
+  th, td {
+    white-space: nowrap; /* Evita el salto de línea forzado */
+  }
+}

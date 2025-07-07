@@ -14,7 +14,7 @@
                                 <button (click)="getVictimarios()" class="badge bg-primary">Todos</button>
                               </div>
 
-                                                          <div class="col-auto d-flex gap-2 mb-2" *ngIf="userInfo.perfil === 'administrador'">
+                                                          <div class="col-auto d-flex gap-2 mb-2" *ngIf="userInfo?.perfil === 'administrador'">
                                 <button class="badge bg-secondary" (click)="getPersonasSinNovedad()">Personas sin novedades</button>
                                 <button class="badge bg-warning" (click)="getVictimarios()">Victimarios con novedades</button>
                               </div>
@@ -73,7 +73,7 @@
           <td class="text-center text-small">
            
             <button class="btn btn-info btn-sm" (click)="verVictimario(victimario)">Ver ficha</button>
-            <button *ngIf="userInfo.perfil !== 'usuario'" class="btn btn-warning btn-sm" (click)="verPersona(victimario.persona)"><i class="bi-pencil"></i></button>
+            <button *ngIf="userInfo?.perfil !== 'usuario'" class="btn btn-warning btn-sm" (click)="verPersona(victimario.persona)"><i class="bi-pencil"></i></button>
             
                         <!-- ...otras acciones... -->
             <button *ngIf="mostrandoPersonasSinNovedad" class="btn btn-danger btn-sm" (click)="eliminarPersona(victimario.persona.id)">
