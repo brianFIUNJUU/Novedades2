@@ -25,12 +25,16 @@ const PartesDiariosPersonal = sequelize.define('PartesDiariosPersonal', {
     },
     allowNull: false
   },
+  personal_datos  : {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
   // Puedes agregar más campos aquí, por ejemplo:
   rol: {
     type: DataTypes.STRING,
   },
   situacion: {
-    type: DataTypes.TEXT,
+    type: DataTypes.STRING,
   },
   tipo_personal: {
     type: DataTypes.STRING,
@@ -41,8 +45,18 @@ const PartesDiariosPersonal = sequelize.define('PartesDiariosPersonal', {
   timestamps: false
 });
 
+PartesDiariosPersonal.sync({ alter: true })
+  .then(() => {
+    console.log("Tabla 'partes_diarios_personal' sincronizada correctamente.");
+  })
+  .catch((error) => {
+    console.error("Error al sincronizar la tabla 'partes_diarios':", error);
+  });
+
+
 // Relaciones
 PartesDiarios.belongsToMany(Personal, { through: PartesDiariosPersonal, foreignKey: 'parte_diario_id', as: 'personal' });
 Personal.belongsToMany(PartesDiarios, { through: PartesDiariosPersonal, foreignKey: 'personal_id', as: 'partesDiarios' });
+PartesDiariosPersonal.belongsTo(Personal, {foreignKey: 'personal_id', as: 'personal' });
 
 module.exports = PartesDiariosPersonal;

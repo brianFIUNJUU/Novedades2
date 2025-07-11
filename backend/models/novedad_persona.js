@@ -20,7 +20,12 @@ const NovedadPersona = sequelize.define('NovedadPersona', {
     },
     estado: {
         type: DataTypes.STRING,
-    }
+    },
+    demorado: {
+        type: DataTypes.BOOLEAN,
+        
+    },
+
 
 }, {
     tableName: 'novedad_persona',

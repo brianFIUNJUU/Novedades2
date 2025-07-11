@@ -55,3 +55,18 @@ exports.getPersonalesByNovedadId = async (req, res) => {
         res.status(400).json({ error: 'Error al obtener personales de la novedad' });
     }
 };
+// Obtener personas demoradas mayores de 18 años
+exports.getPersonasDemoradasMayores = async (req, res) => {
+    try {
+        const personas = await Personal.findAll({
+            where: {
+                edad: { [require('sequelize').Op.gte]: 18 },
+                demorado: true
+            }
+        });
+        res.status(200).json(personas);
+    } catch (error) {
+        console.error('Error al obtener personas demoradas mayores de 18 años:', error);
+        res.status(400).json({ error: 'Error al obtener personas demoradas mayores de 18 años' });
+    }
+};

@@ -5,6 +5,7 @@ const novedadesController = require('../controllers/novedades.controllers'); // 
 // Definir las rutas para la gestión de novedades
 router.get('/today', novedadesController.getNovedadByToday);
 router.get('/rango-fecha', novedadesController.getNovedadByRangoFecha);
+router.get('/by-fecha-hora', novedadesController.getNovedadesByFechaYHoraRango);
 router.get('/legajo/:legajo/rango-fecha', novedadesController.getNovedadByLegajoByRangoFecha);
 router.get('/unidad-regional/:unidad_regional_id', novedadesController.getNovedadByUnidadRegional);
 router.get('/unidad-regional/:unidad_regional_id/today', novedadesController.getNovedadByUnidadRegionalByToday);

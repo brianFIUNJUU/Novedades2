@@ -57,6 +57,7 @@ import { ArchivoNovedad } from '../../../models/archivo_novedad'; // Importa el 
 import { ArchivoNovedadService } from '../../../services/archivo_novedad.services'; // Importa el servicio de ArchivoNovedad
 import { NovedadElemento } from '../../../models/novedad_elemento';
 import { NovedadElementoService } from '../../../services/novedad_elemento.service';
+import { NovedadPersona } from '../../../models/novedad_persona';
 
 // Configurar Leaflet para usar las imágenes desde la carpeta de activos
 L.Icon.Default.imagePath = 'assets/leaflet/';
@@ -83,7 +84,7 @@ export class NovedadesComponent implements OnInit {
   personas: Persona[] = [];//
   paises = PAISES; // Lista de países
   personasIds: number[] = []; // Lista temporal para almacenar los IDs de las personas
-  personasTemporales: { persona: Persona, estado: 'victima' | 'victimario' | 'protagonista'| 'testigo' }[] = []; // Lista temporal para almacenar las personas con su esta
+  personasTemporales: { persona: Persona, estado: 'victima' | 'victimario' | 'protagonista'| 'testigo' , demorado?: boolean}[] = []; // Lista temporal para almacenar las personas con su esta
   isVerificar: boolean = false; // Variable para verificar si se debe mostrar el botón de verificación
   personalTemporales: {personal: Personal}[] = []; // Lista temporal para almacenar los policías con su estado
   policiasIds:number[]=[]; // Lista temporal para almacenar los IDs de los policías
@@ -1435,11 +1436,13 @@ cargarElementosPorCategoria(categoriaNombre: string): void {
       this.personasTemporales.forEach((personaTemporal) => {
         const personaId = personaTemporal.persona.id;
         const estado = personaTemporal.estado;
+        const demorado = personaTemporal.demorado ?? false; // Por defecto false si no está definido
+
         if (!personaId || personaId === 0) {
           console.error('Error: Intentando agregar una persona con un ID no válido:', personaId);
           return;
         }
-             this.novedadesPersonaService.addPersonaToNovedad(novedadId, personaId, estado).subscribe(
+    this.novedadesPersonaService.addPersonaToNovedad(novedadId, personaId, estado, demorado).subscribe(
           () => {
             console.log(`Persona con ID ${personaId} y estado ${estado} agregada a la novedad`);
           },
@@ -1450,44 +1453,54 @@ cargarElementosPorCategoria(categoriaNombre: string): void {
       });
     }
 
-  
-updateNovedad(): void { 
- if (!this.nuevaNovedad.personal_autor_nombre) {
-    this.buscarPersonalAutorPorLegajoUsuario();
-  }
-
-  if (!this.nuevaNovedad.unidad_regional_id) {
-    Swal.fire('Formulario incompleto', 'Por favor, completa todos los campos requeridos.', 'warning');
-    return;
-  }
-
-  // console.log('Datos enviados:', JSON.stringify(this.nuevaNovedad, null, 2)); // Agregar un log para ver los datos enviados 
-  this.novedadesService.updateNovedad(this.nuevaNovedad.id.toString(), this.nuevaNovedad).subscribe(
-    res => {
-      console.log('Novedad actualizada', res);
-      this.nuevaNovedad.id = res.id; // Asegurarse de que el ID de la novedad esté definido
-      this.novedadGuardadaId = this.nuevaNovedad.id; // Asigna el ID de la novedad actualizada
-      // Actualizar las relaciones many-to-many
-      this.actualizarRelacionesPersonas();
-      this.actualizarRelacionesPersonal();
-          // Guardar los estados de las personas temporales
-      this.personasTemporales.forEach((personaTemporal) => {
-        this.guardarEstado(personaTemporal);
-      });
-      this.actualizarElementosAgregados(); // Llamar a actualizarElementosAgregados
-      this.getAllNovedades();
-      // this.resetFormNov();
-       this.subirArchivosNovedad(this.nuevaNovedad.id); // Subir archivos de la novedad actualizada
-
-      Swal.fire('Éxito', 'Novedad actualizada con éxito', 'success');
-      this.router.navigate(['/tableros/novedades-list']); // Redirigir a la lista de novedades
-    },
-    error => {
-      console.error('Error al actualizar novedad', error);
-      Swal.fire('Error', 'Error al actualizar la novedad', 'error');
+  updateNovedad(): void { 
+    if (!this.nuevaNovedad.personal_autor_nombre) {
+      this.buscarPersonalAutorPorLegajoUsuario();
     }
-  );
-}
+  
+    if (!this.nuevaNovedad.unidad_regional_id) {
+      Swal.fire('Formulario incompleto', 'Por favor, completa todos los campos requeridos.', 'warning');
+      return;
+    }
+  
+    this.novedadesService.updateNovedad(this.nuevaNovedad.id.toString(), this.nuevaNovedad).subscribe(
+      res => {
+        this.nuevaNovedad.id = res.id;
+        this.novedadGuardadaId = this.nuevaNovedad.id;
+  
+        // ACTUALIZAR PERSONAS ASOCIADAS (MULTIPLE)
+        this.novedadesPersonaService.updatePersonasNovedadMultiple(
+          this.novedadGuardadaId,
+          this.personasTemporales.map(pt => ({
+            persona_id: pt.persona.id,
+            estado: pt.estado,
+            demorado: pt.demorado ?? false
+          }))
+        ).subscribe(
+          () => {
+            // Aquí puedes refrescar la lista, mostrar mensaje, etc.
+            this.actualizarRelacionesPersonal();
+            this.personasTemporales.forEach((personaTemporal) => {
+              this.guardarEstado(personaTemporal);
+            });
+            this.actualizarElementosAgregados();
+            this.getAllNovedades();
+            this.subirArchivosNovedad(this.nuevaNovedad.id);
+            Swal.fire('Éxito', 'Novedad actualizada con éxito', 'success');
+            this.router.navigate(['/tableros/novedades-list']);
+          },
+          error => {
+            console.error('Error al actualizar personas de la novedad:', error);
+            Swal.fire('Error', 'Error al actualizar personas de la novedad', 'error');
+          }
+        );
+      },
+      error => {
+        console.error('Error al actualizar novedad', error);
+        Swal.fire('Error', 'Error al actualizar la novedad', 'error');
+      }
+    );
+  }
 actualizarRelacionesPersonas(): void {
   const novedadId = this.novedadGuardadaId || this.nuevaNovedad.id; // Usar el ID de la novedad guardada o el ID de la nueva novedad
   if (!novedadId) {
@@ -1535,7 +1548,9 @@ actualizarRelacionesPersonas(): void {
           const personaTemporal = this.personasTemporales.find(pt => pt.persona.id === personaId);
           const estado = personaTemporal ? personaTemporal.estado : '';
           console.log('Agregando persona a la novedad:', { novedad_id: novedadId, persona_id: personaId, estado });
-          this.novedadesPersonaService.addPersonaToNovedad(novedadId, personaId, estado).subscribe(
+                // Dentro de actualizarRelacionesPersonas(), reemplaza la llamada así:
+          const demorado = personaTemporal ? personaTemporal.demorado ?? false : false;
+          this.novedadesPersonaService.addPersonaToNovedad(novedadId, personaId, estado, demorado).subscribe(
             () => {
               console.log(`Persona con IDactualizar ${personaId} y estado ${estado} agregada a la novedad`);
               // Guardar el estado después de agregar la persona
@@ -2174,25 +2189,34 @@ agregarPersonaTemporal(estado: 'victima' | 'victimario' | 'protagonista' | 'test
 
   const persona = { ...personaBase };
 
+  // Obtén el valor de demorado solo para victimario y protagonista
+  let demorado: boolean | undefined = undefined;
+  if (estado === 'victimario') {
+    demorado = this.victimario.demorado ?? false;
+  } else if (estado === 'protagonista') {
+    demorado = this.protagonista.demorado ?? false;
+  }
+
   if (persona.nombre) {
     if (persona.dni) {
       this.personaService.getPersonaByDni(persona.dni).subscribe(
         (data: Persona) => {
           if (data) {
             persona.id = data.id;
-
             const index = this.personasTemporales.findIndex(pt => pt.persona.id === persona.id);
+            const nuevoTemporal = (estado === 'victimario' || estado === 'protagonista')
+              ? { persona, estado, demorado }
+              : { persona, estado };
             if (index === -1) {
-              this.personasTemporales.push({ persona, estado });
+              this.personasTemporales.push(nuevoTemporal);
               if (!this.personasIds.includes(persona.id)) {
-                this.personasIds.push(persona.id); // ✅ Asegurarse de guardar el ID
+                this.personasIds.push(persona.id);
               }
-              console.log('Persona agregada temporalmente:', { persona, estado });
+              console.log('Persona agregada temporalmente:', nuevoTemporal);
             } else {
-              this.personasTemporales[index] = { persona, estado };
-              console.log('Persona actualizada temporalmente:', { persona, estado });
+              this.personasTemporales[index] = nuevoTemporal;
+              console.log('Persona actualizada temporalmente:', nuevoTemporal);
             }
-
             this.cerrarModal2(estado);
             setTimeout(() => this.resetFormulario(estado), 300);
           } else {
@@ -2213,17 +2237,19 @@ agregarPersonaTemporal(estado: 'victima' | 'victimario' | 'protagonista' | 'test
         }
       );
     } else {
-    const index = this.personasTemporales.findIndex(pt => pt.persona.id === persona.id);
-
+      const index = this.personasTemporales.findIndex(pt => pt.persona.id === persona.id);
+      const nuevoTemporal = (estado === 'victimario' || estado === 'protagonista')
+        ? { persona, estado, demorado }
+        : { persona, estado };
       if (index === -1) {
-        this.personasTemporales.push({ persona, estado });
-         if (!this.personasIds.includes(persona.id)) {
-                this.personasIds.push(persona.id); // ✅ Asegurarse de guardar el ID
-              }
-        console.log('Persona agregada temporalmente (sin DNI):', { persona, estado });
+        this.personasTemporales.push(nuevoTemporal);
+        if (!this.personasIds.includes(persona.id)) {
+          this.personasIds.push(persona.id);
+        }
+        console.log('Persona agregada temporalmente (sin DNI):', nuevoTemporal);
       } else {
-        this.personasTemporales[index] = { persona, estado };
-        console.log('Persona actualizada temporalmente (sin DNI):', { persona, estado });
+        this.personasTemporales[index] = nuevoTemporal;
+        console.log('Persona actualizada temporalmente (sin DNI):', nuevoTemporal);
       }
     }
   } else {
@@ -2234,7 +2260,6 @@ agregarPersonaTemporal(estado: 'victima' | 'victimario' | 'protagonista' | 'test
     });
   }
 }
-
         
   guardarPersona(estado: 'victima' | 'victimario' | 'protagonista' | 'testigo', verificado: boolean = false): void {
   console.log('Entrando a guardarPersona', { verificado });
@@ -2445,18 +2470,35 @@ verificarDuplicidadDNI(
   }
 actualizarPersonaTemporal(persona: Persona, estado: 'victima' | 'victimario' | 'protagonista'| 'testigo'): void {
   const index = this.personasTemporales.findIndex(pt => pt.persona.id === persona.id);
+  let demorado = false;
+  // Si ya existe, conserva el valor de demorado
   if (index !== -1) {
-    this.personasTemporales[index] = { persona: { ...persona }, estado };
-    console.log('Persona actualizada temporalmente:', { persona: { ...persona }, estado });
+    demorado = this.personasTemporales[index].demorado ?? false;
+  }
+  // Si el formulario tiene el campo demorado, úsalo
+  if (estado === 'victimario') {
+    demorado = this.victimario.demorado ?? demorado;
+  } else if (estado === 'protagonista') {
+    demorado = this.protagonista.demorado ?? demorado;
+  }
+  const nuevoTemporal = (estado === 'victimario' || estado === 'protagonista')
+    ? { persona: { ...persona }, estado, demorado }
+    : { persona: { ...persona }, estado };
+  if (index !== -1) {
+    this.personasTemporales[index] = nuevoTemporal;
+    console.log('Persona actualizada temporalmente:', nuevoTemporal);
   } else {
-    // Si no existe, la agregamos
-    this.personasTemporales.push({ persona: { ...persona }, estado });
+    this.personasTemporales.push(nuevoTemporal);
     if (!this.personasIds.includes(persona.id)) {
       this.personasIds.push(persona.id);
     }
-    console.log('Persona agregada temporalmente (por edición):', { persona: { ...persona }, estado });
+    console.log('Persona agregada temporalmente (por edición):', nuevoTemporal);
   }
 }
+
+
+
+
 private asignarEdadAuxiliar(tipo: 'victima' | 'victimario' | 'protagonista' | 'testigo', persona: Persona): void {
   let edad_valor = 0;
   let edad_unidad = 'años';
@@ -2484,43 +2526,45 @@ private asignarEdadAuxiliar(tipo: 'victima' | 'victimario' | 'protagonista' | 't
       break;
   }
 }
-    editarPersona(id: number, estado: 'victima' | 'victimario' | 'protagonista'| 'testigo'): void {
-      const personaTemporal = this.personasTemporales.find(pt => pt.persona.id === id);
-      if (personaTemporal) {
-        this.isEditing = true;
-        if (estado === 'victima') {
-          this.victima = { ...personaTemporal.persona };
-          this.cargarArchivosPersona(this.victima); // Cargar los archivos de la persona
-          if (this.victima.localidad_id) {
-            this.cargarLocalidadPorId(+this.victima.localidad_id); // Cargar la localidad por ID
+         editarPersona(id: number, estado: 'victima' | 'victimario' | 'protagonista'| 'testigo'): void {
+        const personaTemporal = this.personasTemporales.find(pt => pt.persona.id === id);
+        if (personaTemporal) {
+          this.isEditing = true;
+          if (estado === 'victima') {
+            this.victima = { ...personaTemporal.persona };
+            this.asignarEdadAuxiliar('victima', this.victima); // <--- AGREGA ESTO
+            this.cargarArchivosPersona(this.victima);
+            if (this.victima.localidad_id) {
+              this.cargarLocalidadPorId(+this.victima.localidad_id);
+            }
+            this.openModal();
+          } else if (estado === 'victimario') {
+            this.victimario = { ...personaTemporal.persona };
+            this.asignarEdadAuxiliar('victimario', this.victimario); // <--- AGREGA ESTO
+            this.cargarArchivosPersona(this.victimario);
+            if (this.victimario.localidad_id) {
+              this.cargarLocalidadPorId(+this.victimario.localidad_id);
+            }
+            this.openModalInculpado();
+          } else if (estado === 'protagonista') {
+            this.protagonista = { ...personaTemporal.persona };
+            this.asignarEdadAuxiliar('protagonista', this.protagonista); // <--- AGREGA ESTO
+            this.cargarArchivosPersona(this.protagonista);
+            if (this.protagonista.localidad_id) {
+              this.cargarLocalidadPorId(+this.protagonista.localidad_id);
+            }
+            this.openModalProtagonista();
+          } else if (estado === 'testigo') {
+            this.testigo = { ...personaTemporal.persona };
+            this.asignarEdadAuxiliar('testigo', this.testigo); // <--- AGREGA ESTO
+            this.cargarArchivosPersona(this.testigo);
+            if (this.testigo.localidad_id) {
+              this.cargarLocalidadPorId(+this.testigo.localidad_id);
+            }
+            this.openModalTestigo();
           }
-          this.openModal(); // Abrir el modal de víctima
-        } else if (estado === 'victimario') {
-          this.victimario = { ...personaTemporal.persona };
-          this.cargarArchivosPersona(this.victimario); // Cargar los archivos de la persona
-          if (this.victimario.localidad_id) {
-            this.cargarLocalidadPorId(+this.victimario.localidad_id); // Cargar la localidad por ID
-          }
-          this.openModalInculpado();     
-        } else if (estado === 'protagonista') {
-          this.protagonista = { ...personaTemporal.persona };
-          this.cargarArchivosPersona(this.protagonista); // Cargar los archivos de la persona
-          if (this.protagonista.localidad_id) {
-            this.cargarLocalidadPorId(+this.protagonista.localidad_id); // Cargar la localidad por ID
-          }
-          this.openModalProtagonista(); // Abrir el modal de protagonista
         }
-        else if (estado === 'testigo') {
-          this.testigo = { ...personaTemporal.persona }; // Estabas asignando this.protagonista aquí
-          this.cargarArchivosPersona(this.testigo);
-          if (this.testigo.localidad_id) {
-            this.cargarLocalidadPorId(+this.testigo.localidad_id);
-          }
-          this.openModalTestigo();
-        }
-        
       }
-    }
  
     cargarPersonas(): void {
     if (this.novedadId !== null) {
@@ -2539,23 +2583,16 @@ private asignarEdadAuxiliar(tipo: 'victima' | 'victimario' | 'protagonista' | 't
   }
 
 cargarPersonasRelacionadas(novedadId: number): void {
-  console.log(`Cargando personas para la novedad con ID: ${novedadId}`);
-  this.novedadesService.getPersonasByNovedadId(novedadId).subscribe(
-    (personas: Persona[]) => {
-      this.personas = personas;
-     
-      personas.forEach(persona => {
-        this.estadoService.getEstadoByNovedadAndPersona(novedadId, persona.id).subscribe(
-          (estado: Estado) => {
-            this.personasTemporales.push({ persona, estado: estado.estado as 'victima' | 'victimario' | 'protagonista' });
-            this.personasIds.push(persona.id); // Agregar el ID de la persona al array personasIds
-          },
-          (error: HttpErrorResponse) => {
-            console.error('Error al obtener estado:', error.message);
-          }
-        );
-      });
-      console.log('Array de personas:', this.personasIds); // Verifica
+  this.novedadesPersonaService.getPersonasByNovedadId(novedadId).subscribe(
+    (personasNovedad: any[]) => {
+      this.personasTemporales = personasNovedad.map(pn => ({
+        persona: pn.persona,
+        estado: pn.estado as 'victima' | 'victimario' | 'protagonista' | 'testigo',
+        demorado: pn.demorado ?? false
+      }));
+      this.personasIds = personasNovedad.map(pn => pn.persona.id);
+      this.personas = personasNovedad.map(pn => pn.persona);
+      console.log('Array de personas:', this.personasIds);
     },
     (error: HttpErrorResponse) => {
       console.error('Error al cargar personas relacionadas:', error.message);

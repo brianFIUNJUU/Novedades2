@@ -31,13 +31,13 @@ export class NovedadesPersonaService {
     return this.http.get<Persona[]>(`${this.apiNovedadPersonaUrl}/${novedadId}/personas`, httpOptions);
   }
 
-  addPersonaToNovedad(novedadId: number, personaId: number, estado: string): Observable<void> {
+addPersonaToNovedad(novedadId: number, personaId: number, estado: string, demorado: boolean): Observable<any> {
     const token = this.getAuthToken();
     const headers = new HttpHeaders({ 
       'Content-Type': 'application/json',
       ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     });
-    const body = { novedad_id: novedadId, persona_id: personaId, estado };
+    const body = { novedad_id: novedadId, persona_id: personaId, estado,demorado };
     return this.http.post<void>(`${this.apiNovedadPersonaUrl}/add`, body, { headers });
   }
 
@@ -92,5 +92,43 @@ export class NovedadesPersonaService {
       }),
     };
     return this.http.get<any[]>(`${this.apiNovedadPersonaUrl}/victimarios/extranjeros`, httpOptions);
+  }
+
+    // Agrega estos métodos en novedades_persona.service.ts
+  
+  getPersonasDemoradasMayores(): Observable<any[]> {
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this.http.get<any[]>(`${this.apiNovedadPersonaUrl}/demorados-mayores`, httpOptions);
+  }
+  
+  getPersonasDemoradasMenores(): Observable<any[]> {
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this.http.get<any[]>(`${this.apiNovedadPersonaUrl}/demorados-menores`, httpOptions);
+  }
+    updatePersonasNovedadMultiple(novedad_id: number, personas: any[]): Observable<any> {
+    const token = this.getAuthToken();
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      }),
+    };
+    return this.http.put(
+      `${this.apiNovedadPersonaUrl}/update-multiple`,
+      { novedad_id, personas },
+      httpOptions
+    );
   }
 }

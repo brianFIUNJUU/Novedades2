@@ -15,63 +15,63 @@ export const navItems: INavData[] = [
     children: [
          
       {
-        name: 'Formulario de Operativos',
+        name: 'Registro de Operativos',
         url: '/tableros/distribucionform',
         icon: 'nav-icon-bullet',
-                attributes: { style: 'font-size: 14px;' }
+                attributes: { style: 'font-size: 12px;' }
       },
       {
-        name: 'Listado de Operativos',  
+        name: 'Opearativos registrados',  
         url: '/tableros/distribucionlist',
         icon: 'nav-icon-bullet',
-        attributes: { style: 'font-size: 14px;' }
+        attributes: { style: 'font-size: 12px;' }
       },
       {
-        name: 'Formulario de Novedades',
+        name: 'Registro de Intervenciones',
         url: '/tableros/novedades',
         icon: 'nav-icon-bullet',
-        attributes: { style: 'font-size: 14px;' }
+        attributes: { style: 'font-size: 12px;' }
 
       },
       {
-        name: 'Listado de Novedades',
+        name: 'Intervenciones registradas',
         url: '/tableros/novedades-list',
         icon: 'nav-icon-bullet',
-        attributes: { style: 'font-size: 14px;' }
+        attributes: { style: 'font-size: 12px;' }
 
       },
       {
-        name: 'Formulario de Partes Diarios',
+        name: 'Resgitro de Partes Diarios',
         url: '/tableros/partes-diarios',
         icon: 'nav-icon-bullet',
-        attributes: { style: 'font-size: 14px;' }
+        attributes: { style: 'font-size: 12px;' }
       },
       {
-        name:'Listado de Partes Diarios',
+        name:'Partes Diarios registrados',
         url: '/tableros/partes-diarios-list',
         icon: 'nav-icon-bullet',
-        attributes: { style: 'font-size: 14px;' }
+        attributes: { style: 'font-size: 12px;' }
       }
       
     ]
   },
    {
     name: 'Resultados  las intervenciones',
-    attributes: { style: 'font-size: 14px; ; white-space: normal;' },
+    attributes: { style: ' white-space: normal;' },
     url: '/tableros',
     iconComponent: { name: 'cil-chart' },
     children: [
       {
-        name: 'Elemento',
+        name: 'Elementos sustraidos/secuestrados',
         url: '/tableros/elemento',
         icon: 'nav-icon-bullet',
-        attributes: { style: 'font-size: 14px;' }
+        attributes: { style: 'font-size: 12px;; white-space: normal;' }
       },
         {
         name: 'Victimarios',
         url: '/tableros/persona',
         icon: 'nav-icon-bullet',
-        attributes: { style: 'font-size: 14px;' }
+        attributes: { style: 'font-size: 12px;' }
 
       }
    
@@ -89,21 +89,21 @@ export const navItems: INavData[] = [
         name: 'personal',
         url: '/tableros/personal',
         icon: 'nav-icon-bullet',
-                attributes: { style: 'font-size: 14px;' }
+                attributes: { style: 'font-size: 12px;' }
 
       },
       {
         name: 'dependencia',
         url: '/tableros/dependencia',
         icon: 'nav-icon-bullet',
-                attributes: { style: 'font-size: 14px;' }
+                attributes: { style: 'font-size: 12px;' }
 
       },    
       {
         name: 'vigilancia',
         url: '/tableros/vigilancia',
         icon: 'nav-icon-bullet',
-        attributes: { style: 'font-size: 14px;' }
+        attributes: { style: 'font-size: 12px;' }
       }
     ]
   },
@@ -120,13 +120,13 @@ export const navItems: INavData[] = [
         name: 'Register',
         url: '/register',
         icon: 'nav-icon-bullet',
-        attributes: { style: 'font-size: 14px;' }
+        attributes: { style: 'font-size: 12px;' }
       },
       {
         name: 'Usuarios',
         url: '/tableros/usuario',
         icon: 'nav-icon-bullet',
-        attributes: { style: 'font-size: 14px;' }
+        attributes: { style: 'font-size: 12px;' }
       }
  
     ]

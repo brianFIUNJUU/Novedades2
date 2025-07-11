@@ -38,8 +38,17 @@ const PartesDiarios = sequelize.define('PartesDiarios', {
     type: DataTypes.STRING,
     allowNull: true
   },
-  remitente: {
+  fecha_desde: {
     type: DataTypes.STRING,
+    allowNull: false
+  },
+  fecha_hasta: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+
+  destinario: {
+    type: DataTypes.TEXT,
     allowNull: false
   },
   hora_desde: {
@@ -50,7 +59,11 @@ const PartesDiarios = sequelize.define('PartesDiarios', {
     type: DataTypes.STRING,
     allowNull: false
   },
-  lapso: {
+  lapso_valor: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  lapso_unidad: {
     type: DataTypes.STRING,
     allowNull: true
   },
@@ -62,6 +75,26 @@ const PartesDiarios = sequelize.define('PartesDiarios', {
     type: DataTypes.STRING,
     allowNull: true
   }
+  , jefe_legajo: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  jefe_op_legajo: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  mayores_detenidos: {
+    type: DataTypes.INTEGER,
+  },
+  menores_detenidos: {
+    type: DataTypes.INTEGER,
+  },
+  vehiculos_secuestrados: {
+    type: DataTypes.INTEGER,
+  },
+  motos_secuestradas: {
+    type: DataTypes.INTEGER,
+  },
 }, {
   tableName: 'partes_diarios',
   timestamps: false

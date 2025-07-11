@@ -1,107 +1,386 @@
 <div class="card text-white custom-card">
   <div class="card-body text-center p-2">
-    <h6 class="card-title font-weight-bold mb-0">Datos del Parte Diario</h6>
+    <h6 class="card-title font-weight-bold mb-0">FORMULARIO DEL PARTE DIARIO</h6>
   </div>
 </div>
 
 <form>
   <br>
   <div class="row">
-    <!-- Tipo de Hora -->
-    <div class="col-sm-4">
-      <div class="form-group">
-        <label for="tipoHora">Tipo de Hora:</label>
-        <input id="tipoHora" name="tipoHora" type="text" class="form-control"
-          placeholder="Ingrese tipo de hora" [(ngModel)]="parteDiario.tipoHora" />
-      </div>
-    </div>
+               <!-- Fecha -->
+        <div class="col-sm-2">
+          <div class="form-group">
+            <label for="fecha">Fecha:</label>
+            <input
+              id="fecha"
+              name="fecha"
+              type="date"
+              class="form-control"
+              [(ngModel)]="parteDiario.fecha_desde"
+              required
+               (change)="onFechaChange()"
+            />
+            <div *ngIf="formIntentado && !parteDiario.fecha_desde" class="text-danger small mt-1">
+              Debe seleccionar una fecha.
+            </div>
+          </div>
+        </div>
+        <!-- Fecha Hasta -->
+        <div class="col-sm-2">
+          <div class="form-group">
+            <label for="fecha_hasta">Fecha Hasta:</label>
+            <input
+              id="fecha_hasta"
+              name="fecha_hasta"
+              type="date"
+              class="form-control"
+              [(ngModel)]="parteDiario.fecha_hasta"
+              required
+               (change)="onFechaHastaChange()"
+            />
+            <div *ngIf="formIntentado && !parteDiario.fecha_hasta" class="text-danger small mt-1">
+              Debe seleccionar una fecha hasta.
+            </div>
+          </div>
+        </div>  
+        
+      
+        
+        <!-- Tipo de Horario -->
+        <div class="col-sm-3">
+          <div class="form-group">
+            <label for="tipoHora">Tipo de Horario:</label>
+            <select id="tipoHora" name="tipoHora" class="form-select" [(ngModel)]="parteDiario.tipoHora" required>
+              <option value="" disabled>Seleccione tipo de horario</option>
+              <option value="Matutino">Matutino</option>
+              <option value="Vespertino">Vespertino</option>
+              <option value="Nocturno">Nocturno</option>
+              <option value="Continuo / Corrido">Continuo(24 horas)</option>
+              <option value="Otro">Horaario Especifico</option>
+            </select>
+            <div *ngIf="formIntentado && !parteDiario.tipoHora" class="text-danger small mt-1">
+              Debe seleccionar un tipo de horario.
+            </div>
+          </div>
+        </div>
+        
+        <!-- Unidad Regional -->
+        <div class="col-sm-2">
+          <div class="form-group">
+            <label for="unidad_regional">Unidad Regional:</label>
+            <select id="unidad_regional" name="unidad_regional" class="form-select"
+              [(ngModel)]="parteDiario.unidad_regional_id" (change)="onUnidadRegionalChange()" required>
+              <option value="" disabled>Seleccione unidad regional</option>
+              <option *ngFor="let unidad of unidadRegionales" [value]="unidad.id">{{ unidad.unidad_regional }}</option>
+            </select>
+            <div *ngIf="formIntentado && !parteDiario.unidad_regional_id" class="text-danger small mt-1">
+              Debe seleccionar una unidad regional.
+            </div>
+          </div>
+        </div>
+        
+        <!-- Dependencia -->
+        <div class="col-sm-3">
+          <div class="form-group">
+            <label for="dependencia">Dependencia:</label>
+            <select id="dependencia" name="dependencia" class="form-select"
+              [(ngModel)]="parteDiario.dependencia_id" (change)="onDependenciaChange()" required>
+              <option value="" disabled>Seleccione dependencia</option>
+              <option *ngFor="let dep of dependencias" [value]="dep.id">{{ dep.juridiccion }}</option>
+            </select>
+            <div *ngIf="formIntentado && !parteDiario.dependencia_id" class="text-danger small mt-1">
+              Debe seleccionar una dependencia.
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-sm-3">
+          <div class="form-group">
+             <label for="hora_desde" class="form-label">Hora desde:</label>
+              <input type="time" class="form-control" id="hora_desde" [(ngModel)]="parteDiario.hora_desde" name="hora_desde" required (change)="onHoraDesdeChange()">
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="form-group">
+            <label for="hora_hasta" class="form-label">Hora Hasta:</label>
+            <input type="time" class="form-control" id="hora_hasta" [(ngModel)]="parteDiario.hora_hasta" name="hora_hasta" required (change)="onHoraHastaChange()">
+          </div>
+        </div>  
+                <!-- Lapso Valor -->
+        <div class="col-sm-2">
+          <div class="form-group">
+            <label for="lapso_valor">Lapso Valor:</label>
+            <input
+              id="lapso_valor"
+              name="lapso_valor"
+              type="number"
+              class="form-control"
+              [(ngModel)]="parteDiario.lapso_valor"
+              required
+              min="1"
+              placeholder="Cantidad"
+            />
+            <div *ngIf="formIntentado && !parteDiario.lapso_valor" class="text-danger small mt-1">
+              Debe ingresar el valor del lapso.
+            </div>
+          </div>
+        </div>
+        
+        <!-- Lapso Unidad -->
+        <div class="col-sm-2">
+          <div class="form-group">
+            <label for="lapso_unidad">Lapso Unidad:</label>
+            <select
+              id="lapso_unidad"
+              name="lapso_unidad"
+              class="form-select"
+              [(ngModel)]="parteDiario.lapso_unidad"
+              required
+            >
+              <option value="" disabled selected>Seleccione unidad</option>
+              <option value="HORAS">Horas</option>
+              <option value="DIAS">Días</option>
+             
+            </select>
+            <div *ngIf="formIntentado && !parteDiario.lapso_unidad" class="text-danger small mt-1">
+              Debe seleccionar la unidad del lapso.
+            </div>
+          </div>
+        </div>
+          
+        <!-- Destinatario -->
+        <div class="col-12">
+          <div class="form-group">
+            <label for="destinatario">Destinatarios:</label>
+            <div class="input-group">
+              <span class="input-group-text">Al señor/a...</span>
+              <input
+                id="destinatario"
+                name="destinatario"
+                type="text"
+                class="form-control"
+                placeholder="Ingrese el/los destinatario del parte diario"
+                [(ngModel)]="parteDiario.destinario"
+                required
+              />
+            </div>
+            <div *ngIf="formIntentado && !parteDiario.destinario" class="text-danger small mt-1">
+              Debe completar el destinatario.
+            </div>
+          </div>
+        </div>
 
-    <!-- Unidad Regional -->
-    <div class="col-sm-4">
-      <div class="form-group">
-        <label for="unidad_regional">Unidad Regional:</label>
-        <select id="unidad_regional" name="unidad_regional" class="form-select"
-          [(ngModel)]="parteDiario.unidad_regional_id" (change)="onUnidadRegionalChange()">
-          <option value="" disabled selected>Seleccione unidad regional</option>
-          <option *ngFor="let unidad of unidadRegionales" [value]="unidad.id">{{ unidad.unidad_regional }}</option>
-        </select>
-      </div>
-    </div>
+   
 
-    <!-- Dependencia -->
-    <div class="col-sm-4">
-      <div class="form-group">
-        <label for="dependencia">Dependencia:</label>
-        <select id="dependencia" name="dependencia" class="form-select"
-          [(ngModel)]="parteDiario.dependencia_id" (change)="onDependenciaChange()">
-          <option value="" disabled selected>Seleccione dependencia</option>
-          <option *ngFor="let dep of dependencias" [value]="dep.id">{{ dep.juridiccion }}</option>
-        </select>
+   
+   
+<!-- Jefe -->
+<div class="col-sm-6">
+  <div class="form-group">
+    <label for="jefe_legajo">Legajo Jefe Encargado:</label>
+    <div class="row align-items-center">
+      <!-- Buscador: 1/3 -->
+      <div class="col-4">
+        <div class="input-group mb-0">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Buscar legajo"
+            [(ngModel)]="parteDiario.jefe_legajo"
+            name="jefe_legajo"
+            (keyup.enter)="buscarJefePorLegajo(parteDiario.jefe_legajo ?? '')"
+          />
+          <div class="input-group-append">
+            <span class="input-group-text bg-primary text-white" style="cursor:pointer;"
+                  (click)="buscarJefePorLegajo(parteDiario.jefe_legajo ?? '')">
+              <i class="bi bi-search"></i>
+            </span>
+          </div>
+        </div>
+        <div *ngIf="mensajeErrorJefe" class="text-danger small mt-1">{{ mensajeErrorJefe }}</div>
+      </div>
+      <!-- Resultado: 2/3 -->
+      <div class="col-8">
+        <div *ngIf="parteDiario.jefe" class="p-2 border bg-light ms-2">
+          <span class="text-success">Efectivo: <strong>{{ parteDiario.jefe }}</strong></span>
+        </div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- Remitente -->
-    <div class="col-sm-4">
-      <div class="form-group">
-        <label for="remitente">Remitente:</label>
-        <input id="remitente" name="remitente" type="text" class="form-control"
-          placeholder="Ingrese remitente" [(ngModel)]="parteDiario.remitente" />
+<!-- Jefe Operativo -->
+<div class="col-sm-6">
+  <div class="form-group">
+    <label for="jefe_op_legajo">Legajo Jefe Operativo:</label>
+    <div class="row align-items-center">
+      <!-- Buscador: 1/3 -->
+      <div class="col-4">
+        <div class="input-group mb-0">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Buscar legajo"
+            [(ngModel)]="parteDiario.jefe_op_legajo"
+            name="jefe_op_legajo"
+            (keyup.enter)="buscarJefeOpPorLegajo(parteDiario.jefe_op_legajo ?? '')"
+          />
+          <div class="input-group-append">
+            <span class="input-group-text bg-primary text-white" style="cursor:pointer;"
+                  (click)="buscarJefeOpPorLegajo(parteDiario.jefe_op_legajo ?? '')">
+              <i class="bi bi-search"></i>
+            </span>
+          </div>
+        </div>
+        <div *ngIf="mensajeErrorJefeOp" class="text-danger small mt-1">{{ mensajeErrorJefeOp }}</div>
+      </div>
+      <!-- Resultado: 2/3 -->
+      <div class="col-8">
+        <div *ngIf="parteDiario.jefe_op" class="p-2 border bg-light ms-2">
+          <span class="text-success">Efectivo: <strong>{{ parteDiario.jefe_op }}</strong></span>
+        </div>
       </div>
     </div>
+  </div>
+</div>
+<hr>
+     <!-- Personal Interviniente -->
+      <div class="card text-white custom-card">
+  <div class="card-body text-center p-2">
+    <h6 class="card-title font-weight-bold mb-0">Personal de Guardia</h6>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="form-group">
+      <label >
+       Agregar Personal de Guardia:
+        <button type="button" class="btn btn-primary btn-sm" (click)="openModalPersonal()" [disabled]="editando && !parteDiario.id">
+          <i class="bi bi-plus"></i>
+        </button>
+      </label>
+    </div>
+  </div>
+</div>
+<div class="table-responsive">
+  <table class="table table-bordered border-primary table-sm table-custom">
+    <thead>
+      <tr>
+        <th class="text-center text-small">Legajo</th>
+        <th class="text-center text-small">Nombre y Apellido</th>
+        <th class="text-center text-small">Jerarquía</th>
+        <th class="text-center text-small">Rol</th>
+        <th class="text-center text-small">Situación</th>
+        <th class="text-center text-small">Tipo Personal</th>
+        <th class="text-center text-small">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+          <tr *ngFor="let pt of (editando ? personalAsociado : personalTemporales)">
+        <td class="text-small">{{ pt.personal?.legajo || pt.legajo || pt.personal_id }}</td>
+        <td class="text-small">{{ pt.personal?.nombre || pt.nombre || pt.personal_datos }} {{ pt.personal?.apellido || '' }}</td>
+        <td class="text-small">{{ pt.personal?.jerarquia || pt.jerarquia || '' }}</td>
+        <td class="text-small">{{ pt.rol }}</td>
+        <td class="text-small">{{ pt.situacion }}</td>
+        <td class="text-small">{{ pt.tipo_personal }}</td>
+        <td class="text-small text-center">
+          <button class="btn btn-danger btn-sm"
+            (click)="editando ? borrarPersonalAsociado(pt.personal_id || pt.personal?.id) : borrarPersonalTemporal(pt.personal.id)">
+            <i class="bi bi-trash"></i>
+          </button>
+          <button class="btn btn-secondary btn-sm" (click)="editarPersonal(pt)">
+            <i class="bi bi-pencil"></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+   <!--Items -->
+  <div class="card text-white custom-card">
+  <div class="card-body text-center p-2">
+    <h6 class="card-title font-weight-bold mb-0">Novedades de la Guardia</h6>
+  </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+    <div class="form-group">
+      <label >
+       Agregar Novedad de la guardia:
+        <button type="button" class="btn btn-primary btn-sm" (click)="openModalNovedad()" [disabled]="editando && !parteDiario.id">
+          <i class="bi bi-plus"></i>
+        </button>
+      </label>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-bordered border-primary table-sm table-custom">
+      <thead>
+        <tr>
+          <th class="text-center text-small">Novedad</th>
+          <th class="text-center text-small">Descripción</th>
+          <th class="text-center text-small">Acciones</th>
+        </tr>
+      </thead>
+           <tbody>
+               <tr *ngFor="let nov of getNovedadesCombinadas()">
+          <td class="text-small text-center text-wrap" style="max-width: 8rem; word-break: break-word;">
+            <strong>{{ nov.titulo }}</strong><br>
+            <span class="text-muted">({{ nov.fecha }}<br>{{ nov.hora }})</span>
+          </td>
+          <td class="text-small text-center text-wrap" [ngClass]="{'text-primary': nov.tipo === 'automatica'}" style="white-space: pre-line; max-width: 350px;">
+            {{ nov.descripcion }}
+          </td>
+          <td class="text-small text-center">
+            <ng-container *ngIf="nov.tipo === 'manual'; else automatica">
+              <button class="btn btn-danger btn-sm" (click)="borrarNovedad(nov)">
+                <i class="bi bi-trash"></i>
+              </button>
+              <button class="btn btn-secondary btn-sm" (click)="editarNovedad(nov)">
+                <i class="bi bi-pencil"></i>
+              </button>
+            </ng-container>
+            <ng-template #automatica>
+              <span class="badge bg-info">Automática</span>
+            </ng-template>
+          </td>
+        </tr>
+      </tbody>
+    </table> 
+          
+</div>
+</div>
 
-    <!-- Remitente -->
-    <div class="col-sm-4">
-      <div class="form-group">
-        <label for="remitente">Remitente:</label>
-        <input id="remitente" name="remitente" type="text" class="form-control"
-          placeholder="Ingrese remitente" [(ngModel)]="parteDiario.remitente" />
+      <div class="card text-white custom-card">
+        <div class="card-body text-center p-2">
+          <h6 class="card-title font-weight-bold mb-0">RESUMEN EJECUTIVO</h6>
+        </div>
       </div>
-    </div>
-
-    <!-- Hora desde -->
-    <div class="col-sm-2">
-      <div class="form-group">
-        <label for="hora_desde">Hora desde:</label>
-        <input type="time" id="hora_desde" name="hora_desde" [(ngModel)]="parteDiario.hora_desde"
-          class="form-control">
+      
+      <!-- tabla -->
+        <div class="table-responsive">
+        <table class="table table-bordered border-primary table-sm table-custom">
+          <thead>
+            <tr>
+              <th class="text-center text-small">MAYORES DEMORADOS</th>
+              <th class="text-center text-small">MENORES DEMORADOS</th>
+              <th class="text-center text-small">VEHICULOS SECUESTRADOS</th>
+              <th class="text-center text-small">MOTOS SECUESTRADAS</th>
+            
+            </tr>
+          </thead>
+          <tbody>
+            <tr >
+                         <td class="text-small text-center">{{ parteDiario.mayores_detenidos }}</td>
+              <td class="text-small text-center">{{ parteDiario.menores_detenidos }}</td>
+              <td class="text-small text-center">{{ parteDiario.vehiculos_secuestrados }}</td>
+              <td class="text-small text-center">{{ parteDiario.motos_secuestradas }}</td>
+            
+            </tr>
+          </tbody>
+        </table>
       </div>
-    </div>
-
-    <!-- Hora hasta -->
-    <div class="col-sm-2">
-      <div class="form-group">
-        <label for="hora_hasta">Hora hasta:</label>
-        <input type="time" id="hora_hasta" name="hora_hasta" [(ngModel)]="parteDiario.hora_hasta"
-          class="form-control">
-      </div>
-    </div>
-
-    <!-- Lapso -->
-    <div class="col-sm-2">
-      <div class="form-group">
-        <label for="lapso">Lapso:</label>
-        <input id="lapso" name="lapso" type="text" class="form-control"
-          placeholder="Ingrese lapso" [(ngModel)]="parteDiario.lapso" />
-      </div>
-    </div>
-
-    <!-- Jefe -->
-    <div class="col-sm-2">
-      <div class="form-group">
-        <label for="jefe">Jefe:</label>
-        <input id="jefe" name="jefe" type="text" class="form-control"
-          placeholder="Ingrese jefe" [(ngModel)]="parteDiario.jefe" />
-      </div>
-    </div>
-
-    <!-- Jefe Operativo -->
-    <div class="col-sm-2">
-      <div class="form-group">
-        <label for="jefe_op">Jefe Operativo:</label>
-        <input id="jefe_op" name="jefe_op" type="text" class="form-control"
-          placeholder="Ingrese jefe operativo" [(ngModel)]="parteDiario.jefe_op" />
-      </div>
-    </div>
+<!--  -->
   </div>
 
   <!-- Botones de acción -->
@@ -114,3 +393,114 @@
     </div>
   </div>
 </form>
+
+
+<!-- Modal para agregar personal -->
+<div class="modal fade" #modalPersonal id="modalPersonal" tabindex="-1" aria-labelledby="modalPersonalLabel" aria-hidden="true">  
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header custom-modal-header p-2">
+        <h5 class="modal-title" id="modalPersonalLabel">Agregar Personal</h5>
+        <button type="button" class="btn-close btn-close-red position-absolute end-0 me-2"
+                (click)="closeModalPersonal()" aria-label="Cerrar"></button>      </div>
+      <div class="modal-body">
+        <form>
+          <div class="row">
+            <div class="col-6">
+              <label for="legajo" class="form-label">Legajo:</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="legajo" name="legajo" placeholder="Buscar por legajo"
+                  [(ngModel)]="nuevaPersonal.legajo" (keyup.enter)="buscarPersonalPorLegajo(nuevaPersonal.legajo)" name="buscar_legajo">
+                <button class="btn btn-primary" type="button" (click)="buscarPersonalPorLegajo(nuevaPersonal.legajo)">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-6">
+              <label for="dni" class="form-label">DNI:</label>
+              <input type="text" class="form-control" id="dni" [(ngModel)]="nuevaPersonal.dni" name="dni" disabled>
+            </div>
+            <div class="col-6">
+              <label for="jerarquia" class="form-label">Jerarquía:</label>
+              <input type="text" class="form-control" id="jerarquia" [(ngModel)]="nuevaPersonal.jerarquia" name="jerarquia" disabled>
+            </div>
+            <div class="col-6">
+              <label for="nombre" class="form-label">Nombre:</label>
+              <input type="text" class="form-control" id="nombre" [(ngModel)]="nuevaPersonal.nombre" name="nombre" disabled>
+            </div>
+            <div class="col-6">
+              <label for="apellido" class="form-label">Apellido:</label>
+              <input type="text" class="form-control" id="apellido" [(ngModel)]="nuevaPersonal.apellido" name="apellido" disabled>
+            </div>
+            <div class="col-6">
+              <label for="rol" class="form-label">FUNCION:</label>
+              <input type="text" class="form-control" id="rol" [(ngModel)]="nuevaPersonal.rol" name="rol">
+            </div>
+                       <div class="col-6">
+              <label for="situacion" class="form-label">Situación:</label>
+              <select class="form-select" id="situacion" [(ngModel)]="nuevaPersonal.situacion" name="situacion" required>
+                <option value="" disabled selected>Seleccione situación</option>
+                <option value="SERVICIO">SERVICIO</option>
+                <option value="DISPONIBILIDAD">DISPONIBILIDAD</option>
+              </select>
+            </div>
+                        <div class="col-6">
+              <label for="tipo_personal" class="form-label">Tipo Personal:</label>
+              <select class="form-select" id="tipo_personal" [(ngModel)]="nuevaPersonal.tipo_personal" name="tipo_personal" required>
+                <option value="" disabled selected>Seleccione tipo</option>
+                <option value="PERSONAL SUPERIOR">PERSONAL SUPERIOR</option>
+                <option value="PERSONAL SUB ALTERNO">PERSONAL SUB ALTERNO</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="resetFormularioPersonal(); closeModalPersonal()">Cancelar</button>       
+         <button type="button" class="btn btn-primary" (click)="agregarPersonalAsociado()">Agregar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- items novedades -->
+ <!-- Modal para agregar/editar Novedad -->
+<div class="modal fade" #modalNovedad id="modalNovedad" tabindex="-1" aria-labelledby="modalNovedadLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header custom-modal-header p-2">
+        <h5 class="modal-title" id="modalNovedadLabel">{{ editandoNovedad ? 'Editar Novedad' : 'Agregar Novedad' }}</h5>
+        <button type="button" class="btn-close btn-close-red position-absolute end-0 me-2"
+                (click)="modalNovedadInstance.hide()" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="row">
+            <div class="col-6">
+              <label for="titulo" class="form-label">Novedad:</label>
+              <input type="text" class="form-control" id="titulo" [(ngModel)]="nuevaNovedad.titulo" name="titulo" required>
+            </div>
+            <div class="col-3">
+              <label for="fecha" class="form-label">Fecha:</label>
+              <input type="date" class="form-control" id="fecha" [(ngModel)]="nuevaNovedad.fecha" name="fecha" required>
+            </div>
+            <div class="col-3">
+              <label for="hora" class="form-label">Hora:</label>
+              <input type="time" class="form-control" id="hora" [(ngModel)]="nuevaNovedad.hora" name="hora" required>
+            </div>
+            <div class="col-12 mt-2">
+              <label for="descripcion" class="form-label">Descripción:</label>
+              <textarea class="form-control" id="descripcion" [(ngModel)]="nuevaNovedad.descripcion" name="descripcion" rows="3" required></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="modalNovedadInstance.hide()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="agregarNovedad()">
+          {{ editandoNovedad ? 'Actualizar' : 'Agregar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

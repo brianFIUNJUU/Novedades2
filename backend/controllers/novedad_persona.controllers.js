@@ -6,16 +6,16 @@ const Novedades = require('../models/novedades');
 // backend/controllers/novedad_persona.controllers.js
 exports.addPersonaToNovedad = async (req, res) => {
     try {
-        const { novedad_id, persona_id, estado } = req.body;
+        const { novedad_id, persona_id, estado, demorado } = req.body;
         if (!novedad_id || !persona_id) {
             return res.status(400).json({ error: 'novedad_id y persona_id son requeridos' });
         }
         const existente = await NovedadPersona.findOne({ where: { novedad_id, persona_id } });
         if (existente) {
-            await existente.update({ estado });
+            await existente.update({ estado, demorado });
             return res.status(200).json(existente);
         }
-        const novedadPersona = await NovedadPersona.create({ novedad_id, persona_id, estado });
+        const novedadPersona = await NovedadPersona.create({ novedad_id, persona_id, estado, demorado });
         res.status(201).json(novedadPersona);
     } catch (error) {
         console.error('Error al agregar persona a la novedad:', error);
@@ -50,19 +50,23 @@ exports.updateEstadoPersonaNovedad = async (req, res) => {
         res.status(400).json({ error: 'Error al actualizar estado' });
     }
 };
-// Obtener todas las personas de una novedad
+// backend/controllers/novedad_persona.controllers.js
 exports.getPersonasByNovedadId = async (req, res) => {
     try {
         const { novedad_id } = req.params;
-        const personas = await Persona.findAll({
+        const relaciones = await NovedadPersona.findAll({
+            where: { novedad_id },
             include: [{
-                model: Novedades,
-                as: 'novedades',
-                where: { id: novedad_id },
-                through: { attributes: [] }
+                model: Persona,
+                as: 'persona'
             }]
         });
-        res.status(200).json(personas);
+        // Devuelve la estructura que tu frontend espera
+        res.status(200).json(relaciones.map(r => ({
+            persona: r.persona,
+            estado: r.estado,
+            demorado: r.demorado
+        })));
     } catch (error) {
         console.error('Error al obtener personas de la novedad:', error);
         res.status(400).json({ error: 'Error al obtener personas de la novedad' });
@@ -162,4 +166,80 @@ exports.getExtranjeroVictimario = async (req, res) => {
         res.status(400).json({ error: 'Error al obtener victimarios extranjeros' });
     }
 };
-// get de persona estado victimario 
+// Obtener personas demoradas mayores de 18 años (usando novedad_persona)
+exports.getPersonasDemoradasMayores = async (req, res) => {
+    try {
+        const personas = await NovedadPersona.findAll({
+            where: { demorado: true },
+            include: [{
+                model: Persona,
+                as: 'persona',
+                where: { edad: { [require('sequelize').Op.gte]: 18 } }
+            }]
+        });
+        res.status(200).json(personas);
+    } catch (error) {
+        console.error('Error al obtener personas demoradas mayores de 18 años:', error);
+        res.status(400).json({ error: 'Error al obtener personas demoradas mayores de 18 años' });
+    }
+};
+// Obtener personas demoradas menores de 18 años (usando novedad_persona)
+exports.getPersonasDemoradasMenores = async (req, res) => {
+    try {
+        const personas = await NovedadPersona.findAll({
+            where: { demorado: true },
+            include: [{
+                model: Persona,
+                as: 'persona',
+                where: { edad: { [require('sequelize').Op.lte]: 17 } }
+            }]
+        });
+        res.status(200).json(personas);
+    } catch (error) {
+        console.error('Error al obtener personas demoradas menores de 18 años:', error);
+        res.status(400).json({ error: 'Error al obtener personas demoradas menores de 18 años' });
+    }
+};
+// backend/controllers/novedad_persona.controllers.js
+
+exports.updatePersonasNovedadMultiple = async (req, res) => {
+    const { novedad_id, personas } = req.body;
+    // personas: array de objetos { persona_id, estado, demorado }
+    if (!novedad_id || !Array.isArray(personas)) {
+        return res.status(400).json({ error: 'Datos inválidos' });
+    }
+    try {
+        // 1. Obtener los persona_id actuales en la novedad
+        const actuales = await NovedadPersona.findAll({ where: { novedad_id } });
+        const actualesIds = actuales.map(np => np.persona_id);
+
+        // 2. Eliminar los que ya no están
+        const nuevosIds = personas.map(p => p.persona_id);
+        const aEliminar = actualesIds.filter(id => !nuevosIds.includes(id));
+        if (aEliminar.length > 0) {
+            await NovedadPersona.destroy({ where: { novedad_id, persona_id: aEliminar } });
+        }
+
+        // 3. Agregar o actualizar los que están en la lista
+        for (const p of personas) {
+            const existente = actuales.find(np => np.persona_id === p.persona_id);
+            if (existente) {
+                // Actualizar estado y demorado
+                await existente.update({ estado: p.estado, demorado: p.demorado });
+            } else {
+                // Crear nueva relación
+                await NovedadPersona.create({
+                    novedad_id,
+                    persona_id: p.persona_id,
+                    estado: p.estado,
+                    demorado: p.demorado
+                });
+            }
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error en actualización múltiple:', error);
+        res.status(500).json({ error: 'Error en actualización múltiple' });
+    }
+};

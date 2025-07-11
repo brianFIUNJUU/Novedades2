@@ -14,6 +14,12 @@ const uploadNovedadesDir = 'uploads/novedades';
 if (!fs.existsSync(uploadNovedadesDir)) {
   fs.mkdirSync(uploadNovedadesDir, { recursive: true });
 }
+// Ejemplo en models/index.js o donde inicialices los modelos
+
+const Personal = require('./models/personal');
+const PartesDiariosPersonal = require('./models/partesDiarios_personal');
+
+
 
 const https = require('https');
 const app = express();
@@ -62,7 +68,7 @@ const authenticateFirebaseToken = async (req, res, next) => {
 
 // Middlewares
 app.use(cors({
-  origin: "https://10.0.10.171:4200",
+  origin: "https://10.0.10.187:4200",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true, // Permite el uso de cookies o autenticación si es necesario
@@ -103,6 +109,9 @@ app.use('/api/archivo-persona', require('./routes/archivo_persona.route.js'));
 app.use('/api/archivo-novedad', require('./routes/archivo_novedad.routes.js'));
 app.use('/api/novedad_elemento', require('./routes/novedad_elemento.route'));
 app.use('/api/partesDiarios', require('./routes/partesDiarios.routes.js'));
+app.use('/api/partes-diarios-personal', require('./routes/partesDiarios_personal.routes'));
+app.use('/api/items', require('./routes/items.routes.js'));
+app.use('/api/partesDiariosNovedad', require('./routes/partesDiarios_Novedad.routes.js'));
 // Endpoint para obtener usuarios
 app.get('/api/users', async (req, res) => {
   try {
@@ -309,8 +318,8 @@ app.set('port', process.env.PORT || 3000);
 
 // HTTPS configuration (update paths)
 const sslOptions = {
-  key: fs.readFileSync(path.join(__dirname, 'ssl/10.0.10.171-key.pem')),
-  cert: fs.readFileSync(path.join(__dirname, 'ssl/10.0.10.171.pem'))
+  key: fs.readFileSync(path.join(__dirname, 'ssl/10.0.10.187-key.pem')),
+  cert: fs.readFileSync(path.join(__dirname, 'ssl/10.0.10.187.pem'))
 };
 
 // Crear el servidor HTTPS y asociarlo a Socket.IO
@@ -318,7 +327,7 @@ const server = https.createServer(sslOptions, app);
 const io = socketIo(server, {
   cors: {
   methods: ["GET", "POST", "PUT", "DELETE"],
-  origin: "https://10.0.10.171:4200", // URL del frontend  cambiar la ip luego de todo 
+  origin: "https://10.0.10.187:4200", // URL del frontend  cambiar la ip luego de todo 
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
     credentials: true, // Permite autenticación si usas cookies o tokens
@@ -340,5 +349,5 @@ configurarSocket(io);  // Configura los eventos de socket en el servidor
 
 // Iniciar el servidor con HTTPS y Socket.IO
 server.listen(app.get('port'), '0.0.0.0', () => {
-console.log(`🚀 Servidor HTTPS con Socket.IO corriendo en https://10.0.10.171:${app.get('port')}`);
+console.log(`🚀 Servidor HTTPS con Socket.IO corriendo en https://10.0.10.187:${app.get('port')}`);
 });
