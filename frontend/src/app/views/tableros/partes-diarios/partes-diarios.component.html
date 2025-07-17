@@ -84,7 +84,7 @@
           <div class="form-group">
             <label for="dependencia">Dependencia:</label>
             <select id="dependencia" name="dependencia" class="form-select"
-              [(ngModel)]="parteDiario.dependencia_id" (change)="onDependenciaChange()" required>
+              [(ngModel)]="parteDiario.dependencia_id" (change)="onDependenciaChange()" (change)="onDependencia2Change()" required>
               <option value="" disabled>Seleccione dependencia</option>
               <option *ngFor="let dep of dependencias" [value]="dep.id">{{ dep.juridiccion }}</option>
             </select>

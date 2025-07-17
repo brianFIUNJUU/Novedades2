@@ -145,27 +145,26 @@ initParteDiarioForm(): void {
     // Agrega aquí otros campos que necesites para el parte diario
   });
 }
- actualizarNovedadesEnRango() {
-        if (
-          this.parteDiario.fecha_desde &&
-          this.parteDiario.hora_desde &&
-          this.parteDiario.fecha_hasta &&
-          this.parteDiario.hora_hasta
-        ) {
-          this.novedadesService.getNovedadesByFechaYHoraRango(
-            this.parteDiario.fecha_desde,
-            this.parteDiario.hora_desde,
-            this.parteDiario.fecha_hasta,
-            this.parteDiario.hora_hasta
-          ).subscribe(novedades => {
-            this.novedadesEnRango = novedades;
-     
-          });
-        } else {
-          this.novedadesEnRango = [];
-      
-        }
-      }
+actualizarNovedadesEnRango() {
+  if (
+    this.parteDiario.fecha_desde &&
+    this.parteDiario.hora_desde &&
+    this.parteDiario.fecha_hasta &&
+    this.parteDiario.hora_hasta
+  ) {
+    this.novedadesService.getNovedadesByFechaYHoraRango(
+      this.parteDiario.fecha_desde,
+      this.parteDiario.hora_desde,
+      this.parteDiario.fecha_hasta,
+      this.parteDiario.hora_hasta,
+      this.parteDiario.dependencia_id // <-- Agrega este parámetro
+    ).subscribe(novedades => {
+      this.novedadesEnRango = novedades;
+    });
+  } else {
+    this.novedadesEnRango = [];
+  }
+}
 
             cargarItemsAsociados(parteId: number): Promise<any[]> {
         return new Promise((resolve, reject) => {
@@ -183,29 +182,30 @@ initParteDiarioForm(): void {
       }
       
       cargarNovedadesEnRango(parte: any): Promise<any[]> {
-        return new Promise((resolve, reject) => {
-          if (parte.fecha_desde && parte.hora_desde && parte.fecha_hasta && parte.hora_hasta) {
-            this.novedadesService.getNovedadesByFechaYHoraRango(
-              parte.fecha_desde,
-              parte.hora_desde,
-              parte.fecha_hasta,
-              parte.hora_hasta
-            ).subscribe({
-              next: (novedades) => {
-                this.novedadesEnRango = novedades;
-                resolve(novedades);
-              },
-              error: (err) => {
-                this.novedadesEnRango = [];
-                resolve([]);
-              }
-            });
-          } else {
-            this.novedadesEnRango = [];
-            resolve([]);
-          }
-        });
-      }
+  return new Promise((resolve, reject) => {
+    if (parte.fecha_desde && parte.hora_desde && parte.fecha_hasta && parte.hora_hasta) {
+      this.novedadesService.getNovedadesByFechaYHoraRango(
+        parte.fecha_desde,
+        parte.hora_desde,
+        parte.fecha_hasta,
+        parte.hora_hasta,
+        parte.dependencia_id // <-- Agrega este parámetro
+      ).subscribe({
+        next: (novedades) => {
+          this.novedadesEnRango = novedades;
+          resolve(novedades);
+        },
+        error: (err) => {
+          this.novedadesEnRango = [];
+          resolve([]);
+        }
+      });
+    } else {
+      this.novedadesEnRango = [];
+      resolve([]);
+    }
+  });
+}
  getNovedadesCombinadas() {
           const items = (this.editando ? this.itemsAsociados : this.itemsTemporales).map(item => ({
             ...item,

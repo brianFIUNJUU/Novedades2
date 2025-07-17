@@ -59,6 +59,16 @@ operativo_nombre: {
   cuadrante_nombre: {
     type: DataTypes.STRING,
   },
+  dependencia_id: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: Dependencia,
+      key: 'id'
+    }
+  },
+  dependencia_nombre: {
+    type: DataTypes.STRING,
+  },
   lugar_hecho: {
     type: DataTypes.STRING,
   },
@@ -202,6 +212,7 @@ Novedades.sync({ alter: true })
 // Definir las asociaciones
 Novedades.belongsTo(Unidad_regional, { foreignKey: 'unidad_regional_id', as: 'unidad_regional' });
 Novedades.belongsTo(Cuadrante, { foreignKey: 'cuadrante_id', as: 'cuadrante' });
+Novedades.belongsTo(Dependencia, { foreignKey: 'dependencia_id', as: 'dependencia' });
 Novedades.belongsTo(Modus_operandi, { foreignKey: 'modus_operandi_id', as: 'modus_operandi' });
 Novedades.belongsTo(Tipo_hecho, { foreignKey: 'tipo_hecho_id', as: 'tipoHecho' }); // Cambiar alias a 'tipoHecho'
 Novedades.belongsTo(Subtipo_hecho, { foreignKey: 'subtipo_hecho_id', as: 'subtipoHecho' }); // Cambiar alias a 'subtipoHecho'

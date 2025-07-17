@@ -598,34 +598,40 @@ exports.getNovedadesByFechaYHoraRango = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener novedades por fecha y rango de hora' });
   }
 };// Obtener novedades por fecha y rango de hora
-
-
 exports.getNovedadesByFechaYHoraRango = async (req, res) => {
   try {
-    const { fecha_desde, hora_desde, fecha_hasta, hora_hasta } = req.query;
+    const { fecha_desde, hora_desde, fecha_hasta, hora_hasta, dependencia_id } = req.query;
 
     if (!fecha_desde || !hora_desde || !fecha_hasta || !hora_hasta) {
       return res.status(400).json({ error: 'Debe proporcionar fecha_desde, hora_desde, fecha_hasta y hora_hasta' });
     }
 
+    // Construir condiciones
+    const condiciones = [
+      sequelize.where(
+        sequelize.fn(
+          'concat',
+          sequelize.col('fecha'),
+          ' ',
+          sequelize.col('horario')
+        ),
+        {
+          [Op.between]: [
+            `${fecha_desde} ${hora_desde}`,
+            `${fecha_hasta} ${hora_hasta}`
+          ]
+        }
+      )
+    ];
+
+    // Si viene dependencia_id, agregarlo al filtro
+    if (dependencia_id) {
+      condiciones.push({ dependencia_id });
+    }
+
     const novedades = await Novedades.findAll({
       where: {
-        [Op.and]: [
-          sequelize.where(
-            sequelize.fn(
-              'concat',
-              sequelize.col('fecha'),
-              ' ',
-              sequelize.col('horario')
-            ),
-            {
-              [Op.between]: [
-                `${fecha_desde} ${hora_desde}`,
-                `${fecha_hasta} ${hora_hasta}`
-              ]
-            }
-          )
-        ]
+        [Op.and]: condiciones
       },
       include: [
         { model: Unidad_regional, as: 'unidad_regional' },

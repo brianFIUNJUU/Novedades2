@@ -116,7 +116,7 @@ public menoresDemorados: number = 0;
         }
       });
     }
-      actualizarNovedadesEnRango() {
+           actualizarNovedadesEnRango() {
         if (
           this.parteDiario.fecha_desde &&
           this.parteDiario.hora_desde &&
@@ -127,16 +127,17 @@ public menoresDemorados: number = 0;
             this.parteDiario.fecha_desde,
             this.parteDiario.hora_desde,
             this.parteDiario.fecha_hasta,
-            this.parteDiario.hora_hasta
+            this.parteDiario.hora_hasta,
+            this.parteDiario.dependencia_id // <-- Agrega este parámetro
           ).subscribe(novedades => {
             this.novedadesEnRango = novedades;
             this.cargarResumenDemoradosPorNovedades();
-            this.cargarResumenElementosSecuestradosPorNovedades(); // <-- Agrega esta línea
+            this.cargarResumenElementosSecuestradosPorNovedades();
           });
         } else {
           this.novedadesEnRango = [];
           this.cargarResumenDemoradosPorNovedades();
-          this.cargarResumenElementosSecuestradosPorNovedades(); // <-- Y aquí también
+          this.cargarResumenElementosSecuestradosPorNovedades();
         }
       }
     
@@ -150,6 +151,9 @@ public menoresDemorados: number = 0;
       this.actualizarNovedadesEnRango();
     }
     onHoraHastaChange() {
+      this.actualizarNovedadesEnRango();
+    }
+    onDependencia2Change(){
       this.actualizarNovedadesEnRango();
     }
 
@@ -204,10 +208,7 @@ public menoresDemorados: number = 0;
   }
 
 
-getFechaHoy(): string {
-  const hoy = new Date();
-  return hoy.toISOString().substring(0, 10);
-}
+
   // Cuando cambia la unidad regional seleccionada
   onUnidadRegionalChange(): void {
     const unidad = this.unidadRegionales.find(u => String(u.id) === String(this.parteDiario.unidad_regional_id));
@@ -219,7 +220,10 @@ getFechaHoy(): string {
     const dep = this.dependencias.find(d => String(d.id) === String(this.parteDiario.dependencia_id));
     this.parteDiario.dependencia_nombre = dep ? dep.juridiccion : '';
   }
-
+getFechaHoy(): string {
+  const hoy = new Date();
+  return hoy.toISOString().substring(0, 10);
+}
     buscarJefePorLegajo(legajo: string): void {
     if (!legajo) {
       this.jefePersonal = undefined;
@@ -470,7 +474,19 @@ if (this.parteDiario.id) {
         
         // Modifica agregarPersonalAsociado para actualizar si es edición
         agregarPersonalAsociado() {
-          if (!this.nuevaPersonal.id) return;
+          if (
+    !this.nuevaPersonal.id ||
+    !this.nuevaPersonal.rol ||
+    !this.nuevaPersonal.situacion ||
+    !this.nuevaPersonal.tipo_personal
+  ) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Faltan campos obligatorios',
+      text: 'Por favor, completa todos los campos del personal antes de guardar.'
+    });
+    return;
+  }
         
           if (!this.editando) {
             // Modo creación: agrega al array temporal

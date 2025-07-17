@@ -27,7 +27,7 @@ const PartesDiariosPersonal = sequelize.define('PartesDiariosPersonal', {
   },
   personal_datos  : {
     type: DataTypes.STRING,
-    allowNull: false
+
   },
   // Puedes agregar más campos aquí, por ejemplo:
   rol: {
@@ -38,7 +38,7 @@ const PartesDiariosPersonal = sequelize.define('PartesDiariosPersonal', {
   },
   tipo_personal: {
     type: DataTypes.STRING,
-    allowNull: false
+   
   }
 }, {
   tableName: 'partes_diarios_personal',

@@ -301,14 +301,18 @@ getNovedadesByFechaYHoraRango(
   fecha_desde: string,
   hora_desde: string,
   fecha_hasta: string,
-  hora_hasta: string
+  hora_hasta: string,
+  dependencia_id?: number
 ): Observable<Novedades[]> {
   const token = this.getAuthToken();
   let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
   if (token) {
     headers = headers.set('Authorization', `Bearer ${token}`);
   }
-  const url = `${this.apiUrl}/by-fecha-hora?fecha_desde=${fecha_desde}&hora_desde=${hora_desde}&fecha_hasta=${fecha_hasta}&hora_hasta=${hora_hasta}`;
+  let url = `${this.apiUrl}/by-fecha-hora?fecha_desde=${fecha_desde}&hora_desde=${hora_desde}&fecha_hasta=${fecha_hasta}&hora_hasta=${hora_hasta}`;
+  if (dependencia_id) {
+    url += `&dependencia_id=${dependencia_id}`;
+  }
   return this.http.get<Novedades[]>(url, { headers });
 }
 }

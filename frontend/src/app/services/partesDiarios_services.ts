@@ -78,15 +78,19 @@ export class PartesDiariosService {
   }
 
   // Obtener partes diarios por fecha (query params: desde, hasta)
-  getPartesPorFecha(desde?: string, hasta?: string): Observable<PartesDiarios[]> {
+  getPartesPorFecha(desde?: string, hasta?: string, dependencia_id?: number): Observable<PartesDiarios[]> {
     const token = this.getAuthToken();
     let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
     let url = `${this.apiUrl}/por-fecha/buscar`;
-    if (desde && hasta) {
-      url += `?desde=${desde}&hasta=${hasta}`;
+    const params: string[] = [];
+    if (desde) params.push(`desde=${desde}`);
+    if (hasta) params.push(`hasta=${hasta}`);
+    if (dependencia_id) params.push(`dependencia_id=${dependencia_id}`);
+    if (params.length > 0) {
+      url += `?${params.join('&')}`;
     }
     return this.http.get<PartesDiarios[]>(url, { headers });
   }

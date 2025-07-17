@@ -100,16 +100,16 @@
     <form>
       <div class="row">
         
-              <div class="col-md-6">
+              <div class="col-4">
                     <div class="form-group d-flex align-items-center">
               <label for="unidad_regional">Unidad Regional:</label>
-              <select [disabled]="readonlyMode" id="unidad_regional" name="unidad_regional" [(ngModel)]="nuevaNovedad.unidad_regional_id" class="form-select" (change)="cargarCuadrantes(+nuevaNovedad.unidad_regional_id)" (change)="onUnidadRegionalChange($event)">
+              <select [disabled]="readonlyMode" id="unidad_regional" name="unidad_regional" [(ngModel)]="nuevaNovedad.unidad_regional_id" class="form-select" (change)="cargarCuadrantes(+nuevaNovedad.unidad_regional_id)" (change)="cargarDependencias(nuevaNovedad.unidad_regional_id)" (change)="onUnidadRegionalChange($event)">
                 <option *ngFor="let unidad_regional of unidadesRegionales" [value]="unidad_regional.id">{{ unidad_regional.unidad_regional}}</option>
               </select>
               </div>
             </div>
 
-                   <div class="col-md-6">
+                   <div class="col-4">
               <div class="form-group d-flex align-items-center">
                 <label for="cuadrante">Cuadrante:</label>
                 <select [disabled]="readonlyMode" id="cuadrante"
@@ -127,6 +127,20 @@
                 <small class="text-danger">Completar este campo</small>
               </div>
             </div>
+                   <!-- Dependencia -->
+   <div class="col-4">
+    <div class="form-group d-flex align-items-center">
+      <label for="dependencia" class="me-2">Dependencia:</label>
+      <select id="dependencia" name="dependencia" class="form-select"
+        [(ngModel)]="nuevaNovedad.dependencia_id" (change)="onDependenciaChange()" required>
+        <option value="" disabled>Seleccione dependencia</option>
+        <option *ngFor="let dep of dependencias" [value]="dep.id">{{ dep.juridiccion }}</option>
+      </select>
+    </div>
+    <div *ngIf="mostrarErrorCampo(nuevaNovedad.dependencia_id)">
+      <small class="text-danger">Completar este campo</small>
+    </div>
+  </div>
       </div>
       <div class="row">
         <div class="col-md-6">

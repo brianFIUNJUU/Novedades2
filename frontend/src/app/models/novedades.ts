@@ -10,6 +10,8 @@ export class Novedades {
   unidad_regional_nombre!: string;
   cuadrante_id!: string;
   cuadrante_nombre!: string;
+  dependencia_id!: number;
+  dependencia_nombre!: string;
   lugar_hecho!: string;
   latitud!: string;
   longitud!: string;

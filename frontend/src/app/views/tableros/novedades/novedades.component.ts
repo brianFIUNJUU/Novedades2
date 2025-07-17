@@ -251,6 +251,7 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     this.cargarDepartamentos();
     this.cargarElementos(); // Cargar elementos al inicializar el componente
     this.cargarCategorias();
+    
     this.setDefaultTime();
     this.cargarModusOperandi();
     // this.inicializarArchivos();
@@ -503,6 +504,20 @@ getOperativosPorLegajo(legajo: string): void {
           (elementos: NovedadElemento[]) => {
             console.log('Elementos recibidos del backend:', elementos); // <-- Agrega este log
             this.elementosCargadosDeBackend = elementos;
+            if (this.nuevaNovedad.dependencia_id) {
+        this.dependenciaService.getDependencia(this.nuevaNovedad.dependencia_id.toString()).subscribe(
+          (dependencia: Dependencia) => {
+            this.nuevaNovedad.dependencia_nombre = dependencia.juridiccion;
+            // Si necesitas cargar la lista de dependencias para el select:
+            if (this.nuevaNovedad.unidad_regional_id) {
+              this.cargarDependencias(this.nuevaNovedad.unidad_regional_id);
+            }
+          },
+          (error) => {
+            console.error('Error al cargar la dependencia:', error);
+          }
+        );
+      }
           },
           (error) => {
             console.error('Error al cargar elementos de la novedad:', error);
@@ -615,6 +630,9 @@ getOperativosPorLegajo(legajo: string): void {
       const cuadrante = this.cuadrantes.find(c => Number(c.id) === selectedId);
       this.nuevaNovedad.cuadrante_nombre = cuadrante ? cuadrante.nombre : '';
     }
+
+
+
 cargarDescripcionesHechos() {
   this.descripcionHechoService.getDescripcionesHecho().subscribe(
     (data) => {
@@ -1327,7 +1345,6 @@ cargarElementosPorCategoria(categoriaNombre: string): void {
         this.buscarPersonalAutorPorLegajoUsuario();
       }
     }
-
   buscarPersonalAutorPorLegajoUsuario(): Promise<void> {
     return new Promise((resolve, reject) => {
       const legajo = this.usuarioLegajo;
@@ -1689,6 +1706,13 @@ actualizarRelacionesPersonal(): void {
         Swal.fire('Error', 'Error al obtener dependencias: ' + error.message, 'error');
       }
     );
+  }
+    // Cargar dependencias
+ 
+  // Cuando cambia la dependencia seleccionada
+  onDependenciaChange(): void {
+    const dep = this.dependencias.find(d => String(d.id) === String(this.nuevaNovedad.dependencia_id));
+    this.nuevaNovedad.dependencia_nombre = dep ? dep.juridiccion : '';
   }
   cargarCuadrantes(UnidadRegionalId: number): void {
     this.cuadranteService.getCuadrantesByUnidadRegional(UnidadRegionalId).subscribe(
