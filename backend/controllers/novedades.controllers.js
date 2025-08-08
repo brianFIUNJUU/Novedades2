@@ -478,7 +478,101 @@ exports.getNovedadByUnidadRegionalByRangoFecha = async (req, res) => {
   }
 };
 // ...existing code...
+// a partir de aqui para el usuario encargada de una unidad el cual debe ver las novedades de su depedencia
+exports.getNovedadByDependencia = async (req, res) => {
+  try {
+    const { dependencia_id } = req.params;
+    const novedades = await Novedades.findAll({
+      where: { dependencia_id },
+      include: [
+        { model: Unidad_regional, as: 'unidad_regional' },
+        { model: Persona, as: 'personas' },
+        { model: Personal, as: 'personal_autor' },
+        { model: Personal, as: 'oficial_cargo' },
+        { model: Tipo_hecho, as: 'tipoHecho' },
+        { model: Subtipo_hecho, as: 'subtipoHecho' },
+        { model: Descripcion_hecho, as: 'descripcionHecho' },
+        { model: Modus_operandi, as: 'modus_operandi' },
+        { model: Operativo, as: 'operativo' }
+      ]
+    });
+    res.json(novedades);
+  } catch (error) {
+    console.error('Error al obtener novedades por dependencia:', error);
+    res.status(500).json({ error: 'Error al obtener novedades por dependencia' });
+  }
+};
 
+exports.getNovedadByDependenciaByToday = async (req, res) => {
+  try {
+    const { dependencia_id } = req.params;
+    // Obtener la fecha de hoy en formato YYYY-MM-DD
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+    const novedades = await Novedades.findAll({
+      where: {
+        dependencia_id,
+        fecha: todayStr
+      },
+      include: [
+        { model: Unidad_regional, as: 'unidad_regional' },
+        { model: Persona, as: 'personas' },
+        { model: Personal, as: 'personal_autor' },
+        { model: Personal, as: 'oficial_cargo' },
+        { model: Tipo_hecho, as: 'tipoHecho' },
+        { model: Subtipo_hecho, as: 'subtipoHecho' },
+        { model: Descripcion_hecho, as: 'descripcionHecho' },
+        { model: Modus_operandi, as: 'modus_operandi' },
+        { model: Operativo, as: 'operativo' }
+      ]
+    });
+    res.json(novedades);
+  } catch (error) {
+    console.error('Error al obtener novedades de hoy por dependencia:', error);
+    res.status(500).json({ error: 'Error al obtener novedades de hoy por dependencia' });
+  }
+};
+
+ // Obtener novedades por unidad regional y rango de fecha
+// Obtener novedades por dependencia y rango de fecha
+exports.getNovedadByDependenciaByRangoFecha = async (req, res) => {
+  try {
+    const { dependencia_id } = req.params;
+    const { fechaInicio, fechaFin } = req.query;
+
+    if (!fechaInicio || !fechaFin) {
+      return res.status(400).json({ error: 'Debe proporcionar fechaInicio y fechaFin en el query string' });
+    }
+
+    const novedades = await Novedades.findAll({
+      where: {
+        dependencia_id,
+        fecha: {
+          [Op.between]: [fechaInicio, fechaFin]
+        }
+      },
+      include: [
+        { model: Unidad_regional, as: 'unidad_regional' },
+        { model: Persona, as: 'personas' },
+        { model: Personal, as: 'personal_autor' },
+        { model: Personal, as: 'oficial_cargo' },
+        { model: Tipo_hecho, as: 'tipoHecho' },
+        { model: Subtipo_hecho, as: 'subtipoHecho' },
+        { model: Descripcion_hecho, as: 'descripcionHecho' },
+        { model: Modus_operandi, as: 'modus_operandi' },
+        { model: Operativo, as: 'operativo' }
+      ]
+    });
+    res.json(novedades);
+  } catch (error) {
+    console.error('Error al obtener novedades por dependencia y rango de fecha:', error);
+    res.status(500).json({ error: 'Error al obtener novedades por dependencia y rango de fecha' });
+  }
+};
 // Obtener novedades por operativo_id
 exports.getNovedadesByOperativo = async (req, res) => {
   try {

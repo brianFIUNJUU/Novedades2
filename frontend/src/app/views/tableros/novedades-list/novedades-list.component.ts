@@ -59,6 +59,7 @@ export class NovedadesListComponent implements OnInit {
   usuarioNombre: string = '';
   usuarioLegajo: string = '';
   usuarioUnidad: string = ''; // Almacenar el número de unidad del usuario
+  usuarioDependencia: string = ''; // Almacenar la id de dependencia del usuario
   fechaFiltroUnidadInicio: string = '';
 fechaFiltroUnidadFin: string = '';
   legajoFiltro: string = '';
@@ -164,15 +165,16 @@ idFiltro: string = '';
     this.usuarioNombre = userInfo.nombre;
     this.userInfo = userInfo;
     this.usuarioLegajo = userInfo.legajo;
+    this.usuarioDependencia = userInfo.dependencia_id; // <-- Aquí asignas la id de dependencia
 
     // Detectar si es EncargadoUnidad y asignar el número de unidad
     if (userInfo.perfil.startsWith('EncargadoUnidad')) {
       // Si el perfil es exactamente "EncargadoUnidad", asigna 1
       // Si es "EncargadoUnidad 2", asigna 2, etc.
-      const match = userInfo.perfil.match(/EncargadoUnidad\s?(\d*)/);
-      this.usuarioUnidad = match && match[1] ? match[1] : '1';
+      // const match = userInfo.perfil.match(/EncargadoUnidad\s?(\d*)/);
+      // this.usuarioUnidad = match && match[1] ? match[1] : '1';
       // Traer novedades de esa unidad regional
-      this.getNovedadesByUnidadRegionalUsuario();
+      this.getNovedadesByDependenciaUsuario();
     } else if (userInfo.perfil === 'usuario') {
       this.getNovedadesByLegajoByToday();
     } else {
@@ -184,75 +186,72 @@ idFiltro: string = '';
 verNovedad(id: string): void {
   this.router.navigate(['/tableros/novedades', id], { queryParams: { view: 'readonly' } });
 }
-   onFiltroUnidadChange(event: any) {
+     onFiltroDependenciaChange(event: any) {
     const valor = event.target.value;
     this.mostrarFiltroFechaUnid = false;
     if (valor === 'todas') {
       this.mostrarFiltroFechaUnid = false;
-      this.getNovedadesByUnidadRegionalUsuarioTodas();
+      this.getNovedadesByDependenciaUsuarioTodas();
     } else if (valor === 'hoy') {
       this.mostrarFiltroFechaUnid = false;
-      this.getNovedadesByUnidadRegionalUsuario();
+      this.getNovedadesByDependenciaUsuario();
     } else if (valor === 'fecha') {
       this.mostrarFiltroFechaUnid = true;
     }
   }
-getNovedadesByUnidadRegionalUsuario(): void {
-  if (this.usuarioUnidad) {
-    this.novedadesService.getNovedadesByUnidadRegionalByToday(this.usuarioUnidad).subscribe(
-      (data: Novedades[]) => {
-        this.novedades = data;
-        this.filteredNovedades = [...this.novedades];
-        this.novedades.forEach(novedad => {
-          this.filtrarNovedadesC();
-        });
-      },
-      (error: HttpErrorResponse) => {
-        console.error('Error al obtener novedades por unidad regional:', error.message);
-        // Swal.fire('Error', 'Error al obtener novedades por unidad regional: ' + error.message, 'error');
-      }
-    );
+
+  getNovedadesByDependenciaUsuario(): void {
+    if (this.usuarioDependencia) {
+      this.novedadesService.getNovedadesByDependenciaByToday(this.usuarioDependencia).subscribe(
+        (data: Novedades[]) => {
+          this.novedades = data;
+          this.filteredNovedades = [...this.novedades];
+          this.novedades.forEach(novedad => {
+            this.filtrarNovedadesC();
+          });
+        },
+        (error: HttpErrorResponse) => {
+          console.error('Error al obtener novedades por dependencia:', error.message);
+        }
+      );
+    }
   }
-} 
-
-
-
-getNovedadesByUnidadRegionalUsuarioTodas(): void {
-  if (this.usuarioUnidad) {
-    this.novedadesService.getNovedadesByUnidadRegional(this.usuarioUnidad).subscribe(
-      (data: Novedades[]) => {
-        this.novedades = data;
-        this.filteredNovedades = [...this.novedades];
-        this.novedades.forEach(novedad => {
-          this.filtrarNovedadesC();
-        });
-      },
-      (error: HttpErrorResponse) => {
-        console.error('Error al obtener novedades por unidad regional:', error.message);
-        // Swal.fire('Error', 'Error al obtener novedades por unidad regional: ' + error.message, 'error');
-      }
-    );
+  
+  getNovedadesByDependenciaUsuarioTodas(): void {
+    if (this.usuarioDependencia) {
+      this.novedadesService.getNovedadesByDependencia(this.usuarioDependencia).subscribe(
+        (data: Novedades[]) => {
+          this.novedades = data;
+          this.filteredNovedades = [...this.novedades];
+          this.novedades.forEach(novedad => {
+            this.filtrarNovedadesC();
+          });
+        },
+        (error: HttpErrorResponse) => {
+          console.error('Error al obtener novedades por dependencia:', error.message);
+        }
+      );
+    }
   }
-}
-
+  
   // Filtrar por rango de fecha
-filtrarNovedadesUnidadPorFecha() {
-  if (this.usuarioUnidad && this.fechaFiltroUnidadInicio && this.fechaFiltroUnidadFin) {
-    this.novedadesService.getNovedadesByUnidadRegionalByRangoFecha(
-      this.usuarioUnidad,
-      this.fechaFiltroUnidadInicio,
-      this.fechaFiltroUnidadFin
-    ).subscribe(
-      (data: Novedades[]) => {
-        this.novedades = data;
-        this.filteredNovedades = [...this.novedades];
-        this.novedades.forEach(novedad => {
-          this.filtrarNovedadesC();
-        });
-      }
-    );
+  filtrarNovedadesDependenciaPorFecha() {
+    if (this.usuarioDependencia && this.fechaFiltroUnidadInicio && this.fechaFiltroUnidadFin) {
+      this.novedadesService.getNovedadesByDependenciaByRangoFecha(
+        this.usuarioDependencia,
+        this.fechaFiltroUnidadInicio,
+        this.fechaFiltroUnidadFin
+      ).subscribe(
+        (data: Novedades[]) => {
+          this.novedades = data;
+          this.filteredNovedades = [...this.novedades];
+          this.novedades.forEach(novedad => {
+            this.filtrarNovedadesC();
+          });
+        }
+      );
+    }
   }
-}
  
   onFiltroAdminChange(event: any) {
     const valor = event.target.value;

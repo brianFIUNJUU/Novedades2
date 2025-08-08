@@ -202,5 +202,59 @@ personalCtrl.getPersonalByLegajo = async (req, res) => {
         });
     }
 };
+// Modificar personal por legajo
+personalCtrl.editPersonalByLegajo = async (req, res) => {
+    try {
+        const legajo = req.params.legajo;
+        // Busca el personal por legajo
+        const personal = await Personal.findOne({ where: { legajo } });
+        if (!personal) {
+            return res.status(404).json({
+                status: '0',
+                msg: 'Personal no encontrado con ese legajo.',
+            });
+        }
+        // Actualiza los campos recibidos en el body
+        await personal.update(req.body);
+        res.json({
+            status: '1',
+            msg: 'Personal actualizado por legajo.',
+            data: personal
+        });
+    } catch (error) {
+        res.status(400).json({
+            status: '0',
+            msg: 'Error al actualizar personal por legajo.',
+        });
+    }
+};
+
+personalCtrl.getPersonalesByDependencia = async (req, res) => {
+    try {
+        const { dependencia_id } = req.params;
+        const personales = await Personal.findAll({
+            where: { DependenciaId: dependencia_id },
+            include: [
+                {
+                    model: Dependencia,
+                    as: 'dependencia',
+                    include: [
+                        {
+                            model: UnidadRegional,
+                            as: 'unidadRegional',
+                        },
+                    ],
+                },
+            ],
+        });
+        res.json(personales);
+    } catch (error) {
+        console.error('Error al obtener personal por dependencia:', error);
+        res.status(400).json({
+            status: '0',
+            msg: 'Error al obtener personal por dependencia.',
+        });
+    }
+};
 
 module.exports = personalCtrl;

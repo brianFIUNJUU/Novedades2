@@ -32,7 +32,10 @@ export class PersonalComponent implements OnInit {
   isUpdating: boolean = false; // Variable para determinar si estamos en modo de edición
   userInfo: any = {}; // Variable para almacenar la información del usuario
   userType: string = ''; // Variable para almacenar el tipo de usuario
-
+  usuarioDependencia: string = ''; // Variable para almacenar la dependencia del usuario
+    personalesDependencia: Personal[] = [];
+    selectedUnidadRegional: string = '';
+selectedDependencia: string = '';
 
   constructor(
     private personalService: PersonalService,
@@ -45,6 +48,9 @@ export class PersonalComponent implements OnInit {
   ngOnInit(): void {
     this.authService.getUserInfo().subscribe(userInfo => {
       this.userInfo = userInfo;
+      this.usuarioDependencia = userInfo.dependencia_id;
+          this.getPersonalesByDependencia();
+
       if (this.userInfo.perfil === 'usuario' || this.userInfo.perfil === 'EncargadoUnidad') {
         this.legajo = this.userInfo.legajo;
         this.buscarPersonalPorLegajo();
@@ -64,6 +70,48 @@ export class PersonalComponent implements OnInit {
     this.excelExportService.exportAsExcelFile(this.personales, 'Personal');
   }
 
+  cargarUnidadesRegionales(): void {
+  this.unidadRegionalService.getUnidadesRegionales().subscribe({
+    next: (data) => {
+      this.unidadRegionales = data;
+    },
+    error: (error) => {
+      console.error('Error al cargar unidades regionales', error);
+    }
+  });
+}
+
+// Cargar dependencias de la unidad regional seleccionada
+cargarDependenciasPorUnidad(): void {
+  if (this.selectedUnidadRegional) {
+    this.dependenciaService.getDependenciasByUnidadRegional(Number(this.selectedUnidadRegional)).subscribe({
+      next: (data) => {
+        this.dependencias = data;
+      },
+      error: (error) => {
+        console.error('Error al cargar dependencias', error);
+      }
+    });
+  }
+}
+
+// Cambiar la dependencia y cargar el personal
+filtrarPersonalPorDependencia(): void {
+  if (this.selectedDependencia) {
+    this.personalService.getPersonalesByDependencia(this.selectedDependencia).subscribe(
+      (data: Personal[]) => {
+        this.personalesDependencia = data;
+        this.personalesDependencia.forEach(personal => {
+          this.cargarUnidadRegionalNombre(personal);
+          this.cargarJuridiccionNombre(personal);
+        });
+      },
+      error => console.error('Error al obtener personal por dependencia:', error)
+    );
+  }
+}
+
+
   getPersonales(): void {
     this.personalService.getPersonales().subscribe(
       data => {
@@ -82,7 +130,21 @@ export class PersonalComponent implements OnInit {
       error => console.error('Error al obtener los personales:', error)
     );
   }
-
+  getPersonalesByDependencia(): void {
+  if (this.usuarioDependencia) {
+    this.personalService.getPersonalesByDependencia(this.usuarioDependencia).subscribe(
+      (data: Personal[]) => {
+        this.personalesDependencia = data;
+        // Si necesitas cargar nombres de unidad regional o jurisdicción:
+        this.personalesDependencia.forEach(personal => {
+          this.cargarUnidadRegionalNombre(personal);
+          this.cargarJuridiccionNombre(personal);
+        });
+      },
+      error => console.error('Error al obtener personal por dependencia:', error)
+    );
+  }
+}
     showModal(): void {
     if (this.userInfo.perfil === 'usuario'|| this.userInfo.perfil === 'EncargadoUnidad'|| this.userInfo.perfil === 'usuarioDOP') {
       this.personal.legajo = this.userInfo.legajo;

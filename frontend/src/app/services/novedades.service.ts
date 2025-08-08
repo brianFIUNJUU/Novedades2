@@ -260,6 +260,56 @@ export class NovedadesService {
       { headers }
     );
   }
+
+    // Obtener novedades por dependencia (con cache)
+  getNovedadesByDependencia(dependencia_id: string): Observable<Novedades[]> {
+    if (this.novedadesByUnidadCache[dependencia_id]) {
+      return of(this.novedadesByUnidadCache[dependencia_id]);
+    }
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<Novedades[]>(
+      `${this.apiUrl}/dependencia/${dependencia_id}`,
+      { headers }
+    );
+  }
+  
+  // Obtener novedades de una dependencia solo del día de hoy (con cache)
+  getNovedadesByDependenciaByToday(dependencia_id: string): Observable<Novedades[]> {
+    if (this.novedadesByUnidadTodayCache[dependencia_id]) {
+      return of(this.novedadesByUnidadTodayCache[dependencia_id]);
+    }
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<Novedades[]>(
+      `${this.apiUrl}/dependencia/today/${dependencia_id}`,
+      { headers }
+    );
+  }
+  
+  // Obtener novedades por dependencia y rango de fecha (con cache)
+  getNovedadesByDependenciaByRangoFecha(dependencia_id: string, fechaInicio: string, fechaFin: string): Observable<Novedades[]> {
+    const key = `${dependencia_id}_${fechaInicio}_${fechaFin}`;
+    if (this.novedadesByUnidadRangoFechaCache[key]) {
+      return of(this.novedadesByUnidadRangoFechaCache[key]);
+    }
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<Novedades[]>(
+      `${this.apiUrl}/dependencia/rango-fecha/${dependencia_id}?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`,
+      { headers }
+    );
+  }
+
   getNovedadesByOperativo(operativo_id: string): Observable<Novedades[]> {
   if (this.novedadesByOperativoCache[operativo_id]) {
     return of(this.novedadesByOperativoCache[operativo_id]);

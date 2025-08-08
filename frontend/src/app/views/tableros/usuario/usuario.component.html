@@ -54,6 +54,7 @@
           <th class="text-small">N° de Legajo</th>
           <th class="text-small">Nombre</th>
           <th class="text-small">Email</th>
+          <th class="text-small">Dependencia</th>
           <th class="text-small">Perfil</th>
           <th class="text-small">Estado</th>
     <th class="text-small" *ngIf="perfilUsuarioActual === 'administrador' || perfilUsuarioActual === 'usuarioDOP'">Acciones</th>
@@ -64,6 +65,7 @@
           <td class="text-small">{{ usuario.legajo }}</td>
           <td class="text-small">{{ usuario.nombre }}</td>
           <td class="text-small">{{ usuario.email }}</td>
+          <td class="text-small">{{ usuario.dependencia_nombre}}</td>
           <td class="text-small">{{ usuario.perfil }}</td>
           <td class="text-small">{{ usuario.estado ? 'Activo' : 'Pendiente' }}</td>
           <td>

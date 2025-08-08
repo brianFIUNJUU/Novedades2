@@ -39,6 +39,15 @@ const Personal = sequelize.define('Personal', {
         },
         allowNull: false
     },
+    dependencia_nombre: {
+        type: DataTypes.STRING,
+        allowNull: true // Puede ser nulo si no se proporciona
+    },
+    unidad_regional_nombre: {
+        type: DataTypes.STRING,
+        allowNull: true // Puede ser nulo si no se proporciona
+    },
+
     unidad_regional_id: {
         type: DataTypes.INTEGER,
         references: {

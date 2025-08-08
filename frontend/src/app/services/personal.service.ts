@@ -38,9 +38,7 @@ export class PersonalService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.get<Personal[]>(this.apiUrl, { headers }).pipe(
-      tap(data => this.personalesCache = data)
-    );
+    return this.http.get<Personal[]>(this.apiUrl, { headers })
   }
 
   // Obtener un personal por ID (con cache)
@@ -53,9 +51,7 @@ export class PersonalService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.get<Personal>(`${this.apiUrl}/${id}`, { headers }).pipe(
-      tap(data => this.personalByIdCache[id] = data)
-    );
+    return this.http.get<Personal>(`${this.apiUrl}/${id}`, { headers })
   }
 
   // Crear un nuevo personal
@@ -65,9 +61,7 @@ export class PersonalService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.post<Personal>(this.apiUrl, personal, { headers }).pipe(
-      tap(() => this.clearCache())
-    );
+    return this.http.post<Personal>(this.apiUrl, personal, { headers })
   }
 
   // Actualizar un personal existente
@@ -77,9 +71,7 @@ export class PersonalService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.put<Personal>(`${this.apiUrl}/${personal.id}`, personal, { headers }).pipe(
-      tap(() => this.clearCache())
-    );
+    return this.http.put<Personal>(`${this.apiUrl}/${personal.id}`, personal, { headers })
   }
 
   // Eliminar un personal
@@ -89,9 +81,7 @@ export class PersonalService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers }).pipe(
-      tap(() => this.clearCache())
-    );
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers })
   }
 
   // Obtener personal por legajo (con cache)
@@ -104,8 +94,25 @@ export class PersonalService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    return this.http.get<Personal>(`${this.apiUrl}/search/legajo/${legajo}`, { headers }).pipe(
-      tap(data => this.personalByLegajoCache[legajo] = data)
-    );
+    return this.http.get<Personal>(`${this.apiUrl}/search/legajo/${legajo}`, { headers })
   }
+  // obtener personal por legajo y moficarlo algo asi seria
+    updatePersonalByLegajo(legajo: string, personal: Personal): Observable<Personal> {
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.put<Personal>(`${this.apiUrl}/legajo/${legajo}`, personal, { headers })
+  }
+  // Obtener personales por dependencia
+    getPersonalesByDependencia(dependencia_id: string): Observable<Personal[]> {
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return this.http.get<Personal[]>(`${this.apiUrl}/dependencia/${dependencia_id}`, { headers });
+  }
+
 }

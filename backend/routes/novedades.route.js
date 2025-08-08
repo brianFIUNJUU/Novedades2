@@ -10,6 +10,16 @@ router.get('/legajo/:legajo/rango-fecha', novedadesController.getNovedadByLegajo
 router.get('/unidad-regional/:unidad_regional_id', novedadesController.getNovedadByUnidadRegional);
 router.get('/unidad-regional/:unidad_regional_id/today', novedadesController.getNovedadByUnidadRegionalByToday);
 router.get('/unidad-regional/:unidad_regional_id/rango-fecha', novedadesController.getNovedadByUnidadRegionalByRangoFecha);
+
+
+
+router.get('/dependencia/:dependencia_id', novedadesController.getNovedadByDependencia);
+
+// backend/routes/novedades.route.js
+router.get('/dependencia/today/:dependencia_id', novedadesController.getNovedadByDependenciaByToday);
+
+// backend/routes/novedades.route.js
+router.get('/dependencia/rango-fecha/:dependencia_id', novedadesController.getNovedadByDependenciaByRangoFecha);
 router.get('/operativo/:operativo_id', novedadesController.getNovedadesByOperativo);
 router.get('/novedades/n_incidencia/:n_incidencia', novedadesController.getNovedadesByNIncidencia);
 router.get('/origen/:origen_novedad/rango-fecha', novedadesController.getNovedadesByOrigenNovedadYRangoFecha);

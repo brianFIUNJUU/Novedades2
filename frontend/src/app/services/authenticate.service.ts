@@ -83,7 +83,18 @@ import Swal from 'sweetalert2';
       return this.http.put<any>(`${this.apiUrl}/users/legajo/${legajo}`, nuevosDatos, { headers });
     }
 
-    register(email: string, password: string, nombre: string, perfil: string, legajo: string, estado: boolean): Promise<void> {
+      register(
+      email: string,
+      password: string,
+      nombre: string,
+      perfil: string,
+      legajo: string,
+      estado: boolean,
+      unidad_regional_id: string,
+      unidad_regional_nombre: string,
+      dependencia_id: string,
+      dependencia_nombre: string
+    ): Promise<void> {
       return createUserWithEmailAndPassword(this.auth, email, password)
         .then((result) => {
           sendEmailVerification(result.user);
@@ -91,30 +102,30 @@ import Swal from 'sweetalert2';
           // Datos del usuario a enviar al backend (Firestore)
           const usuarioData: Usuario = {
             legajo: legajo,
-            estado: estado,              // Estado predeterminado
-            id: result.user.uid,               // Asegúrate de incluir el 'id'
-            uid: result.user.uid,              // También el 'uid' desde Firebase
-            nombre: nombre, // Nombre (puedes solicitarlo en otro momento)
-            email: result.user.email || '',    // Email verificado por Firebase
-            usuario: email.split('@')[0],      // Generar nombre de usuario
-            perfil: perfil,                 // Perfil predeterminado
-            password: password                 // Solo si es necesario almacenarlo (normalmente no es seguro)
+            estado: estado,
+            id: result.user.uid,
+            uid: result.user.uid,
+            nombre: nombre,
+            email: result.user.email || '',
+            usuario: email.split('@')[0],
+            perfil: perfil,
+            password: password,
+            unidad_regional_id: unidad_regional_id,
+            unidad_regional_nombre: unidad_regional_nombre,
+            dependencia_id: dependencia_id,
+            dependencia_nombre: dependencia_nombre
           };
     
           // Guardar los datos del usuario en Firestore
           return this.createUsuario(usuarioData).then(() => {
             return this.auth.signOut().then(() => {
-              // Obtener el token antes de hacer la solicitud
-              const token = this.getAuthToken(); // Llamamos a la función getAuthToken para obtener el token
-    
-              // Verificamos si el token existe antes de hacer la solicitud HTTP
+              const token = this.getAuthToken();
               if (token) {
                 return this.http.post<any>(`${this.apiUrl}/usuarios/crear`, usuarioData, {
                   headers: new HttpHeaders({
-                    'Authorization': `Bearer ${token}`  // Ahora pasamos el token en el header
+                    'Authorization': `Bearer ${token}`
                   })
                 }).toPromise().then(() => {
-                  // Redirigir al login después de desloguear
                   this.router.navigate(['/login']);
                 });
               } else {

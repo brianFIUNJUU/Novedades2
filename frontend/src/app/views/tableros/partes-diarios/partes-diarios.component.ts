@@ -113,6 +113,17 @@ public menoresDemorados: number = 0;
           this.parteDiario = new PartesDiarios();
           this.parteDiario.fecha_hasta = this.getFechaHoy();
           this.personalAsociado = [];
+             // Asignar datos del usuario logueado si existen
+      this.authService.getUserInfo().subscribe(userInfo => {
+        if (userInfo.unidad_regional_id) {
+          this.parteDiario.unidad_regional_id = userInfo.unidad_regional_id;
+          this.parteDiario.unidad_regional_nombre = userInfo.unidad_regional_nombre;
+        }
+        if (userInfo.dependencia_id) {
+          this.parteDiario.dependencia_id = userInfo.dependencia_id;
+          this.parteDiario.dependencia_nombre = userInfo.dependencia_nombre;
+        }
+      });
         }
       });
     }
@@ -660,7 +671,7 @@ cargarResumenDemoradosPorNovedades() {
         this.parteDiario.menores_detenidos = res.menores;
       },
       error: err => {
-        console.error('Error al obtener demorados:', err);
+        console.log('Sin demorados:', err);
       }
     });
 }
@@ -676,7 +687,7 @@ cargarResumenElementosSecuestradosPorNovedades() {
         this.parteDiario.vehiculos_secuestrados = res.totalVehiculos ?? 0;
       },
       error: err => {
-        console.error('Error al obtener vehículos secuestrados:', err);
+        console.log('sin vehículos secuestrados:', err);
         this.parteDiario.vehiculos_secuestrados = 0;
       }
     });
@@ -690,7 +701,7 @@ cargarResumenElementosSecuestradosPorNovedades() {
         this.parteDiario.motos_secuestradas = res.totalMotos ?? 0;
       },
       error: err => {
-        console.error('Error al obtener motos secuestradas:', err);
+        console.log('sin motos secuestradas:', err);
         this.parteDiario.motos_secuestradas = 0;
       }
     });

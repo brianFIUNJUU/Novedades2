@@ -244,6 +244,20 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
       this.cargarPersonalRelacionado(this.novedadId);
     } else {
       this.isUpdating = false; // <--- MARCA QUE ESTÁS CREANDO
+
+          // Solo en modo creación, asigna la dependencia del usuario
+      this.authService.getUserInfo().subscribe(userInfo => {
+        this.nuevaNovedad.dependencia_id = userInfo.dependencia_id;
+        this.nuevaNovedad.dependencia_nombre = userInfo.dependencia_nombre;
+        
+        // Si quieres usar la del personal, puedes hacer una consulta aquí
+        // Ejemplo:
+        // this.personalService.getPersonalByLegajo(userInfo.legajo).subscribe(personal => {
+        //   this.nuevaNovedad.dependencia_id = personal.DependenciaId;
+        //   this.nuevaNovedad.dependencia_nombre = personal.dependencia_nombre;
+        // });
+      });
+
     }
   });
     this.getAllNovedades();
@@ -266,6 +280,8 @@ if (!this.isUpdating) {
       this.usuarioNombre = userInfo.nombre;
       this.usuarioLegajo = userInfo.legajo;
        if (!this.isUpdating) {
+            this.nuevaNovedad.dependencia_id = userInfo.dependencia_id;
+    this.nuevaNovedad.dependencia_nombre = userInfo.dependencia_nombre;
       this.cargarDatosPersonal();
     }
     });
@@ -1345,7 +1361,8 @@ cargarElementosPorCategoria(categoriaNombre: string): void {
         this.buscarPersonalAutorPorLegajoUsuario();
       }
     }
-  buscarPersonalAutorPorLegajoUsuario(): Promise<void> {
+    // aqui obtengo los valores del personal autor por el legajo del usuario 
+   buscarPersonalAutorPorLegajoUsuario(): Promise<void> {
     return new Promise((resolve, reject) => {
       const legajo = this.usuarioLegajo;
       if (!legajo) { reject(); return; }
@@ -1353,7 +1370,7 @@ cargarElementosPorCategoria(categoriaNombre: string): void {
         (personal: Personal) => {
           this.nuevaNovedad.personal_autor_id = personal.id;
           this.nuevaNovedad.personal_autor_legajo = personal.legajo;
-          this.nuevaNovedad.personal_autor_nombre = `(${personal.legajo})${personal.jerarquia}:${personal.nombre} ${personal.apellido}`;
+          this.nuevaNovedad.personal_autor_nombre = `(${personal.legajo})${personal.jerarquia}:${personal.nombre} ${personal.apellido} (${personal.dependencia_nombre})`;
           this.personalAutor = personal;
           this.mensajeError = '';
           resolve();
@@ -1362,6 +1379,7 @@ cargarElementosPorCategoria(categoriaNombre: string): void {
       );
     });
   }
+  // agregar novedad
     async addNovedad(){
         try {
        await this.buscarPersonalAutorPorLegajoUsuario();

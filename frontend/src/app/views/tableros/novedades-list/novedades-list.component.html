@@ -73,11 +73,11 @@
       </button>
     </div>
   </div>
-  <!--usuario Unidad  -->
+  <!--usuario Dependencia Encargo Unidad  -->
   <div *ngIf="userInfo.perfil && userInfo.perfil.startsWith('EncargadoUnidad')" class="col-12 col-md-3 d-flex align-items-center gap-2">
     <label class="form-label mb-0">Novedades:</label>
-    <select class="form-select form-select-sm" (change)="onFiltroUnidadChange($event)">
-      <option value="hoy">Del Día</option>
+    <select class="form-select form-select-sm" (change)="onFiltroDependenciaChange($event)">   
+         <option value="hoy">Del Día</option>
       <option value="todas">Todas</option>
       <option value="fecha">Por Fecha</option>
     </select>
@@ -88,7 +88,7 @@
         <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUnidadInicio" placeholder="Desde" />
         <input type="date" class="form-control form-control-sm mb-1" [(ngModel)]="fechaFiltroUnidadFin" placeholder="Hasta" />
       </div>
-      <button class="btn btn-primary btn-sm" (click)="filtrarNovedadesUnidadPorFecha()">Filtrar</button>
+      <button class="btn btn-primary btn-sm" (click)="filtrarNovedadesDependenciaPorFecha()">Filtrar</button>
     </div>
   </div>
   <!-- usuario -->

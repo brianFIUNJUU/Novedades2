@@ -59,6 +59,7 @@ operativo_nombre: {
   cuadrante_nombre: {
     type: DataTypes.STRING,
   },
+  // esta no es la dependencia correspondiente a la novedad, es la del personal autor
   dependencia_id: {
     type: DataTypes.INTEGER,
     references: {

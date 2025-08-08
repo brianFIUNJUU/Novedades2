@@ -68,7 +68,7 @@ export const navItems: INavData[] = [
         attributes: { style: 'font-size: 12px;; white-space: normal;' }
       },
         {
-        name: 'Victimarios',
+        name: 'Victimarios registrados',
         url: '/tableros/persona',
         icon: 'nav-icon-bullet',
         attributes: { style: 'font-size: 12px;' }
@@ -86,21 +86,21 @@ export const navItems: INavData[] = [
  
     
       {
-        name: 'personal',
+        name: 'Datos de Personal Policial',
         url: '/tableros/personal',
         icon: 'nav-icon-bullet',
                 attributes: { style: 'font-size: 12px;' }
 
       },
       {
-        name: 'dependencia',
+        name: 'Listado de Dependencias',
         url: '/tableros/dependencia',
         icon: 'nav-icon-bullet',
                 attributes: { style: 'font-size: 12px;' }
 
       },    
       {
-        name: 'vigilancia',
+        name: 'Vigilancias Estatisticas',
         url: '/tableros/vigilancia',
         icon: 'nav-icon-bullet',
         attributes: { style: 'font-size: 12px;' }

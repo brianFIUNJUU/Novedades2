@@ -69,6 +69,46 @@
                 <input autoComplete="email" cFormControl placeholder="Email" name="email" [(ngModel)]='email' />
               </c-input-group>
 
+            
+                            <!-- Unidad Regional -->
+              <div class="form-group mb-3">
+              
+                <select id="unidad_regional" name="unidad_regional"
+                  [(ngModel)]="unidad_regional_id"
+                  class="form-select"
+                  (change)="onUnidadRegionalChange($event)">
+                  <option value="" disabled selected>Seleccione unidad regional</option>
+                  <option *ngFor="let unidad of unidadesRegionales" [value]="unidad.id">{{ unidad.unidad_regional }}</option>
+                </select>
+              </div>
+              
+              <!-- Dependencia -->
+              <div class="form-group mb-3">
+         
+                <select id="dependencia" name="dependencia"
+                  [(ngModel)]="dependencia_id"
+                  class="form-select"
+                  required
+                  (change)="onDependenciaChange()">
+                  <option value="" disabled selected>Seleccione dependencia</option>
+                  <option *ngFor="let dep of dependencias" [value]="dep.id">{{ dep.juridiccion }}</option>
+                </select>
+              </div>
+
+                   <!-- Campo desplegable para seleccionar el perfil -->
+              <c-input-group class="mb-4">
+                <span cInputGroupText>Perfil</span>
+                <select cFormControl [(ngModel)]="perfil" name="perfil">
+                  <option value="usuario">Usuario Común</option>
+                  <!-- con encargadoUnidad vamos a hacer todos los usuarios que dependen o administran una dependencia de esta manera podremos discriminar la novedades por dependencia -->
+                  <option value="EncargadoUnidad">Encargado de unidad</option>
+                  <option value="usuario911">Usuario 911</option>
+                  <option value="usuarioDOP">Usuario D.O.P.</option>
+                  <option *ngIf="userType === 'administrador'" value="administrador">Administrador</option>
+                </select>
+
+              </c-input-group>
+
               <c-input-group class="mb-3">
                 <span cInputGroupText>
                   <svg cIcon name="cilLockLocked"></svg>
@@ -83,24 +123,8 @@
                 <input autoComplete="new-password" cFormControl placeholder="Repeat password" type="password" name="repeatpassword" [(ngModel)]='repeatpassword'/>
               </c-input-group>
 
-              <!-- Campo desplegable para seleccionar el perfil -->
-              <c-input-group class="mb-4">
-                <span cInputGroupText>Perfil</span>
-                <select cFormControl [(ngModel)]="perfil" name="perfil">
-                  <option value="usuario">Usuario Común</option>
-                  <option value="EncargadoUnidad">Encargado de unidad 1</option>
-                  <option value="EncargadoUnidad 2">Encargado de unidad 2</option>
-                  <option value="EncargadoUnidad 3">Encargado de unidad 3</option>
-                  <option value="EncargadoUnidad 4">Encargado de unidad 4</option>
-                  <option value="EncargadoUnidad 5">Encargado de unidad 5</option>
-                  <option value="EncargadoUnidad 6">Encargado de unidad 6</option>
-                  <option value="EncargadoUnidad 7">Encargado de unidad 7</option>
-                  <option value="EncargadoUnidad 8">Encargado de unidad 8</option>
-                  <option value="usuario911">Usuario 911</option>
-                  <option value="usuarioDOP">Usuario D.O.P.</option>
-                  <option *ngIf="userType === 'administrador'" value="administrador">Administrador</option>
-                </select>
-              </c-input-group>
+           
+
 
               <div class="d-flex justify-content-center">
                 <button cButton color="success" (click)="register()">

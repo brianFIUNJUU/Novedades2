@@ -5,6 +5,11 @@ import { CommonModule } from '@angular/common';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import Swal from 'sweetalert2';
 import { Usuario } from '../../../models/Usuario';
+import { UnidadRegional } from '../../../models/unidad_regional';
+import { UnidadRegionalService } from '../../../services/unidad_regional.service';
+import { DependenciaService } from '../../../services/dependencia.service';
+import { PersonalService } from '../../../services/personal.service';
+import { Personal } from '../../../models/personal';
 
 @Component({
   selector: 'app-register',
@@ -26,72 +31,140 @@ export class RegisterComponent {
   public loadingregister: boolean = false;
   userType: string = ''; // Variable para almacenar el tipo de usuario
   public userData: any = null; // Variable para almacenar los datos del usuario
-  
+  public unidad_regional_id: string = '';
+public dependencia_id: string = '';
+public unidadesRegionales: any[] = [];
+public dependencias: any[] = [];
+public unidad_regional_nombre: string = '';
+public dependencia_nombre: string = '';
+public personal: any = {}; // Agrega la propiedad 'personal'
 
-  constructor(private authService: AuthenticateService, private firestore: AngularFirestore) {}
+  constructor(private authService: AuthenticateService, private firestore: AngularFirestore
+    , private unidadRegionalService: UnidadRegionalService, private dependenciaService: DependenciaService ,
+    private personalService: PersonalService
+  ) {}
   ngOnInit(): void {
     this.authService.getUserType().subscribe(userType => {
       console.log('Tipo de usuario:', userType); // Mostrar el tipo de usuario en la consola
       this.userType = userType ? userType.trim() : ''; // Asigna el tipo de usuario desde el servicio de autenticación y elimina espacios adicionales
     });
     this.getUserData();
+    this.cargarUnidadesRegionales();
   }
-  register() {
-    // Validación básica de los campos del formulario
-    if (this.email === '' || this.password === '' || this.repeatpassword === '' || this.nombre === '') {
-      this.message = "Error: Introduzca un nombre, un email válido y contraseñas.";
-      this.type = "danger";
-      return; // Detener el registro
-    }
   
-    // Validación de que las contraseñas coincidan
-    if (this.password !== this.repeatpassword) {
-      this.message = "Error: Las contraseñas no coinciden.";
-      this.type = "danger";
-      return; // Detener el registro
-    }
-  
-    this.loadingregister = true;
-  
-     // Verificar si el legajo ya existe en Firestore
-     this.firestore.collection('usuarios', ref => ref.where('legajo', '==', this.legajo)).get().subscribe((querySnapshot) => {
-      if (!querySnapshot.empty) {
-        // El legajo ya existe
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'El legajo ya está en uso.',
-        });
-        this.loadingregister = false;
-      } else {
-        // Registrar el usuario en Firebase Authentication y crear su perfil en Firestore
-        this.authService.register(this.email, this.password, this.nombre, this.perfil, this.legajo, this.estado) // Pasar nombre aquí
-          .then(() => {
-            // Registro exitoso
-            
-            this.message = "Usuario registrado correctamente. Revise su correo para confirmar el registro.";
+
+onUnidadRegionalChange(event: any) {
+  const selectedId = +event.target.value;
+  const unidad = this.unidadesRegionales.find(u => Number(u.id) === selectedId);
+  this.unidad_regional_nombre = unidad ? unidad.unidad_regional : '';
+  this.cargarDependencias(selectedId);
+}
+onDependenciaChange() {
+  const dependenciaObj = this.dependencias.find(d => d.id == this.dependencia_id);
+  this.dependencia_nombre = dependenciaObj ? dependenciaObj.juridiccion : '';
+}
+  cargarUnidadesRegionales(): void {
+    this.unidadRegionalService.getUnidadesRegionales().subscribe(
+      data => {
+        this.unidadesRegionales = data;
+      },
+      error => {
+        Swal.fire('Error', 'Error al cargar unidades regionales: ' + error.message, 'error');
+      }
+    );
+  }
+
+  cargarDependencias(unidadRegionalId: number): void {
+    this.dependenciaService.getDependenciasByUnidadRegional(unidadRegionalId).subscribe(
+      data => {
+        this.dependencias = data;
+      },
+      error => {
+        console.error('Error al obtener las dependencias:', error.message);
+        Swal.fire('Error', 'Error al obtener dependencias: ' + error.message, 'error');
+      }
+    );
+  }
+// ...en el método REGITER DEBE NO SOLO REGISTRAR SINO TAMBIEN GUARDAR Y MOFICIAR PERSONAL DE LA BASE DE DATOS...
+register() {
+  // ...validaciones previas...
+
+  this.loadingregister = true;
+
+  // Obtener nombres de unidad regional y dependencia
+  const unidadObj = this.unidadesRegionales.find(u => u.id == this.unidad_regional_id);
+  const dependenciaObj = this.dependencias.find(d => d.id == this.dependencia_id);
+  this.unidad_regional_nombre = unidadObj ? unidadObj.unidad_regional : '';
+  this.dependencia_nombre = dependenciaObj ? dependenciaObj.juridiccion : '';
+
+  // Verificar si el legajo ya existe en Firestore
+  this.firestore.collection('usuarios', ref => ref.where('legajo', '==', this.legajo)).get().subscribe((querySnapshot) => {
+    if (!querySnapshot.empty) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'El legajo ya está en uso.',
+      });
+      this.loadingregister = false;
+    } else {
+      // Registrar el usuario en Firebase Authentication y crear su perfil en Firestore
+      this.authService.register(
+        this.email,
+        this.password,
+        this.nombre,
+        this.perfil,
+        this.legajo,
+        this.estado,
+        this.unidad_regional_id,
+        this.unidad_regional_nombre,
+        this.dependencia_id,
+        this.dependencia_nombre
+      )
+      .then(() => {
+        // Intentar actualizar el personal por legajo
+        const datosActualizados: Partial<Personal> = {
+         
+          email: this.email,
+          DependenciaId: Number(this.dependencia_id),
+          dependencia_nombre: this.dependencia_nombre,
+          unidad_regional_id: Number(this.unidad_regional_id)
+        };
+
+        this.personalService.updatePersonalByLegajo(this.legajo, datosActualizados as Personal).subscribe(
+          (data) => {
+            // Personal encontrado y actualizado
+            this.message = "Usuario y personal registrado correctamente. Revise su correo para confirmar el registro.";
             this.type = "success";
             this.loadingregister = false;
             Swal.fire({
               icon: 'success',
-              title: 'Exito',
-              text: 'Usuario registrado revise su gmail para confirmar el registro.', 
-             confirmButtonText: 'Aceptar'
+              title: 'Éxito',
+              text: this.message,
+              confirmButtonText: 'Aceptar'
             });
-           
-            
-        
-            
-          })
-          .catch((error) => {
-            // Error en el registro
-            this.message = `Error: ${error.message}`;
-            this.type = "danger";
+          },
+          (error) => {
+            // Personal no existe
+            this.message = "Usuario registrado correctamente, personal no existente. Revise su correo y luego revise sus datos personales.";
+            this.type = "warning";
             this.loadingregister = false;
-          });
-      }
-    });
-  }
+            Swal.fire({
+              icon: 'warning',
+              title: 'Atención',
+              text: this.message,
+              confirmButtonText: 'Aceptar'
+            });
+          }
+        );
+      })
+      .catch((error) => {
+        this.message = `Error: ${error.message}`;
+        this.type = "danger";
+        this.loadingregister = false;
+      });
+    }
+  });
+}
   getUserData() {
     this.authService.getCurrentUser().then(user => {
       if (user) {
@@ -186,20 +259,44 @@ export class RegisterComponent {
       .get()
       .subscribe(querySnapshot => {
         if (!querySnapshot.empty) {
-          const usuarioDoc = querySnapshot.docs[0]; // Obtenemos el primer documento encontrado
-          const usuarioId = usuarioDoc.id; // ID del documento encontrado
+          const usuarioDoc = querySnapshot.docs[0];
+          const usuarioId = usuarioDoc.id;
   
-          // Si el documento existe, se actualizan los datos
+          // Actualizar datos del usuario
           this.firestore.collection('usuarios').doc(usuarioId).update({
             nombre: this.nombre,
             email: this.email,
             perfil: this.perfil,
+            unidad_regional_id: this.unidad_regional_id,
+            unidad_regional_nombre: this.unidad_regional_nombre,
+            dependencia_id: this.dependencia_id,
+            dependencia_nombre: this.dependencia_nombre
           }).then(() => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Éxito',
-              text: 'Datos actualizados correctamente.',
-            });
+            // Actualizar también el personal por legajo
+            const datosActualizados: Partial<Personal> = {
+              
+              email: this.email,
+              DependenciaId: Number(this.dependencia_id),
+              dependencia_nombre: this.dependencia_nombre,
+              unidad_regional_id: Number(this.unidad_regional_id)
+            };
+  
+            this.personalService.updatePersonalByLegajo(this.legajo, datosActualizados as Personal).subscribe(
+              (data) => {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Éxito',
+                  text: 'Datos de usuario y personal actualizados correctamente.',
+                });
+              },
+              (error) => {
+                Swal.fire({
+                  icon: 'warning',
+                  title: 'Atención',
+                  text: 'Usuario actualizado, pero el personal no existe. Revise sus datos personales.',
+                });
+              }
+            );
           }).catch(error => {
             console.log('Error al actualizar:', error);
             Swal.fire({
@@ -225,10 +322,17 @@ export class RegisterComponent {
         });
       });
   }
+
+
      limpiarLegajo(event: any) {
       // Solo permite números
       const soloNumeros = event.target.value.replace(/[^0-9]/g, '');
       this.legajo = soloNumeros;
       event.target.value = soloNumeros; // fuerza el valor en el input
     }
+
+
+
 }  
+
+

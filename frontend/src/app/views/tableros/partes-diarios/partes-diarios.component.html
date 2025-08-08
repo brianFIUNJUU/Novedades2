@@ -47,7 +47,7 @@
       
         
         <!-- Tipo de Horario -->
-        <div class="col-sm-3">
+        <div class="col-sm-4">
           <div class="form-group">
             <label for="tipoHora">Tipo de Horario:</label>
             <select id="tipoHora" name="tipoHora" class="form-select" [(ngModel)]="parteDiario.tipoHora" required>
@@ -64,8 +64,7 @@
           </div>
         </div>
         
-        <!-- Unidad Regional -->
-        <div class="col-sm-2">
+        <!-- <div class="col-sm-2">
           <div class="form-group">
             <label for="unidad_regional">Unidad Regional:</label>
             <select id="unidad_regional" name="unidad_regional" class="form-select"
@@ -79,7 +78,6 @@
           </div>
         </div>
         
-        <!-- Dependencia -->
         <div class="col-sm-3">
           <div class="form-group">
             <label for="dependencia">Dependencia:</label>
@@ -92,62 +90,61 @@
               Debe seleccionar una dependencia.
             </div>
           </div>
-        </div>
+        </div> -->
         
-        <div class="col-sm-3">
+        <div class="col-sm-2">
           <div class="form-group">
              <label for="hora_desde" class="form-label">Hora desde:</label>
               <input type="time" class="form-control" id="hora_desde" [(ngModel)]="parteDiario.hora_desde" name="hora_desde" required (change)="onHoraDesdeChange()">
           </div>
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-2">
           <div class="form-group">
             <label for="hora_hasta" class="form-label">Hora Hasta:</label>
             <input type="time" class="form-control" id="hora_hasta" [(ngModel)]="parteDiario.hora_hasta" name="hora_hasta" required (change)="onHoraHastaChange()">
           </div>
         </div>  
-                <!-- Lapso Valor -->
-        <div class="col-sm-2">
-          <div class="form-group">
-            <label for="lapso_valor">Lapso Valor:</label>
-            <input
-              id="lapso_valor"
-              name="lapso_valor"
-              type="number"
-              class="form-control"
-              [(ngModel)]="parteDiario.lapso_valor"
-              required
-              min="1"
-              placeholder="Cantidad"
-            />
-            <div *ngIf="formIntentado && !parteDiario.lapso_valor" class="text-danger small mt-1">
-              Debe ingresar el valor del lapso.
+
+              <div class="mb-2">
+          <label class="form-label">Seleccione el intervalo del parte diario (por días o por horas si es diurno):</label>
+          <div class="row">
+            <div class="col-sm-2">
+              <div class="form-group">
+                <input
+                  id="lapso_valor"
+                  name="lapso_valor"
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="parteDiario.lapso_valor"
+                  required
+                  min="1"
+                  placeholder="Cantidad"
+                />
+                <div *ngIf="formIntentado && !parteDiario.lapso_valor" class="text-danger small mt-1">
+                  Debe ingresar el valor del lapso.
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-2">
+              <div class="form-group">
+                <select
+                  id="lapso_unidad"
+                  name="lapso_unidad"
+                  class="form-select"
+                  [(ngModel)]="parteDiario.lapso_unidad"
+                  required
+                >
+                  <option value="" disabled selected>Seleccione unidad</option>
+                  <option value="HORAS">Horas</option>
+                  <option value="DIAS">Días</option>
+                </select>
+                <div *ngIf="formIntentado && !parteDiario.lapso_unidad" class="text-danger small mt-1">
+                  Debe seleccionar la unidad del lapso.
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        
-        <!-- Lapso Unidad -->
-        <div class="col-sm-2">
-          <div class="form-group">
-            <label for="lapso_unidad">Lapso Unidad:</label>
-            <select
-              id="lapso_unidad"
-              name="lapso_unidad"
-              class="form-select"
-              [(ngModel)]="parteDiario.lapso_unidad"
-              required
-            >
-              <option value="" disabled selected>Seleccione unidad</option>
-              <option value="HORAS">Horas</option>
-              <option value="DIAS">Días</option>
-             
-            </select>
-            <div *ngIf="formIntentado && !parteDiario.lapso_unidad" class="text-danger small mt-1">
-              Debe seleccionar la unidad del lapso.
-            </div>
-          </div>
-        </div>
-          
         <!-- Destinatario -->
         <div class="col-12">
           <div class="form-group">

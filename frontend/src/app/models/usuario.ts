@@ -1,13 +1,17 @@
 export class Usuario {
+legajo: string;
+  estado: boolean;
   id: string;
-  nombre: string ;
+  uid: string;
+  nombre: string;
   email: string | null; // Permitir null
   usuario: string;
-  password: string;
   perfil: string;
-  legajo:string;
-  estado:boolean;
-  uid: string;
+  password: string;
+  unidad_regional_id?: string;
+  unidad_regional_nombre?: string;
+  dependencia_id?: string;
+  dependencia_nombre?: string;
 
   constructor() {
       this.id = "";
