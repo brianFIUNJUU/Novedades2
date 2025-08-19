@@ -67,12 +67,7 @@ const authenticateFirebaseToken = async (req, res, next) => {
 
 
 // Middlewares
-app.use(cors({
-  origin: "https://10.0.10.247:4200",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true, // Permite el uso de cookies o autenticación si es necesario
-}));
+app.use(cors({  }));
 
 app.use(bodyParser.json({ limit: '10mb' })); // Configura el límite de tamaño del cuerpo JSON
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true })); // Configura el límite para datos URL-encoded
@@ -317,37 +312,16 @@ sequelize.sync().then(() => {
 app.set('port', process.env.PORT || 3000);
 
 // HTTPS configuration (update paths)
-const sslOptions = {
-  key: fs.readFileSync(path.join(__dirname, 'ssl/10.0.10.247-key.pem')),
-  cert: fs.readFileSync(path.join(__dirname, 'ssl/10.0.10.247.pem'))
-};
+//const sslOptions = {
+//  key: fs.readFileSync(path.join(__dirname, 'ssl/192.168.80.31-key.pem')),  // Ruta correcta desde backend
+//  cert: fs.readFileSync(path.join(__dirname, 'ssl/192.168.80.31.pem'))     // Ruta correcta desde backend
+//};
 
-// Crear el servidor HTTPS y asociarlo a Socket.IO
-const server = https.createServer(sslOptions, app);
-const io = socketIo(server, {
-  cors: {
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  origin: "https://10.0.10.247:4200", // URL del frontend  cambiar la ip luego de todo
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"],
-    credentials: true, // Permite autenticación si usas cookies o tokens
-  },
-  transports: ["websocket"], // Solo permitir WebSocket
-});
+// Starting the server with HTTPS
+//https.createServer(sslOptions, app).listen(app.get('port'), '0.0.0.0', () => {
+//  console.log(`Servidor HTTPS corriendo en https://0.0.0.0:${app.get('port')}`);
+//});
 
-
-
-// Configurar los eventos de Socket.IO para el servicio de mensajes
-const { configurarSocket } = require('./controllers/mensaje.controllers');
-configurarSocket(io);  // Configura los eventos de socket en el servidor
-
-// Starting the server with HTTPS 
-// https.createServer(sslOptions, app).listen(app.get('port'), '0.0.0.0', () => {
-//   console.log(`Servidor HTTPS corriendo en https://0.0.0.0:${app.get('port')}`);
-// });
-// quizas podriamos crear  un certificado que pueda ser utilizado en cualquier ip se puede
-
-// Iniciar el servidor con HTTPS y Socket.IO
-server.listen(app.get('port'), '0.0.0.0', () => {
-console.log(`🚀 Servidor HTTPS con Socket.IO corriendo en https://10.0.10.247:${app.get('port')}`);
+app.listen(3000, '127.0.0.1', () => {
+  console.log('Servidor Node escuchando en http://localhost:3000');
 });
