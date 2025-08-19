@@ -30,16 +30,8 @@ personalCtrl.getPersonales = async (req, res) => {
         });
     }
 };
-
 personalCtrl.createPersonal = async (req, res) => {
-    const { legajo, jerarquia, nombre, apellido, dni, email, DependenciaId, unidad_regional_id } = req.body;
-
-    if (!DependenciaId || !unidad_regional_id) {
-        return res.status(400).json({
-            'status': '0',
-            'msg': 'Los campos DependenciaId y unidad_regional_id son obligatorios.'
-        });
-    }
+    const { legajo, jerarquia, nombre, apellido, dni, email, DependenciaId, unidad_regional_id, dependencia_nombre, unidad_regional_nombre } = req.body;
 
     try {
         // Crear el nuevo registro de Personal
@@ -51,20 +43,22 @@ personalCtrl.createPersonal = async (req, res) => {
             dni,
             email,
             DependenciaId,
-            unidad_regional_id
+            unidad_regional_id,
+            dependencia_nombre,
+            unidad_regional_nombre
         });
 
-        // Obtener y mostrar Dependencia y UnidadRegional
-        const dependencia = await Dependencia.findByPk(DependenciaId);
-        const unidadRegional = await UnidadRegional.findByPk(unidad_regional_id);
+        // Obtener y mostrar Dependencia y UnidadRegional (pueden ser null)
+        const dependencia = DependenciaId ? await Dependencia.findByPk(DependenciaId) : null;
+        const unidadRegional = unidad_regional_id ? await UnidadRegional.findByPk(unidad_regional_id) : null;
         console.log('Dependencia:', dependencia);
         console.log('Unidad Regional:', unidadRegional);
 
         res.json({
             'status': '1',
             'msg': 'Personal guardado.',
-            'data': personal // Opcional: enviar el objeto creado como respuesta
-        });
+            'data': personal // Opcional: enviar
+                   });
     } catch (error) {
         console.error('Error al guardar personal:', error);
         res.status(400).json({

@@ -97,7 +97,8 @@ import Swal from 'sweetalert2';
     ): Promise<void> {
       return createUserWithEmailAndPassword(this.auth, email, password)
         .then((result) => {
-          sendEmailVerification(result.user);
+
+          // sendEmailVerification(result.user);
     
           // Datos del usuario a enviar al backend (Firestore)
           const usuarioData: Usuario = {
@@ -197,61 +198,66 @@ programarAvisoExpiracion(idToken: string) {
     this.router.navigate(['/login']);
   });
 }
-    login(email: string, password: string): Promise<UserCredential> {
-  return signInWithEmailAndPassword(this.auth, email, password)
-    .then(async (result) => {
-      const user = result.user;
-
-      // Verificar si el correo es el del administrador
-      if (email === '41409926@fi.unju.edu.ar') {
-        const firestoreInstance = getFirestore(this.app);
-        const userRef = doc(firestoreInstance, 'usuarios', user.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (!userSnap.exists()) {
-          await setDoc(userRef, {
-            email: user.email,
-            perfil: 'administrador',
-            creadoEn: new Date(),
-            verificado: user.emailVerified
+        login(email: string, password: string): Promise<UserCredential> {
+      return signInWithEmailAndPassword(this.auth, email, password)
+        .then(async (result) => {
+          const user = result.user;
+    
+          // Verificar si el correo es el del administrador
+          if (email === '41409926@fi.unju.edu.ar') {
+            const firestoreInstance = getFirestore(this.app);
+            const userRef = doc(firestoreInstance, 'usuarios', user.uid);
+            const userSnap = await getDoc(userRef);
+    
+            if (!userSnap.exists()) {
+              await setDoc(userRef, {
+                email: user.email,
+                perfil: 'administrador',
+                creadoEn: new Date(),
+                verificado: user.emailVerified
+              });
+              console.log("Usuario 'administrador' creado en Firestore.");
+            }
+    
+            // Programar aviso de expiración de sesión
+            const idToken = await user.getIdToken();
+            this.programarAvisoExpiracion(idToken);
+    
+            return result;
+          }
+    
+          // >>>> ELIMINA ESTA VALIDACIÓN <<<<
+          // if (!user.emailVerified) {
+          //   await sendEmailVerification(user);
+          //   this.logout();
+          //   throw new Error('auth/email-not-verified');
+          // }
+    
+          await this.updateUserStatus2(user.uid, true);
+    
+          // (Opcional) Marca el correo como verificado en Firestore si lo necesitas
+          await this.firestore.collection('usuarios').doc(user.uid).update({
+            emailVerified: true
           });
-          console.log("Usuario 'administrador' creado en Firestore.");
-        }
-
-        // Programar aviso de expiración de sesión
-        const idToken = await user.getIdToken();
-        this.programarAvisoExpiracion(idToken);
-
-        return result;
-      }
-
-      // Si el correo no es el del administrador, continuar con el flujo normal
-      if (!user.emailVerified) {
-        await sendEmailVerification(user);
-        this.logout();
-        throw new Error('auth/email-not-verified');
-      }
-
-      await this.updateUserStatus2(user.uid, true);
-
-      // Programar aviso de expiración de sesión
-      const idToken = await user.getIdToken();
-      this.programarAvisoExpiracion(idToken);
-
-      return result;
-    })
-    .catch((error) => {
-      console.error('Error en el inicio de sesión: ', error);
-
-      if (error.code === 'auth/too-many-requests') {
-        throw new Error('Revisa la bandeja de entrada de tu Gmail para verificarlo');
-      } else if (error.code === 'auth/email-not-verified') {
-        throw new Error('El correo electrónico no está verificado.');
-      } else {
-        throw new Error('Error en el inicio de sesión: ' + error.message);
-      }
-    });
-}
+    
+          // Programar aviso de expiración de sesión
+          const idToken = await user.getIdToken();
+          this.programarAvisoExpiracion(idToken);
+    
+          return result;
+        })
+        .catch((error) => {
+          console.error('Error en el inicio de sesión: ', error);
+    
+          if (error.code === 'auth/too-many-requests') {
+            throw new Error('Revisa la bandeja de entrada de tu Gmail para verificarlo');
+          } else if (error.code === 'auth/email-not-verified') {
+            throw new Error('El correo electrónico no está verificado.');
+          } else {
+            throw new Error('Error en el inicio de sesión: ' + error.message);
+          }
+        });
+    }
   
     // Método para actualizar el campo `estado` en Firestore
     private updateUserStatus2(uid: string, estado: boolean): Promise<void> {

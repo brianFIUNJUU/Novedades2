@@ -4,25 +4,26 @@ const Dependencia = require('./dependencia'); // Importar el modelo de Dependenc
 const Unidad_regional = require('./unidad_regional');
 
 const Personal = sequelize.define('Personal', {
+    id: {
+  type: DataTypes.INTEGER,
+  primaryKey: true,
+  autoIncrement: true
+},
     legajo: {
         type: DataTypes.STRING,
         allowNull: false, // Requerido
     },
     jerarquia: {
         type: DataTypes.STRING,
-        allowNull: false, // Requerido
     },
     nombre: {
         type: DataTypes.STRING,
-        allowNull: false, // Requerido
     },
     apellido: {
         type: DataTypes.STRING,
-        allowNull: false, // Requerido
     },
     dni: {
         type: DataTypes.STRING,
-        allowNull: false, // Requerido
     },
     email: {
         type: DataTypes.STRING,
@@ -31,30 +32,29 @@ const Personal = sequelize.define('Personal', {
             isEmail: true // Validar que sea un email
         }
     },
-    DependenciaId: {
+       DependenciaId: {
         type: DataTypes.INTEGER,
+        allowNull: true, // <-- esto permite null
         references: {
             model: Dependencia,
             key: 'id'
         },
-        allowNull: false
     },
     dependencia_nombre: {
         type: DataTypes.STRING,
-        allowNull: true // Puede ser nulo si no se proporciona
     },
     unidad_regional_nombre: {
         type: DataTypes.STRING,
-        allowNull: true // Puede ser nulo si no se proporciona
     },
 
     unidad_regional_id: {
         type: DataTypes.INTEGER,
+          allowNull: true,
+
         references: {
             model: Unidad_regional,
             key: 'id'
         },
-        allowNull: false        
     },
 }, {
     tableName: 'personal', // Nombre de la tabla en la base de datos

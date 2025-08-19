@@ -41,7 +41,7 @@ export const navItems: INavData[] = [
 
       },
       {
-        name: 'Resgitro de Partes Diarios',
+        name: 'Registro de Partes Diarios',
         url: '/tableros/partes-diarios',
         icon: 'nav-icon-bullet',
         attributes: { style: 'font-size: 12px;' }
@@ -100,7 +100,7 @@ export const navItems: INavData[] = [
 
       },    
       {
-        name: 'Vigilancias Estatisticas',
+        name: 'Vigilancias-Estadisticas',
         url: '/tableros/vigilancia',
         icon: 'nav-icon-bullet',
         attributes: { style: 'font-size: 12px;' }

@@ -9,7 +9,9 @@ dependenciaCtrl.getDependencias = async (req, res) => {
             include: [{
                 model: UnidadRegional,
                 as: 'unidadRegional' // Usar el alias que definiste en el modelo
-            }]
+            }],
+                        order: [['id', 'ASC']] // Ordenar por id ascendente
+
         });
         res.json(dependencias);
     } catch (error) {
@@ -80,22 +82,22 @@ dependenciaCtrl.getDependencia = async (req, res) => {
 dependenciaCtrl.getDependenciasByUnidadRegional = async (req, res) => {
     try {
         const dependencias = await Dependencia.findAll({
-            where: { unidad_regional_id: req.params.unidadRegionalId }, // Cambiado a unidad_regional_id
+            where: { unidad_regional_id: req.params.unidadRegionalId },
             include: [{
                 model: UnidadRegional,
                 as: 'unidadRegional'
-            }]
+            }],
+            order: [['id', 'ASC']] // Ordenar por id ascendente
         });
         res.json(dependencias);
     } catch (error) {
-        console.error('Error al obtener las dependencias por unidad regional:', error); // Log para depuración
+        console.error('Error al obtener las dependencias por unidad regional:', error);
         res.status(400).json({
             'status': '0',
             'msg': 'Error al obtener las dependencias por unidad regional.'
         });
     }
 };
-
 // Editar una dependencia
 dependenciaCtrl.editDependencia = async (req, res) => {
     // Asegúrate de que el ID esté en el cuerpo de la solicitud

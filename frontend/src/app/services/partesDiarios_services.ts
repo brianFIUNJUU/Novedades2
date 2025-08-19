@@ -94,4 +94,13 @@ export class PartesDiariosService {
     }
     return this.http.get<PartesDiarios[]>(url, { headers });
   }
+    getPartesDiariosPorDependencia(dependencia_id: number): Observable<PartesDiarios[]> {
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    const url = `${this.apiUrl}/por-dependencia/${dependencia_id}`;
+    return this.http.get<PartesDiarios[]>(url, { headers });
+  }
 }

@@ -33,9 +33,10 @@ export class PersonalComponent implements OnInit {
   userInfo: any = {}; // Variable para almacenar la información del usuario
   userType: string = ''; // Variable para almacenar el tipo de usuario
   usuarioDependencia: string = ''; // Variable para almacenar la dependencia del usuario
-    personalesDependencia: Personal[] = [];
-    selectedUnidadRegional: string = '';
+personalesDependencia: Personal[] = [];
+selectedUnidadRegional: string = '';
 selectedDependencia: string = '';
+nombreDependenciaActual: string = '';
 
   constructor(
     private personalService: PersonalService,
@@ -49,7 +50,14 @@ selectedDependencia: string = '';
     this.authService.getUserInfo().subscribe(userInfo => {
       this.userInfo = userInfo;
       this.usuarioDependencia = userInfo.dependencia_id;
-          this.getPersonalesByDependencia();
+      
+        // Primero carga las dependencias
+    this.dependenciaService.getDependencias().subscribe(dependencias => {
+      this.dependencias = dependencias;
+
+      // Ahora sí busca el nombre y carga el personal
+      this.getPersonalesByDependencia();
+    });
 
       if (this.userInfo.perfil === 'usuario' || this.userInfo.perfil === 'EncargadoUnidad') {
         this.legajo = this.userInfo.legajo;
@@ -70,6 +78,8 @@ selectedDependencia: string = '';
     this.excelExportService.exportAsExcelFile(this.personales, 'Personal');
   }
 
+
+  
   cargarUnidadesRegionales(): void {
   this.unidadRegionalService.getUnidadesRegionales().subscribe({
     next: (data) => {
@@ -95,9 +105,12 @@ cargarDependenciasPorUnidad(): void {
   }
 }
 
-// Cambiar la dependencia y cargar el personal
 filtrarPersonalPorDependencia(): void {
   if (this.selectedDependencia) {
+    // Busca el nombre de la dependencia seleccionada
+    const dependencia = this.dependencias.find(dep => dep.id == this.selectedDependencia);
+    this.nombreDependenciaActual = dependencia ? dependencia.juridiccion : '';
+
     this.personalService.getPersonalesByDependencia(this.selectedDependencia).subscribe(
       (data: Personal[]) => {
         this.personalesDependencia = data;
@@ -130,21 +143,24 @@ filtrarPersonalPorDependencia(): void {
       error => console.error('Error al obtener los personales:', error)
     );
   }
-  getPersonalesByDependencia(): void {
-  if (this.usuarioDependencia) {
-    this.personalService.getPersonalesByDependencia(this.usuarioDependencia).subscribe(
-      (data: Personal[]) => {
-        this.personalesDependencia = data;
-        // Si necesitas cargar nombres de unidad regional o jurisdicción:
-        this.personalesDependencia.forEach(personal => {
-          this.cargarUnidadRegionalNombre(personal);
-          this.cargarJuridiccionNombre(personal);
-        });
-      },
-      error => console.error('Error al obtener personal por dependencia:', error)
-    );
+   getPersonalesByDependencia(): void {
+    if (this.usuarioDependencia) {
+      // Busca el nombre de la dependencia del usuario
+      const dependencia = this.dependencias.find(dep => dep.id == this.usuarioDependencia);
+      this.nombreDependenciaActual = dependencia ? dependencia.juridiccion : '';
+  
+      this.personalService.getPersonalesByDependencia(this.usuarioDependencia).subscribe(
+        (data: Personal[]) => {
+          this.personalesDependencia = data;
+          this.personalesDependencia.forEach(personal => {
+            this.cargarUnidadRegionalNombre(personal);
+            this.cargarJuridiccionNombre(personal);
+          });
+        },
+        error => console.error('Error al obtener personal por dependencia:', error)
+      );
+    }
   }
-}
     showModal(): void {
     if (this.userInfo.perfil === 'usuario'|| this.userInfo.perfil === 'EncargadoUnidad'|| this.userInfo.perfil === 'usuarioDOP') {
       this.personal.legajo = this.userInfo.legajo;
@@ -161,35 +177,48 @@ filtrarPersonalPorDependencia(): void {
   }
 
   cargarUnidadRegionalNombre(personal: Personal): void {
-    this.unidadRegionalService.getUnidadRegional(personal.unidad_regional_id).subscribe(
-      (unidadRegional: UnidadRegional) => {
-        personal.unidad_regional_nombre = unidadRegional.unidad_regional;
-      },
-      (error: HttpErrorResponse) => {
-        console.error('Error al obtener unidad regional:', error.message);
-      }
-    );
+    if (personal.unidad_regional_id !== null && personal.unidad_regional_id !== undefined) {
+      this.unidadRegionalService.getUnidadRegional(personal.unidad_regional_id).subscribe(
+        (unidadRegional: UnidadRegional) => {
+          personal.unidad_regional_nombre = unidadRegional.unidad_regional;
+        },
+        (error: HttpErrorResponse) => {
+          console.error('Error al obtener unidad regional:', error.message);
+        }
+      );
+    }
   }
 
   cargarJuridiccionNombre(personal: Personal): void {
-    this.dependenciaService.getDependencia(personal.DependenciaId.toString()).subscribe(
-      (dependencia: Dependencia) => {
-        personal.dependencia_nombre = dependencia.juridiccion;
-      },
-      (error: HttpErrorResponse) => {
-        console.error('Error al obtener jurisdicción:', error.message);
-      }
-    );
+    if (personal.DependenciaId !== null && personal.DependenciaId !== undefined) {
+      this.dependenciaService.getDependencia(personal.DependenciaId.toString()).subscribe(
+        (dependencia: Dependencia) => {
+          personal.dependencia_nombre = dependencia.juridiccion;
+        },
+        (error: HttpErrorResponse) => {
+          console.error('Error al obtener jurisdicción:', error.message);
+        }
+      );
+    }
   }
 
   
-  cargarDependencias(unidad_regional_id: number): void {
+  cargarDependencias(unidad_regional_id: number | null): void {
+    if (unidad_regional_id == null) {
+      this.dependencias = [];
+      return;
+    }
     this.dependenciaService.getDependenciasByUnidadRegional(unidad_regional_id).subscribe(
       data => this.dependencias = data,
       error => console.error('Error al obtener las dependencias:', error)
     );
   }
-  cargarDependenciaPorId(dependenciaId: number): void {
+  
+    cargarDependenciaPorId(dependenciaId: number | null | undefined): void {
+    if (dependenciaId == null) {
+      this.dependencias = [];
+      return;
+    }
     this.dependenciaService.getDependencia(dependenciaId.toString()).subscribe(
       data => {
         this.dependencias = [data];
@@ -221,7 +250,9 @@ filtrarPersonalPorDependencia(): void {
     this.personal = { ...personal };
     this.isUpdating = true; // Establecer el estado de actualización
     this.openModalPersonal(); // Abrir el modal
-    this.cargarDependenciaPorId(personal.DependenciaId); // Cargar la dependencia por ID
+    if (personal.DependenciaId !== null && personal.DependenciaId !== undefined) {
+      this.cargarDependenciaPorId(personal.DependenciaId); // Cargar la dependencia por ID
+    }
   }
 
   openModalPersonal(): void {

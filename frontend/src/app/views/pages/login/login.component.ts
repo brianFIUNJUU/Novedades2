@@ -79,16 +79,16 @@ export class LoginComponent {
           .then(async user => {
             if (user) {
               await user.reload();
-              if (!user.emailVerified) {
-                this.loadinglogin = false;
-                Swal.fire({
-                  title: 'Email no confirmado',
-                  text: 'Tu email aún no ha sido confirmado. Revisa la bandeja de entrada con la leyenda "noreply" y haz click en el link para confirmar el email. Si no lo encuentras, revisa en spam.',
-                  icon: 'warning',
-                  confirmButtonText: 'Entendido'
-                });
-                return;
-              }
+              // if (!user.emailVerified) {
+              //   this.loadinglogin = false;
+              //   Swal.fire({
+              //     title: 'Email no confirmado',
+              //     text: 'Tu email aún no ha sido confirmado. Revisa la bandeja de entrada con la leyenda "noreply" y haz click en el link para confirmar el email. Si no lo encuentras, revisa en spam.',
+              //     icon: 'warning',
+              //     confirmButtonText: 'Entendido'
+              //   });
+              //   return;
+              // }
               // Ahora getUsuarioByUid devuelve un Observable, así que solo suscríbete
               this.authService.getUsuarioByUid(user.uid).subscribe(usuario => {
                 localStorage.setItem('userType', usuario.perfil);

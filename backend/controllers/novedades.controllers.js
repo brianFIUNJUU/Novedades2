@@ -749,3 +749,55 @@ exports.getNovedadesByFechaYHoraRango = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener novedades por fecha y rango de hora' });
   }
 };
+exports.getNovedadesByFechaYHoraRangoSinDependencia = async (req, res) => {
+  try {
+    const { fecha_desde, hora_desde, fecha_hasta, hora_hasta } = req.query;
+
+    if (!fecha_desde || !hora_desde || !fecha_hasta || !hora_hasta) {
+      return res.status(400).json({ error: 'Debe proporcionar fecha_desde, hora_desde, fecha_hasta y hora_hasta' });
+    }
+
+    // Construir condiciones solo con rango de fecha y hora
+    const condiciones = [
+      sequelize.where(
+        sequelize.fn(
+          'concat',
+          sequelize.col('fecha'),
+          ' ',
+          sequelize.col('horario')
+        ),
+        {
+          [Op.between]: [
+            `${fecha_desde} ${hora_desde}`,
+            `${fecha_hasta} ${hora_hasta}`
+          ]
+        }
+      )
+    ];
+
+    const novedades = await Novedades.findAll({
+      where: {
+        [Op.and]: condiciones
+      },
+      include: [
+        { model: Unidad_regional, as: 'unidad_regional' },
+        { model: Persona, as: 'personas' },
+        { model: Personal, as: 'personal_autor' },
+        { model: Personal, as: 'oficial_cargo' },
+        { model: Tipo_hecho, as: 'tipoHecho' },
+        { model: Subtipo_hecho, as: 'subtipoHecho' },
+        { model: Descripcion_hecho, as: 'descripcionHecho' },
+        { model: Modus_operandi, as: 'modus_operandi' },
+        { model: Operativo, as: 'operativo' }
+      ],
+      order: [
+        [sequelize.literal("concat(fecha, ' ', horario)"), 'ASC']
+      ]
+    });
+
+    res.json(novedades);
+  } catch (error) {
+    console.error('Error al obtener novedades por fecha y rango de hora:', error);
+    res.status(500).json({ error: 'Error al obtener novedades por fecha y rango de hora' });
+  }
+};

@@ -41,11 +41,19 @@
     </div>
   </div>
   <br/>
-  <!-- Botón para abrir el modal de Dependenciaa -->
-  <div *ngIf="userType === 'administrador'|| userType === 'usuarioDOP'" class="mb-2">
-    <button type="button" class="btn btn-primary" (click)="showModal()">
-      Agregar Dependencia
-    </button>
+  <div class="row align-items-end mb-3">
+    <div *ngIf="userType === 'administrador' || userType === 'usuarioDOP'" class="col-md-3 mb-0">
+      <button type="button" class="btn btn-primary w-100" (click)="showModal()">
+        Agregar Dependencia
+      </button>
+    </div>
+
+    <div class="col-md-3 mb-0">
+      <select id="unidadRegionalFiltro" class="form-select" [(ngModel)]="selectedUnidadRegionalFiltro" (change)="filtrarDependenciasPorUnidadRegional()">
+        <option value="" selected>Ver todas</option>
+        <option *ngFor="let unidad of unidadesRegionales" [value]="unidad.id">{{ unidad.unidad_regional }}</option>
+      </select>
+    </div>
   </div>
   
   <div class="table-responsive">

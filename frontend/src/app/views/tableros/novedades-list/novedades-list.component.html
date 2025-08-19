@@ -6,12 +6,13 @@
 </div>
 <div class="row g-2">
   <!-- admin y dop -->
-  <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP'" class="col-12 col-md-2 d-flex align-items-center gap-2">
+  <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP'|| userInfo.perfil === 'usuario911'|| userInfo.perfil === 'supervisor'" class="col-12 col-md-2 d-flex align-items-center gap-2">
     <label for="filtroAdmin" class="form-label mb-0">Novedades:</label>
     <select id="filtroAdmin" class="form-select form-select-sm" (change)="onFiltroAdminChange($event)">
       <option value="hoy">Del Día</option>
       <option value="todas">Todas</option>
-      <option value="fecha">Por Fecha</option>
+      <option value="baseOperacional">BASE OPERACIONAL</option>     
+       <option value="fecha">Por Fecha</option>
       <option value="porLegajo">Por legajo</option>
       <option value="porId">Por N° ID</option>
       <option value="porUnidad">Por U.R.</option>
@@ -20,7 +21,7 @@
       <!-- GETBYORIGEN DE LA NOVEDAD PARA HACER EL FILTRO POR ORIGEN LE PASO POR PARAMETRO "TORRE 911" -->
     </select>
   </div>
-  <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP'|| userInfo.perfil === 'usuario911' " class="col-12 col-md-4 d-flex align-items-center gap-2">
+  <div *ngIf="userInfo.perfil === 'administrador' || userInfo.perfil === 'usuarioDOP'|| userInfo.perfil === 'usuario911'|| userInfo.perfil === 'supervisor' " class="col-12 col-md-4 d-flex align-items-center gap-2">
     <!-- byfecha -->
     <div *ngIf="mostrarFiltroFechaAdmin" class="d-flex flex-column w-100">
       <div class="d-flex gap-2">
@@ -154,7 +155,7 @@
         </td>
       
         <td class=" text-center text-small">{{novedad.personal_autor_nombre}}</td>
-        <td class=" text-center text-small">
+        <td class=" text-center text-small"  *ngIf="isEditable(novedad) && userInfo.perfil !== 'usuarioDOP'|| userInfo.perfil !== 'usuario911'" >
             <button 
             *ngIf="isEditable(novedad) && userInfo.perfil !== 'usuarioDOP'|| userInfo.perfil !== 'usuario911'" 
             (click)="navigateToUpdateForm(novedad.id.toString())" 

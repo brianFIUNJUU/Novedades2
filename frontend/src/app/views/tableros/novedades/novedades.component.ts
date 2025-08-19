@@ -72,6 +72,7 @@ L.Icon.Default.imagePath = 'assets/leaflet/';
 })
 export class NovedadesComponent implements OnInit {
   novedades: Novedades[] = [];
+  userType: string = '';
   isUpdating: boolean = false; // Variable para determinar si estamos en modo de actualización
   isEditing: boolean = false; // Variable para determinar si estamos en modo de edición
   nuevaNovedad: Novedades = new Novedades();
@@ -123,7 +124,7 @@ export class NovedadesComponent implements OnInit {
   elementoRecuperado: boolean = false;
   elementoRecuperadoAnterior: boolean = false; // Añadido para controlar el estado anterior
   modalElementoSecuestradoAbierto: boolean = false;
-
+unidadRegionalSeleccionada: string = '';
   elementosTemporales: NovedadElemento[] = [];
   elementosCargadosDeBackend: NovedadElemento[] = [];
 
@@ -156,6 +157,7 @@ edad_unidad: string = 'años'; // por defecto
 // Variables para manejar la cámara de novedades
 availableCamerasN: MediaDeviceInfo[] = []; // Lista de cámaras disponibles
 currentCameraIndexN: number = 0; // Índice de la cámara actual
+    modificandoDependencia: boolean = false;
 
   ubicacionEditable: boolean = false;
   // Declaración en el componente:
@@ -237,6 +239,9 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
   });
     this.route.params.subscribe(params => {
     this.novedadId = params['id'] ? +params['id'] : null;
+      this.authService.getUserType().subscribe(userType => {
+    this.userType = userType ? userType.trim() : '';
+  });
     if (this.novedadId !== null) {
       this.isUpdating = true; // <--- MARCA QUE ESTÁS EDITANDO
       this.getNovedadById(this.novedadId.toString());
@@ -245,17 +250,10 @@ private scrollPosition: number = 0; // Almacena la posición del scroll
     } else {
       this.isUpdating = false; // <--- MARCA QUE ESTÁS CREANDO
 
-          // Solo en modo creación, asigna la dependencia del usuario
+      // Asigna la dependencia a novedad segun el usuario autor
       this.authService.getUserInfo().subscribe(userInfo => {
         this.nuevaNovedad.dependencia_id = userInfo.dependencia_id;
         this.nuevaNovedad.dependencia_nombre = userInfo.dependencia_nombre;
-        
-        // Si quieres usar la del personal, puedes hacer una consulta aquí
-        // Ejemplo:
-        // this.personalService.getPersonalByLegajo(userInfo.legajo).subscribe(personal => {
-        //   this.nuevaNovedad.dependencia_id = personal.DependenciaId;
-        //   this.nuevaNovedad.dependencia_nombre = personal.dependencia_nombre;
-        // });
       });
 
     }
@@ -372,15 +370,19 @@ getOperativosPorLegajo(legajo: string): void {
   }
 
    cargarJuridiccionNombre(personal: Personal): void {
-    this.dependenciaService.getDependencia(personal.DependenciaId.toString()).subscribe(
-      (dependencia: Dependencia) => {
-        personal.dependencia_nombre = dependencia.juridiccion;
-        this.nuevaNovedad.unidad_actuante = personal.dependencia_nombre; // Asignar el valor a nuevaNovedad.unidad_actuante
-      },
-      (error: HttpErrorResponse) => {
-        console.error('Error al obtener jurisdicción:', error.message);
-      }
-    );
+    if (personal.DependenciaId != null) {
+      this.dependenciaService.getDependencia(personal.DependenciaId.toString()).subscribe(
+        (dependencia: Dependencia) => {
+          personal.dependencia_nombre = dependencia.juridiccion;
+          this.nuevaNovedad.unidad_actuante = personal.dependencia_nombre; // Asignar el valor a nuevaNovedad.unidad_actuante
+        },
+        (error: HttpErrorResponse) => {
+          console.error('Error al obtener jurisdicción:', error.message);
+        }
+      );
+    } else {
+      console.error('DependenciaId es null o undefined en personal:', personal);
+    }
   }
   configurarFiltradoModusOperandi() {
     this.searchModusOperandi$
@@ -1379,6 +1381,8 @@ cargarElementosPorCategoria(categoriaNombre: string): void {
       );
     });
   }
+
+  
   // agregar novedad
     async addNovedad(){
         try {
@@ -1713,7 +1717,12 @@ actualizarRelacionesPersonal(): void {
       }
     );
   }
-
+onUnidadRegionalChange2(event: any): void {
+  const unidadRegionalId = +event.target.value;
+  this.unidadRegionalSeleccionada = unidadRegionalId.toString();
+  this.cargarDependencias(unidadRegionalId);
+  // No asignes unidad_regional_id a la novedad
+}
   cargarDependencias(unidadRegionalId: number): void {
     this.dependenciaService.getDependenciasByUnidadRegional(unidadRegionalId).subscribe(
       data => {
@@ -1725,8 +1734,11 @@ actualizarRelacionesPersonal(): void {
       }
     );
   }
-    // Cargar dependencias
- 
+    
+    getNombreDependenciaActual(): string {
+      const dep = this.dependencias.find(d => String(d.id) === String(this.nuevaNovedad.dependencia_id));
+      return dep ? dep.juridiccion : this.nuevaNovedad.dependencia_nombre || '';
+    }
   // Cuando cambia la dependencia seleccionada
   onDependenciaChange(): void {
     const dep = this.dependencias.find(d => String(d.id) === String(this.nuevaNovedad.dependencia_id));

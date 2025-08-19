@@ -71,19 +71,21 @@
         <td class="text-center text-small">{{ parte.fecha_desde }}-{{ parte.fecha_hasta}}</td>
         <td class="text-center text-small">{{ parte.tipoHora }}</td>
         <td class="text-center text-small text-truncate-custom">{{ parte.destinario }}</td>
-        <td class="text-center text-small" >
-                         <button class="btn btn-warning btn-sm" (click)="editarParte(parte.id!)" title="Editar">
-                  <i class="bi bi-pencil"></i>
-                </button>
-                <button class="btn btn-danger btn-sm" (click)="eliminarParte(parte.id!)" title="Eliminar">
-                  <i class="bi bi-x"></i>
-                </button>
-                      <button
-              (click)="generateParteDiarioPDF(parte.id!)"
-              title="Generar PDF"
-              class="btn btn-primary btn-sm">
-              <i class="bi bi-file-earmark-text"></i>
+                <td class="text-center text-small">
+          <ng-container *ngIf="userInfo?.perfil !== 'usuarioDop' && userInfo?.perfil !== 'usuario'">
+            <button class="btn btn-warning btn-sm" (click)="editarParte(parte.id!)" title="Editar">
+              <i class="bi bi-pencil"></i>
             </button>
+            <button class="btn btn-danger btn-sm" (click)="eliminarParte(parte.id!)" title="Eliminar">
+              <i class="bi bi-x"></i>
+            </button>
+          </ng-container>
+          <button
+            (click)="generateParteDiarioPDF(parte.id!)"
+            title="Generar PDF"
+            class="btn btn-primary btn-sm">
+            <i class="bi bi-file-earmark-text"></i>
+          </button>
         </td>
       </tr>
     </tbody>

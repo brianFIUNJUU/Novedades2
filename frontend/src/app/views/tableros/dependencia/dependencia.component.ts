@@ -30,6 +30,7 @@ export class DependenciaComponent implements OnInit {
   selectedDependencia: Dependencia = new Dependencia();
   mensajeError: string = '';
   userType: string = ''; // Variable para almacenar el tipo de usuario
+  selectedUnidadRegionalFiltro: string = ''; // Filtro para la unidad regional seleccionada
 
   constructor(
     private dependenciaService: DependenciaService,
@@ -60,7 +61,27 @@ export class DependenciaComponent implements OnInit {
       modal.show();
     }
   }
-      
+                             filtrarDependenciasPorUnidadRegional(): void {
+                      if (this.selectedUnidadRegionalFiltro) {
+                        this.dependenciaService.getDependenciasByUnidadRegional(Number(this.selectedUnidadRegionalFiltro)).subscribe(
+                          data => {
+                            this.dependencias = data;
+                            this.dependencias.forEach(dependencia => {
+                              if (dependencia.unidad_regional_id) {
+                                this.updateUnidadRegionalNombre(dependencia);
+                              } else {
+                                dependencia.unidad_regional_nombre = 'Desconocido';
+                              }
+                            });
+                          },
+                          error => {
+                            console.error('Error al filtrar dependencias por unidad regional:', error);
+                          }
+                        );
+                      } else {
+                        this.getDependencias();
+                      }
+                    }
   getDependencias(): void {
     this.dependenciaService.getDependencias().subscribe(
       data => {

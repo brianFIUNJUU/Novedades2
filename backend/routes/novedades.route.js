@@ -11,7 +11,7 @@ router.get('/unidad-regional/:unidad_regional_id', novedadesController.getNoveda
 router.get('/unidad-regional/:unidad_regional_id/today', novedadesController.getNovedadByUnidadRegionalByToday);
 router.get('/unidad-regional/:unidad_regional_id/rango-fecha', novedadesController.getNovedadByUnidadRegionalByRangoFecha);
 
-
+router.get('/todosNovedades-por-fecha-hora-rango', novedadesController.getNovedadesByFechaYHoraRangoSinDependencia);
 
 router.get('/dependencia/:dependencia_id', novedadesController.getNovedadByDependencia);
 

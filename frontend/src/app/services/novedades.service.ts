@@ -365,4 +365,21 @@ getNovedadesByFechaYHoraRango(
   }
   return this.http.get<Novedades[]>(url, { headers });
 }
+
+  // Obtener novedades por fecha y hora (sin dependencia)
+  getNovedadesByFechaYHoraRangoSinDependencia(
+    fecha_desde: string,
+    hora_desde: string,
+    fecha_hasta: string,
+    hora_hasta: string
+  ): Observable<Novedades[]> {
+    const token = this.getAuthToken();
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    const url = `${this.apiUrl}/todosNovedades-por-fecha-hora-rango?fecha_desde=${fecha_desde}&hora_desde=${hora_desde}&fecha_hasta=${fecha_hasta}&hora_hasta=${hora_hasta}`;
+    return this.http.get<Novedades[]>(url, { headers });
+  }
+
 }

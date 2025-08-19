@@ -10,7 +10,7 @@
                <!-- Fecha -->
         <div class="col-sm-2">
           <div class="form-group">
-            <label for="fecha">Fecha:</label>
+            <label for="fecha">Fecha Desde:</label>
             <input
               id="fecha"
               name="fecha"
@@ -322,7 +322,7 @@
            <tbody>
                <tr *ngFor="let nov of getNovedadesCombinadas()">
           <td class="text-small text-center text-wrap" style="max-width: 8rem; word-break: break-word;">
-            <strong>{{ nov.titulo }}</strong><br>
+            <strong>{{ nov.titulo }}{{nov.dependencia}}</strong><br>
             <span class="text-muted">({{ nov.fecha }}<br>{{ nov.hora }})</span>
           </td>
           <td class="text-small text-center text-wrap" [ngClass]="{'text-primary': nov.tipo === 'automatica'}" style="white-space: pre-line; max-width: 350px;">

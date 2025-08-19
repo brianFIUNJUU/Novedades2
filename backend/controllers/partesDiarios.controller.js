@@ -87,3 +87,16 @@ exports.getPartesPorFecha = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener partes diarios por fecha.' });
   }
 };
+// Obtener partes diarios por dependencia
+exports.getPartesDiariosPorDependencia = async (req, res) => {
+  try {
+    const { dependencia_id } = req.params;
+    const partes = await PartesDiarios.findAll({
+      where: { dependencia_id }
+    });
+    res.json(partes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener partes diarios por dependencia.' });
+  }
+};

@@ -66,6 +66,7 @@ personalAsociado: any[] = [];
   indiceEditandoNovedad?: number;
 public mayoresDemorados: number = 0;
 public menoresDemorados: number = 0;
+public userType: string = '';
 
 
   constructor(
@@ -89,6 +90,10 @@ public menoresDemorados: number = 0;
   }
 
     ngOnInit(): void {
+       this.authService.getUserType().subscribe(userType => {
+    this.userType = userType ? userType.trim() : '';
+    // ... resto de tu lógica ...
+  });
       this.route.paramMap.subscribe(params => {
         const id = params.get('id');
         if (id) {
@@ -128,29 +133,44 @@ public menoresDemorados: number = 0;
       });
     }
            actualizarNovedadesEnRango() {
-        if (
-          this.parteDiario.fecha_desde &&
-          this.parteDiario.hora_desde &&
-          this.parteDiario.fecha_hasta &&
-          this.parteDiario.hora_hasta
-        ) {
-          this.novedadesService.getNovedadesByFechaYHoraRango(
-            this.parteDiario.fecha_desde,
-            this.parteDiario.hora_desde,
-            this.parteDiario.fecha_hasta,
-            this.parteDiario.hora_hasta,
-            this.parteDiario.dependencia_id // <-- Agrega este parámetro
-          ).subscribe(novedades => {
-            this.novedadesEnRango = novedades;
-            this.cargarResumenDemoradosPorNovedades();
-            this.cargarResumenElementosSecuestradosPorNovedades();
-          });
-        } else {
-          this.novedadesEnRango = [];
-          this.cargarResumenDemoradosPorNovedades();
-          this.cargarResumenElementosSecuestradosPorNovedades();
-        }
-      }
+  if (
+    this.parteDiario.fecha_desde &&
+    this.parteDiario.hora_desde &&
+    this.parteDiario.fecha_hasta &&
+    this.parteDiario.hora_hasta
+  ) {
+    if (this.userType === 'supervisor') {
+      // Sin filtro de dependencia
+      this.novedadesService.getNovedadesByFechaYHoraRangoSinDependencia(
+        this.parteDiario.fecha_desde,
+        this.parteDiario.hora_desde,
+        this.parteDiario.fecha_hasta,
+        this.parteDiario.hora_hasta
+      ).subscribe(novedades => {
+        this.novedadesEnRango = novedades;
+        this.cargarResumenDemoradosPorNovedades();
+        this.cargarResumenElementosSecuestradosPorNovedades();
+      });
+    } else {
+      // Filtra por dependencia
+      this.novedadesService.getNovedadesByFechaYHoraRango(
+        this.parteDiario.fecha_desde,
+        this.parteDiario.hora_desde,
+        this.parteDiario.fecha_hasta,
+        this.parteDiario.hora_hasta,
+        this.parteDiario.dependencia_id
+      ).subscribe(novedades => {
+        this.novedadesEnRango = novedades;
+        this.cargarResumenDemoradosPorNovedades();
+        this.cargarResumenElementosSecuestradosPorNovedades();
+      });
+    }
+  } else {
+    this.novedadesEnRango = [];
+    this.cargarResumenDemoradosPorNovedades();
+    this.cargarResumenElementosSecuestradosPorNovedades();
+  }
+}
     
     onFechaChange() {
       this.actualizarNovedadesEnRango();
@@ -168,32 +188,71 @@ public menoresDemorados: number = 0;
       this.actualizarNovedadesEnRango();
     }
 
-               getNovedadesCombinadas() {
-          const items = (this.editando ? this.itemsAsociados : this.itemsTemporales).map(item => ({
-            ...item,
-            tipo: 'manual',
-            fecha: item.fecha,
-            hora: item.hora,
-            titulo: item.titulo,
-            descripcion: item.descripcion
-          }));
-        
-          const novedades = this.novedadesEnRango.map(nov => ({
-            ...nov,
-            tipo: 'automatica',
-            fecha: nov.fecha,
-            hora: nov.horario,
-            titulo: 'ACTUACION SUMARIA: ' + nov.descripcion_hecho,
-            descripcion: nov.descripcion
-          }));
-        
-          // Ordenar por fecha y hora usando objetos Date
-          return [...items, ...novedades].sort((a, b) => {
-            const dateA = new Date(`${a.fecha}T${a.hora || '00:00'}`);
-            const dateB = new Date(`${b.fecha}T${b.hora || '00:00'}`);
-            return dateA.getTime() - dateB.getTime();
-          });
-        }
+                                                       // Función para formatear fecha a dd/MM/yyyy
+                            private formatearFecha(fechaISO: string): string {
+                              if (!fechaISO) return '';
+                              const fecha = new Date(fechaISO);
+                              const dia = String(fecha.getDate()).padStart(2, '0');
+                              const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                              const anio = fecha.getFullYear();
+                              return `${dia}/${mes}/${anio}`;
+                            }
+                            
+                            getNovedadesCombinadas() {
+                              if (this.userType === 'supervisor') {
+                                const items = (this.editando ? this.itemsAsociados : this.itemsTemporales).map(item => ({
+                                  ...item,
+                                  tipo: 'manual',
+                                  dependencia: '',
+                                  fecha: this.formatearFecha(item.fecha), // <-- Formatea la fecha aquí
+                                  hora: item.hora,
+                                  titulo: item.titulo,
+                                  descripcion: item.descripcion
+                                }));
+                            
+                                const novedades = this.novedadesEnRango.map(nov => ({
+                                  ...nov,
+                                  tipo: 'automatica',
+                                  dependencia: `-(${nov.dependencia_nombre})`,
+                                  fecha: this.formatearFecha(nov.fecha), // <-- Formatea la fecha aquí
+                                  hora: nov.horario,
+                                  titulo: 'ACTUACION SUMARIA: ' + nov.descripcion_hecho,
+                                  descripcion: nov.descripcion
+                                }));
+                            
+                                return [...items, ...novedades].sort((a, b) => {
+                                  const dateA = new Date(`${a.fecha.split('/').reverse().join('-')}T${a.hora || '00:00'}`);
+                                  const dateB = new Date(`${b.fecha.split('/').reverse().join('-')}T${b.hora || '00:00'}`);
+                                  return dateA.getTime() - dateB.getTime();
+                                });
+                              } else {
+                                const items = (this.editando ? this.itemsAsociados : this.itemsTemporales).map(item => ({
+                                  ...item,
+                                  tipo: 'manual',
+                                  dependencia: '',
+                                  fecha: this.formatearFecha(item.fecha), // <-- Formatea la fecha aquí
+                                  hora: item.hora,
+                                  titulo: item.titulo,
+                                  descripcion: item.descripcion
+                                }));
+                            
+                                const novedades = this.novedadesEnRango.map(nov => ({
+                                  ...nov,
+                                  tipo: 'automatica',
+                                  dependencia: '',
+                                  fecha: this.formatearFecha(nov.fecha), // <-- Formatea la fecha aquí
+                                  hora: nov.horario,
+                                  titulo: 'ACTUACION SUMARIA: ' + nov.descripcion_hecho,
+                                  descripcion: nov.descripcion
+                                }));
+                            
+                                return [...items, ...novedades].sort((a, b) => {
+                                  const dateA = new Date(`${a.fecha.split('/').reverse().join('-')}T${a.hora || '00:00'}`);
+                                  const dateB = new Date(`${b.fecha.split('/').reverse().join('-')}T${b.hora || '00:00'}`);
+                                  return dateA.getTime() - dateB.getTime();
+                                });
+                              }
+                            }
  // Cargar unidades regionales
   cargarUnidadesRegionales(): void {
     this.unidadRegionalService.getUnidadesRegionales().subscribe({

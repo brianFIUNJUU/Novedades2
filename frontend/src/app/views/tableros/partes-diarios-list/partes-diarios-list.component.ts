@@ -24,6 +24,7 @@ import { PartesDiariosNovedad } from '../../../models/partesDiarios_Novedad';
 import { PartesDiariosNovedadService } from '../../../services/partesDiarios_Novedad.services'; // Asegúrate de que la ruta sea correcta
 import { ChangeDetectorRef } from '@angular/core';
 import { NgZone } from '@angular/core';
+import { AuthenticateService } from '../../../services/authenticate.service';
 
 
 
@@ -35,7 +36,8 @@ import { NgZone } from '@angular/core';
   styleUrl: './partes-diarios-list.component.scss'
 })
 export class PartesDiariosListComponent implements OnInit {
- parteDiario: PartesDiarios = new PartesDiarios();
+  userInfo: any; // <-- Agrega esta línea para declarar la propiedad userInfo
+  parteDiario: PartesDiarios = new PartesDiarios();
   partesFiltrados: PartesDiarios[] = [];
   unidadesRegionales: string[] = [];
   unidadFiltro: string = '';
@@ -60,13 +62,31 @@ export class PartesDiariosListComponent implements OnInit {
                 private zone: NgZone,
                 private itemsService: ItemsService,
               private router: Router,
+              private authService: AuthenticateService,
                 private fb: FormBuilder // <--- AGREGA ESTO
 
   ) {}
 
-  ngOnInit(): void {
-    this.cargarPartes();
-  }
+ngOnInit(): void {
+  this.authService.getUserInfo().subscribe(userInfo => {
+    this.userInfo = userInfo;
+    const userType = userInfo.perfil;
+    const dependenciaId = userInfo.dependencia_id;
+ console.log('Tipo de usuario detectado:', userType);
+    if (userType === 'administrador' || userType === 'usuarioDop') {
+      this.cargarPartes();
+    } else if (userType === 'supervisor' || userType === 'EncargadoUnidad') {
+      this.cargarPartesPorDependencia(dependenciaId);
+     } 
+  });
+}
+cargarPartesPorDependencia(dependenciaId: number): void {
+  this.partesDiariosService.getPartesDiariosPorDependencia(dependenciaId).subscribe({
+    next: (data) => {
+      this.partesFiltrados = data;
+    }
+  });
+}
 
   cargarPartes(): void {
     this.partesDiariosService.getAllPartesDiarios().subscribe({
@@ -76,6 +96,7 @@ export class PartesDiariosListComponent implements OnInit {
       }
     });
   }
+  
 
 editarParte(id: number): void {
   this.router.navigate(['/tableros/partes-diarios', id]);
@@ -152,21 +173,34 @@ actualizarNovedadesEnRango() {
     this.parteDiario.fecha_hasta &&
     this.parteDiario.hora_hasta
   ) {
-    this.novedadesService.getNovedadesByFechaYHoraRango(
-      this.parteDiario.fecha_desde,
-      this.parteDiario.hora_desde,
-      this.parteDiario.fecha_hasta,
-      this.parteDiario.hora_hasta,
-      this.parteDiario.dependencia_id // <-- Agrega este parámetro
-    ).subscribe(novedades => {
-      this.novedadesEnRango = novedades;
-    });
+    if (this.userInfo?.perfil === 'supervisor') {
+      // Supervisor: sin dependencia
+      this.novedadesService.getNovedadesByFechaYHoraRangoSinDependencia(
+        this.parteDiario.fecha_desde,
+        this.parteDiario.hora_desde,
+        this.parteDiario.fecha_hasta,
+        this.parteDiario.hora_hasta
+      ).subscribe(novedades => {
+        this.novedadesEnRango = novedades;
+      });
+    } else {
+      // Otros perfiles: con dependencia
+      this.novedadesService.getNovedadesByFechaYHoraRango(
+        this.parteDiario.fecha_desde,
+        this.parteDiario.hora_desde,
+        this.parteDiario.fecha_hasta,
+        this.parteDiario.hora_hasta,
+        this.parteDiario.dependencia_id
+      ).subscribe(novedades => {
+        this.novedadesEnRango = novedades;
+      });
+    }
   } else {
     this.novedadesEnRango = [];
   }
 }
 
-            cargarItemsAsociados(parteId: number): Promise<any[]> {
+      cargarItemsAsociados(parteId: number): Promise<any[]> {
         return new Promise((resolve, reject) => {
           this.itemsService.getItemsByParteDiarioId(parteId).subscribe({
             next: (items) => {
@@ -181,57 +215,156 @@ actualizarNovedadesEnRango() {
         });
       }
       
-      cargarNovedadesEnRango(parte: any): Promise<any[]> {
+     cargarNovedadesEnRango(parte: any): Promise<any[]> {
   return new Promise((resolve, reject) => {
     if (parte.fecha_desde && parte.hora_desde && parte.fecha_hasta && parte.hora_hasta) {
-      this.novedadesService.getNovedadesByFechaYHoraRango(
-        parte.fecha_desde,
-        parte.hora_desde,
-        parte.fecha_hasta,
-        parte.hora_hasta,
-        parte.dependencia_id // <-- Agrega este parámetro
-      ).subscribe({
-        next: (novedades) => {
-          this.novedadesEnRango = novedades;
-          resolve(novedades);
-        },
-        error: (err) => {
-          this.novedadesEnRango = [];
-          resolve([]);
-        }
-      });
+      if (this.userInfo?.perfil === 'supervisor') {
+        // Supervisor: sin dependencia
+        this.novedadesService.getNovedadesByFechaYHoraRangoSinDependencia(
+          parte.fecha_desde,
+          parte.hora_desde,
+          parte.fecha_hasta,
+          parte.hora_hasta
+        ).subscribe({
+          next: (novedades) => {
+            this.novedadesEnRango = novedades;
+            resolve(novedades);
+          },
+          error: (err) => {
+            this.novedadesEnRango = [];
+            resolve([]);
+          }
+        });
+      } else {
+        // Otros perfiles: con dependencia
+        this.novedadesService.getNovedadesByFechaYHoraRango(
+          parte.fecha_desde,
+          parte.hora_desde,
+          parte.fecha_hasta,
+          parte.hora_hasta,
+          parte.dependencia_id
+        ).subscribe({
+          next: (novedades) => {
+            this.novedadesEnRango = novedades;
+            resolve(novedades);
+          },
+          error: (err) => {
+            this.novedadesEnRango = [];
+            resolve([]);
+          }
+        });
+      }
     } else {
       this.novedadesEnRango = [];
       resolve([]);
     }
   });
 }
- getNovedadesCombinadas() {
-          const items = (this.editando ? this.itemsAsociados : this.itemsTemporales).map(item => ({
-            ...item,
-            tipo: 'manual',
-            fecha: item.fecha,
-            hora: item.hora,
-            titulo: item.titulo,
-            descripcion: item.descripcion
-          }));
-        
-          const novedades = this.novedadesEnRango.map(nov => ({
-            ...nov,
-            tipo: 'automatica',
-            fecha: nov.fecha,
-            hora: nov.horario,
-            titulo: 'ACTUACION SUMARIA: ' + nov.descripcion_hecho,
-            descripcion: nov.descripcion
-          }));
-        
-          // Ordenar por fecha y hora usando objetos Date
-          return [...items, ...novedades].sort((a, b) => {
-            const dateA = new Date(`${a.fecha}T${a.hora || '00:00'}`);
-            const dateB = new Date(`${b.fecha}T${b.hora || '00:00'}`);
-            return dateA.getTime() - dateB.getTime();
-          });
-        }
+
+private formatearFecha(fechaISO: string): string {
+  if (!fechaISO) return '';
+  const fecha = new Date(fechaISO);
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  const anio = fecha.getFullYear();
+  return `${dia}/${mes}/${anio}`;
+}
+
+getNovedadesCombinadas() {
+  // Puedes cambiar 'perfil' por 'userType' si así lo tienes en tu clase
+  if (this.userInfo?.perfil === 'supervisor') {
+    const items = (this.editando ? this.itemsAsociados : this.itemsTemporales).map(item => ({
+      ...item,
+      tipo: 'manual',
+      dependencia: '',
+      fecha: this.formatearFecha(item.fecha),
+      hora: item.hora,
+      titulo: item.titulo,
+      descripcion: item.descripcion
+    }));
+
+    const novedades = this.novedadesEnRango.map(nov => ({
+      ...nov,
+      tipo: 'automatica',
+      dependencia: `-(${nov.dependencia_nombre})`,
+      fecha: this.formatearFecha(nov.fecha),
+      hora: nov.horario,
+      titulo: 'ACTUACION SUMARIA: ' + nov.descripcion_hecho,
+      descripcion: nov.descripcion
+    }));
+
+    return [...items, ...novedades].sort((a, b) => {
+      const dateA = new Date(`${a.fecha.split('/').reverse().join('-')}T${a.hora || '00:00'}`);
+      const dateB = new Date(`${b.fecha.split('/').reverse().join('-')}T${b.hora || '00:00'}`);
+      return dateA.getTime() - dateB.getTime();
+    });
+  } else {
+    const items = (this.editando ? this.itemsAsociados : this.itemsTemporales).map(item => ({
+      ...item,
+      tipo: 'manual',
+      dependencia: '',
+      fecha: this.formatearFecha(item.fecha),
+      hora: item.hora,
+      titulo: item.titulo,
+      descripcion: item.descripcion
+    }));
+
+    const novedades = this.novedadesEnRango.map(nov => ({
+      ...nov,
+      tipo: 'automatica',
+      dependencia: '',
+      fecha: this.formatearFecha(nov.fecha),
+      hora: nov.horario,
+      titulo: 'ACTUACION SUMARIA: ' + nov.descripcion_hecho,
+      descripcion: nov.descripcion
+    }));
+
+    return [...items, ...novedades].sort((a, b) => {
+      const dateA = new Date(`${a.fecha.split('/').reverse().join('-')}T${a.hora || '00:00'}`);
+      const dateB = new Date(`${b.fecha.split('/').reverse().join('-')}T${b.hora || '00:00'}`);
+      return dateA.getTime() - dateB.getTime();
+    });
+  }
+}
+
+
+private formatearHora(hora: string): string {
+  if (!hora) return '';
+  if (/^\d{2}:\d{2}$/.test(hora)) return hora;
+  const [h, m] = hora.split(':');
+  return `${h.padStart(2, '0')}:${m.padStart(2, '0')}`;
+}
+
+private getNovedadesCombinadasPDF(items: any[], novedades: any[]): any[] {
+  const esSupervisor = this.userInfo?.perfil === 'supervisor';
+
+  const itemsFormateados = items.map(item => ({
+    ...item,
+    tipo: 'manual',
+    fecha: this.formatearFecha(item.fecha),
+    hora: this.formatearHora(item.hora),
+    titulo: item.titulo,
+    descripcion: item.descripcion,
+    dependencia: '' // nunca muestra dependencia para items manuales
+  }));
+
+  const novedadesFormateadas = novedades.map(nov => ({
+    ...nov,
+    tipo: 'automatica',
+    fecha: this.formatearFecha(nov.fecha),
+    hora: this.formatearHora(nov.horario),
+    titulo: 'ACTUACION SUMARIA: ' + (nov.descripcion_hecho || ''),
+    descripcion: nov.descripcion || '',
+    dependencia: esSupervisor && nov.dependencia_nombre ? `-(${nov.dependencia_nombre})` : ''
+  }));
+
+  return [...itemsFormateados, ...novedadesFormateadas].sort((a, b) => {
+    const dateA = new Date(`${a.fecha.split('/').reverse().join('-')}T${a.hora || '00:00'}`);
+    const dateB = new Date(`${b.fecha.split('/').reverse().join('-')}T${b.hora || '00:00'}`);
+    return dateA.getTime() - dateB.getTime();
+  });
+}
+
 async generateParteDiarioPDF(parteId: number): Promise<void> {
   await this.cargarPersonalParte(parteId);
 
@@ -357,10 +490,12 @@ async generateParteDiarioPDF(parteId: number): Promise<void> {
         yActual += parrafoJustificado.length * lineHeight;
 
         const finalTextoY = yActual;
+
         // --- TABLA DE PERSONAL ---
         const personal = this.personalParaActa || [];
+        let yTabla = finalTextoY + lineHeight;
+
         if (personal.length > 0) {
-          const tablaTituloY = finalTextoY + lineHeight;
           pdf.setFontSize(11);
           pdf.setFont("helvetica", "bold");
 
@@ -368,13 +503,11 @@ async generateParteDiarioPDF(parteId: number): Promise<void> {
           const personalSuperior = personal.filter(p => (p.tipo_personal || '').toUpperCase().includes('SUPERIOR'));
           const personalSubalterno = personal.filter(p => (p.tipo_personal || '').toUpperCase().includes('SUB'));
 
-          let yTabla = tablaTituloY;
-
           // Tabla de PERSONAL SUPERIOR
           if (personalSuperior.length > 0) {
-            pdf.setTextColor(0, 51, 102); // Azul oscuro para el título
+            pdf.setTextColor(0, 51, 102);
             pdf.text("PERSONAL SUPERIOR:", marginHorizontal, yTabla);
-            pdf.setTextColor(0, 0, 0); // Vuelve a negro para el resto
+            pdf.setTextColor(0, 0, 0);
             autoTable(pdf, {
               startY: yTabla + lineHeight,
               margin: { left: marginHorizontal, right: marginHorizontal },
@@ -387,9 +520,9 @@ async generateParteDiarioPDF(parteId: number): Promise<void> {
                 p.tipo_personal || ''
               ]),
               theme: 'grid',
-              headStyles: { fillColor: [0, 51, 102], textColor: 255 }, // Azul oscuro y texto blanco
-              styles: { fontSize: 9, lineColor: [0, 51, 102], textColor: [0, 0, 0] }, // Bordes azul oscuro
-              tableLineColor: [0, 51, 102], // Bordes de la tabla azul oscuro
+              headStyles: { fillColor: [0, 51, 102], textColor: 255 },
+              styles: { fontSize: 9, lineColor: [0, 51, 102], textColor: [0, 0, 0] },
+              tableLineColor: [0, 51, 102],
               tableLineWidth: 0.5
             });
             yTabla = (pdf as any).lastAutoTable.finalY + lineHeight;
@@ -397,9 +530,9 @@ async generateParteDiarioPDF(parteId: number): Promise<void> {
 
           // Tabla de PERSONAL SUBALTERNO
           if (personalSubalterno.length > 0) {
-            pdf.setTextColor(0, 51, 102); // Azul oscuro para el título
+            pdf.setTextColor(0, 51, 102);
             pdf.text("PERSONAL SUBALTERNO:", marginHorizontal, yTabla);
-            pdf.setTextColor(0, 0, 0); // Vuelve a negro para el resto
+            pdf.setTextColor(0, 0, 0);
             autoTable(pdf, {
               startY: yTabla + lineHeight,
               margin: { left: marginHorizontal, right: marginHorizontal },
@@ -412,95 +545,69 @@ async generateParteDiarioPDF(parteId: number): Promise<void> {
                 p.tipo_personal || ''
               ]),
               theme: 'grid',
-              headStyles: { fillColor: [0, 51, 102], textColor: 255 }, // Azul oscuro y texto blanco
-              styles: { fontSize: 9, lineColor: [0, 51, 102], textColor: [0, 0, 0] }, // Bordes azul oscuro
-              tableLineColor: [0, 51, 102], // Bordes de la tabla azul oscuro
+              headStyles: { fillColor: [0, 51, 102], textColor: 255 },
+              styles: { fontSize: 9, lineColor: [0, 51, 102], textColor: [0, 0, 0] },
+              tableLineColor: [0, 51, 102],
               tableLineWidth: 0.5
             });
             yTabla = (pdf as any).lastAutoTable.finalY + lineHeight;
           }
+        }
 
-          // --- TÍTULO NOVEDADES ---
-          const novedadesY = (pdf as any).lastAutoTable?.finalY
-            ? (pdf as any).lastAutoTable.finalY + lineHeight * 2
-            : yTabla + lineHeight * 2;
+        // --- TÍTULO NOVEDADES (siempre, aunque no haya personal) ---
+        const novedadesY = (pdf as any).lastAutoTable?.finalY
+          ? (pdf as any).lastAutoTable.finalY + lineHeight * 2
+          : yTabla + lineHeight * 2;
 
-          pdf.setFont("helvetica", "bold");
-          pdf.setFontSize(13);
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(13);
+        pdf.text("NOVEDADES", pageWidth / 2, novedadesY, { align: 'center' });
 
-          pdf.text("NOVEDADES", pageWidth / 2, novedadesY, { align: 'center' });
+        // --- TABLA DE NOVEDADES (siempre, aunque no haya personal) ---
+        const novedadesCombinadas = this.getNovedadesCombinadasPDF(this.itemsAsociados, this.novedadesEnRango);
 
-          // --- TABLA DE NOVEDADES ---
-          function getNovedadesCombinadasPDF(items: any[], novedades: any[]): any[] {
-            const itemsFormateados = items.map(item => ({
-              ...item,
-              tipo: 'manual',
-              fecha: item.fecha,
-              hora: item.hora,
-              titulo: item.titulo,
-              descripcion: item.descripcion
-            }));
-
-            const novedadesFormateadas = novedades.map(nov => ({
-              ...nov,
-              tipo: 'automatica',
-              fecha: nov.fecha,
-              hora: nov.horario,
-              titulo: 'ACTUACION SUMARIA: ' + (nov.descripcion_hecho || ''),
-              descripcion: nov.descripcion  || ''
-            }));
-
-            return [...itemsFormateados, ...novedadesFormateadas].sort((a, b) => {
-              const dateA = new Date(`${a.fecha}T${a.hora || '00:00'}`);
-              const dateB = new Date(`${b.fecha}T${b.hora || '00:00'}`);
-              return dateA.getTime() - dateB.getTime();
-            });
-          }
-
-          const novedadesCombinadas = getNovedadesCombinadasPDF(this.itemsAsociados, this.novedadesEnRango);
-          
-          if (novedadesCombinadas.length > 0) {
-                   autoTable(pdf, {
-              startY: novedadesY + lineHeight,
-              margin: { left: marginHorizontal, right: marginHorizontal },
-              head: [['Novedad', 'Descripción']],
-              body: novedadesCombinadas.map(nov => [
-                `${nov.titulo || ''}\n(${nov.fecha || ''} ${nov.hora || ''})`,
-                nov.descripcion || ''
-              ]),
-              theme: 'grid',
-              headStyles: { fillColor: [0, 51, 102], textColor: 255 },
-              styles: { fontSize: 9, lineColor: [0, 51, 102], textColor: [0, 0, 0] },
-              tableLineColor: [0, 51, 102],
-              tableLineWidth: 0.5,
-              columnStyles: {
-                0: { cellWidth: 25 } // Fija el ancho de la columna "Novedad" a 200 px
-              },
-              didParseCell: function (data) {
-                if (data.section === 'body' && data.column.index === 1) {
-                  const nov = novedadesCombinadas[data.row.index];
-                  if (nov.tipo === 'automatica') {
-                    data.cell.styles.textColor = [0, 51, 204]; // azul
-                  }
+        if (novedadesCombinadas.length > 0) {
+          autoTable(pdf, {
+            startY: novedadesY + lineHeight,
+            margin: { left: marginHorizontal, right: marginHorizontal },
+            head: [['Novedad', 'Descripción']],
+            body: novedadesCombinadas.map(nov => [
+              `${nov.titulo || ''}${nov.dependencia ? '\n' + nov.dependencia : ''}\n(${nov.fecha || ''} ${nov.hora || ''})`,
+              nov.descripcion || ''
+            ]),
+            theme: 'grid',
+            headStyles: { fillColor: [0, 51, 102], textColor: 255 },
+            styles: { fontSize: 9, lineColor: [0, 51, 102], textColor: [0, 0, 0] },
+            tableLineColor: [0, 51, 102],
+            tableLineWidth: 0.5,
+            columnStyles: {
+              0: { cellWidth: 25 }
+            },
+            didParseCell: function (data) {
+              if (data.section === 'body' && data.column.index === 1) {
+                const nov = novedadesCombinadas[data.row.index];
+                if (nov.tipo === 'automatica') {
+                  data.cell.styles.textColor = [0, 51, 204];
                 }
               }
-            });
-          }
+            }
+          });
         }
-              // Calcula la posición Y final de la última tabla
+
+        // Calcula la posición Y final de la última tabla
         const finalY = (pdf as any).lastAutoTable?.finalY || pdf.internal.pageSize.getHeight() - 40;
-        
+
         // Título "RESUMEN EJECUTIVO"
         pdf.setFont("helvetica", "bold");
         pdf.setFontSize(13);
         pdf.text("RESUMEN EJECUTIVO", pageWidth / 2, finalY + 16, { align: 'center' });
-        
+
         // Tabla de cantidades al final
         const mayores = formData.mayores_detenidos || 0;
         const menores = formData.menores_detenidos || 0;
         const vehiculos = formData.vehiculos_secuestrados || 0;
         const motos = formData.motos_secuestradas || 0;
-        
+
         autoTable(pdf, {
           startY: finalY + 20,
           margin: { left: 20, right: 20 },

@@ -6,10 +6,10 @@ export class Personal {
   apellido!: string;
   dni!: string;
   email!: string;
-  DependenciaId!: number;
-  unidad_regional_id!: number;
-  dependencia_nombre!: string;
-  unidad_regional_nombre!: string;
+  DependenciaId!: number | null;
+  unidad_regional_id!: number | null;
+  dependencia_nombre!: string | null;
+  unidad_regional_nombre!: string | null;
 
   constructor() {
     this.legajo = '';
@@ -18,8 +18,8 @@ export class Personal {
     this.apellido = '';
     this.dni = '';
     this.email = '';
-    this.DependenciaId = 0;
-    this.unidad_regional_id = 0;
+    this.DependenciaId = null; // <-- Cambia a null
+    this.unidad_regional_id = null; // <-- Cambia a null
     this.dependencia_nombre = '';
     this.unidad_regional_nombre = '';
   }

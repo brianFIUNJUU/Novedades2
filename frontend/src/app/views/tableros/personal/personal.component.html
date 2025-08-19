@@ -74,11 +74,17 @@
         </tbody>
       </table>
     </div>
-  <div class="card text-white custom-card">
-    <div class="card-body text-center p-2">
-      <h6 class="card-title font-weight-bold mb-0">Personal Registrado de la Dependencia:</h6>
+
+      <div class="card text-white custom-card">
+      <div class="card-body text-center p-2">
+                     <h6 class="card-title font-weight-bold mb-0" style="display: flex; align-items: center; justify-content: center;">
+                Personal Registrado de: 
+                                                          <span class="text-warning" style="font-size: 1.50rem !important; margin-left: 5px;">
+                                              {{ nombreDependenciaActual }}
+                                            </span>
+              </h6>
+      </div>
     </div>
-  </div>
   <!-- tabla de personal de la depedencia segun el usuario -->
    <div *ngIf="userType === 'administrador'" class="row mb-3">
   <div class="col-md-4">
@@ -167,11 +173,9 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="dependencia">Dependencia</label>
-                <select id="dependencia" [(ngModel)]="personal.DependenciaId" name="dependencia" class="form-control form-select" required>
-                  <option value="" disabled selected>Selecciona una Dependencia</option>
-                  <option *ngFor="let dependencia of dependencias" [value]="dependencia.id">
-                    {{ dependencia.juridiccion }}
-                  </option>
+                               <select id="dependencia" [(ngModel)]="personal.DependenciaId" name="dependencia" class="form-control form-select" required>
+                  <option value="">Seleccione una dependencia</option>
+                  <option *ngFor="let dep of dependencias" [value]="dep.id">{{ dep.juridiccion }}</option>
                 </select>
               </div>
             </div>

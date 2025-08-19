@@ -259,8 +259,9 @@ verNovedad(id: string): void {
     this.mostrarFiltroLegajoAdmin = false;
     this.mostrarFiltroIdAdmin = false;
     this.mostrarFiltroUnidadAdmin = false;
-    this.mostrarFiltroOrigenTorre911 = false; // Resetear el filtro de origen Torre 911
-    this.mostrarFiltroNIncidencia = false; // Resetear el filtro de N_incidencia
+    this.mostrarFiltroOrigenTorre911 = false;
+    this.mostrarFiltroNIncidencia = false;
+  
     if (valor === 'todas') {
       this.getAllNovedades();
     } else if (valor === 'hoy') {
@@ -269,20 +270,36 @@ verNovedad(id: string): void {
       this.mostrarFiltroFechaAdmin = true;
     } else if (valor === 'porLegajo') {
       this.mostrarFiltroLegajoAdmin = true;
+    } else if (valor === 'baseOperacional') {
+      // Aquí haces la búsqueda automática por legajo 99999
+      this.legajoFiltro = '99999';
+      Swal.fire({
+        title: 'Cargando...',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      this.novedadesService.getNovedadesByPersonalAutorLegajo(this.legajoFiltro).subscribe(
+        (data: Novedades[]) => {
+          this.novedades = data;
+          this.filteredNovedades = [...this.novedades];
+          this.novedades.forEach(novedad => {
+            this.filtrarNovedadesC();
+          });
+          Swal.close();
+        }
+      );
     } else if (valor === 'porId') {
       this.mostrarFiltroIdAdmin = true;
-    }
-    else if (valor === 'porUnidad') {
+    } else if (valor === 'porUnidad') {
       this.mostrarFiltroUnidadAdmin = true;
-    }
-     else if (valor === 'TORRE 911') {
+    } else if (valor === 'TORRE 911') {
       this.mostrarFiltroOrigenTorre911 = true;
-    } 
-    else if (valor === 'por N_incidencia') {
-    this.mostrarFiltroNIncidencia = true;
-  // Oculta otros filtros si es necesario
-    } 
-
+    } else if (valor === 'por N_incidencia') {
+      this.mostrarFiltroNIncidencia = true;
+    }
   }
     filtrarporUnidadAdmin() {
        Swal.fire({
