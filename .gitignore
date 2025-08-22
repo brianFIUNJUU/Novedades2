@@ -16,3 +16,4 @@ frontend/.angular/
 *.key
 .env
 .pem
+.rar
