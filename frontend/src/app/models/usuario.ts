@@ -25,3 +25,4 @@ legajo: string;
       this.uid = "";
   }
 }
+

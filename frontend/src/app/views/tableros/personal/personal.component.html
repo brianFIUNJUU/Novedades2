@@ -162,7 +162,11 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label for="unidad_regional">Unidad Regional</label>
+<<<<<<< HEAD
               <select id="unidad_regional" [(ngModel)]="personal.unidad_regional_id" name="unidad_regional" class="form-control form-select" (change)="cargarDependencias(personal.unidad_regional_id!)" required>
+=======
+                <select id="unidad_regional" [(ngModel)]="personal.unidad_regional_id" name="unidad_regional" class="form-control form-select" (change)="cargarDependencias(personal.unidad_regional_id!)" required>
+>>>>>>> c870c1987932ca67fea9de2a9f361482d6c229a8
                   <option value="" disabled selected>Selecciona una Unidad Regional</option>
                   <option *ngFor="let unidad of unidadRegionales" [value]="unidad.id">
                     {{ unidad.unidad_regional }}
