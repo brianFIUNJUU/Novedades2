@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Importa FormsModule para ngModel
 import { AuthenticateService } from '../../../services/authenticate.service'; // Importar el servicio de autenticación
 import Swal from 'sweetalert2'; // Importar SweetAlert
+import { UsuarioService } from '../../../services/usuario.services'; // Importar el servicio de usuario
 
 @Component({
   selector: 'app-usuario',
@@ -19,10 +20,8 @@ perfilUsuarioActual: string = '';
   buscarLegajo: string = ''; // Variable para el filtro por legajo
   filtroPerfil: string = ''; // Variable para el filtro por perfil
 
-  constructor(private authService: AuthenticateService) {}
+  constructor(private authService: AuthenticateService, private usuarioService: UsuarioService) {}
 
-    
-  
   ngOnInit(): void {
     this.authService.getUserInfo().subscribe(userInfo => {
       this.perfilUsuarioActual = userInfo.perfil;
@@ -39,7 +38,18 @@ perfilUsuarioActual: string = '';
       console.error('Error al cargar administradores:', error);
     });
   }
-  
+    // En usuario.component.ts
+  sincronizarUsuariosFirestore() {
+    this.usuarioService.sincronizarDesdeFirestore().subscribe({
+      next: (res) => {
+        alert(res.msg || 'Sincronización completada');
+      },
+      error: (err) => {
+        alert('Error al sincronizar usuarios');
+        console.error(err);
+      }
+    });
+  }
   // Método para eliminar un usuario con confirmación de SweetAlert
   eliminarUsuario(uid: string): void {
     Swal.fire({

@@ -4,7 +4,7 @@ import { AuthenticateService } from '../../../services/authenticate.service';
 import { CommonModule } from '@angular/common';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import Swal from 'sweetalert2';
-import { Usuario } from '../../../models/Usuario';
+import { Usuario } from '../../../models/usuario';
 import { UnidadRegional } from '../../../models/unidad_regional';
 import { UnidadRegionalService } from '../../../services/unidad_regional.service';
 import { DependenciaService } from '../../../services/dependencia.service';

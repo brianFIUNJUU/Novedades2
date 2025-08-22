@@ -1,12 +1,17 @@
 const { Sequelize } = require('sequelize');
 
-// Crear una nueva instancia de Sequelize
+// Instancia de desarrollo
 const sequelize = new Sequelize('Novedades', 'postgres', '12345', {
     host: 'localhost',
     dialect: 'postgres',
     logging: false,  // deshabilita los logs de SQL en consola
 });
-
+//Instancia de produccion
+// const sequelize = new Sequelize('novedades', 'postgres', 'Sistemas2025', {
+//     host: 'localhost',
+//     dialect: 'postgres',
+//     logging: false,  // deshabilita los logs de SQL en consola
+// });
 // Función para ajustar la secuencia de autoincremento
 async function adjustSequence() {
     try {

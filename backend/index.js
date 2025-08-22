@@ -2,82 +2,64 @@ const express = require('express');
 const cors = require('cors');
 const socketIo = require('socket.io');
 const bodyParser = require('body-parser');
-const sequelize = require('./database'); // Importamos la conexión a PostgreSQL usando Sequelize
-const path = require('path');
+const sequelize = require('./database');
 const admin = require('firebase-admin');
 const fs = require('fs');
-const uploadDir = 'uploads/personas';
-if (!fs.existsSync(uploadDir)){
-    fs.mkdirSync(uploadDir, { recursive: true });
-}//CREA LA CARPETA SI NO EXISTE
-const uploadNovedadesDir = 'uploads/novedades';
-if (!fs.existsSync(uploadNovedadesDir)) {
-  fs.mkdirSync(uploadNovedadesDir, { recursive: true });
-}
-// Ejemplo en models/index.js o donde inicialices los modelos
-
-const Personal = require('./models/personal');
-const PartesDiariosPersonal = require('./models/partesDiarios_personal');
-
-
-
+const path = require('path');
 const https = require('https');
-const app = express();
-const Novedades = require('./models/novedades'); // Importa el modelo Novedades desde el directorio models
+
+// Crear carpetas de uploads si no existen
+['uploads/personas', 'uploads/novedades'].forEach(dir => {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+});
+
+// Modelos
+const Personal = require('./models/personal');
+const Novedades = require('./models/novedades');
 const Persona = require('./models/persona');
 const NovedadPersona = require('./models/novedad_persona');
-const Usuario = require('./models/usuario'); // Ajusta la ruta según la ubicación de tu modelo
-
+const Usuario = require('./models/usuario');
 const NovedadPersonal = require('./models/novedad_personal');
-require('./models/associations'); // Importar las relaciones
+require('./models/associations');
+const PORT = process.env.PORT || 3000;
 
-// Definir las asociaciones
-module.exports = {
-  Novedades,
-  Persona,
-  NovedadPersona,
-  NovedadPersonal
-};
+// Exportar modelos
+module.exports = { Novedades, Persona, NovedadPersona, NovedadPersonal };
 
-
-// Inicializa Firebase Admin con las credenciales del servicio  
-const serviceAccount = require('./config/serviceAccountKey.json'); // Ajusta la ruta según corresponda
+// Inicializar Firebase Admin
+const serviceAccount = require('./config/serviceAccountKey.json');
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
-const authenticateFirebaseToken = async (req, res, next) => {
-  const idToken = req.headers['authorization']?.split('Bearer ')[1];  // Extraer token del encabezado Authorization
-  
-  // Verificar si se recibió un token
-  // console.log("Token recibido:", idToken);
-  
-  if (!idToken) {
-    return res.status(401).send('Inicia sesion');
-  }
 
+// Middleware de autenticación Firebase
+const authenticateFirebaseToken = async (req, res, next) => {
+  const idToken = req.headers['authorization']?.split('Bearer ')[1];
+  if (!idToken) return res.status(401).send('Inicia sesión');
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
-    req.user = decodedToken;  // Almacenar la información del usuario decodificada en la solicitud
-    next();  // Continúa con la solicitud si el token es válido
+    req.user = decodedToken;
+    next();
   } catch (error) {
-    console.error("Error al verificar el token:", error);
+    console.error("Error verificando token:", error);
     return res.status(401).send('Invalid token');
   }
 };
 
+// Crear app de Express
+const app = express();
 
-// Middlewares
+// Middlewares globales
+// CORS configurable
+const FRONTEND_URL = process.env.FRONTEND_URL || "*";
 app.use(cors({
-  origin: "https://10.0.10.247:4200",
+  origin: FRONTEND_URL,
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true, // Permite el uso de cookies o autenticación si es necesario
+  credentials: true
 }));
-
-app.use(bodyParser.json({ limit: '10mb' })); // Configura el límite de tamaño del cuerpo JSON
-app.use(bodyParser.urlencoded({ limit: '10mb', extended: true })); // Configura el límite para datos URL-encoded
-
-// Sirve archivos estáticos desde el directorio uploads
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 app.use('/uploads', express.static('uploads'));
 
 // Middleware de autenticación global (se aplica a todas las rutas después de este middleware)
@@ -306,48 +288,48 @@ app.get('/api/users/administradores', async (req, res) => {
   }
 });
 
-// Sincronización con Sequelize
-sequelize.sync().then(() => {
-  console.log('Se ha sincronizado la base de datos con Sequelize.');
-}).catch(error => {
-  console.error('Error al sincronizar Sequelize:', error);
-});
+// SEQUELIZE SYNC
+// ========================
+sequelize.sync()
+  .then(() => console.log('DB sincronizada con Sequelize'))
+  .catch(err => console.error('Error sincronizando DB:', err));
 
-// Settings
-app.set('port', process.env.PORT || 3000);
+// ========================
+// HTTPS Y SOCKET.IO
+// ========================
+const SSL_KEY_PATH = process.env.SSL_KEY || path.join(__dirname, 'ssl/10.0.10.203-key.pem');
+const SSL_CERT_PATH = process.env.SSL_CERT || path.join(__dirname, 'ssl/10.0.10.203.pem');
 
-// HTTPS configuration (update paths)
-const sslOptions = {
-  key: fs.readFileSync(path.join(__dirname, 'ssl/10.0.10.247-key.pem')),
-  cert: fs.readFileSync(path.join(__dirname, 'ssl/10.0.10.247.pem'))
-};
+let server;
+if (fs.existsSync(SSL_KEY_PATH) && fs.existsSync(SSL_CERT_PATH)) {
+  const sslOptions = {
+    key: fs.readFileSync(SSL_KEY_PATH),
+    cert: fs.readFileSync(SSL_CERT_PATH)
+  };
+  server = https.createServer(sslOptions, app);
+  console.log('Servidor HTTPS habilitado');
+} else {
+  server = require('http').createServer(app);
+  console.log('Servidor HTTP habilitado (SSL no encontrado)');
+}
 
-// Crear el servidor HTTPS y asociarlo a Socket.IO
-const server = https.createServer(sslOptions, app);
 const io = socketIo(server, {
   cors: {
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  origin: "https://10.0.10.247:4200", // URL del frontend  cambiar la ip luego de todo
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"],
-    credentials: true, // Permite autenticación si usas cookies o tokens
+    origin: FRONTEND_URL,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
   },
-  transports: ["websocket"], // Solo permitir WebSocket
+  transports: ["websocket"]
 });
 
-
-
-// Configurar los eventos de Socket.IO para el servicio de mensajes
+// Configurar eventos Socket.IO
 const { configurarSocket } = require('./controllers/mensaje.controllers');
-configurarSocket(io);  // Configura los eventos de socket en el servidor
+configurarSocket(io);
 
-// Starting the server with HTTPS 
-// https.createServer(sslOptions, app).listen(app.get('port'), '0.0.0.0', () => {
-//   console.log(`Servidor HTTPS corriendo en https://0.0.0.0:${app.get('port')}`);
-// });
-// quizas podriamos crear  un certificado que pueda ser utilizado en cualquier ip se puede
-
-// Iniciar el servidor con HTTPS y Socket.IO
-server.listen(app.get('port'), '0.0.0.0', () => {
-console.log(`🚀 Servidor HTTPS con Socket.IO corriendo en https://10.0.10.247:${app.get('port')}`);
+// ========================
+// INICIAR SERVIDOR
+// ========================
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Servidor corriendo en ${SSL_KEY_PATH ? 'https' : 'http'}://0.0.0.0:${PORT}`);
 });

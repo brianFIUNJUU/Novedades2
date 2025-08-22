@@ -12,7 +12,7 @@
   import { AngularFirestore } from '@angular/fire/compat/firestore';
   import { HttpClient } from '@angular/common/http';
   import { Observable, forkJoin, of } from 'rxjs';
-  import { Usuario } from '../models/Usuario';
+  import { Usuario } from '../models/usuario';
   import { map, switchMap } from 'rxjs/operators';
   import { Firestore, doc, getDoc, setDoc } from '@angular/fire/firestore';
   import { getFirestore } from 'firebase/firestore';

@@ -33,6 +33,8 @@ const Usuario = sequelize.define('Usuario', {
     }
 }, {
     timestamps: false
+       , tableName: 'Usuarios' // <-- ¡Esto es lo importante!
+
 });
 
 Usuario.sync({ alter: true })

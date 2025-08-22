@@ -42,6 +42,12 @@
       <label for="buscarLegajo" class="form-label ">Buscar legajo</label>
       <input type="text" id="buscarLegajo" class="form-control" [(ngModel)]="buscarLegajo" (input)="filtrarPorLegajo()" placeholder="Ingrese N° de Leg.">
     </div>
+    <div class="col-md-3">
+  <button class="btn btn-primary btn-sm"
+          (click)="sincronizarUsuariosFirestore()">
+    Sincronizar usuarios desde Firestore
+  </button>
+</div>
   </div>
 
   <!-- Tabla de Usuarios -->

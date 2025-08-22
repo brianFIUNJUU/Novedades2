@@ -13,7 +13,6 @@ frontend/.angular/
 *.env
 *.zip
 # Ignorar archivos de configuración de Google Cloud
-*.json
 *.key
 .env
 .pem
