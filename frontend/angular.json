@@ -86,8 +86,8 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
           "ssl": true,
-         "sslKey": "src/ssl/10.0.10.203-key.pem",
-    "sslCert": "src/ssl/10.0.10.203.pem",
+         "sslKey": "src/ssl/10.0.10.106-key.pem",
+    "sslCert": "src/ssl/10.0.10.106.pem",
           "host": "0.0.0.0",
           "port": 4200
         },

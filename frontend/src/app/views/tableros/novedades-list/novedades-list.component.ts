@@ -36,7 +36,8 @@ import { LocalidadService } from '../../../services/localidad.service'
 import { Validator } from '@angular/forms';
 import { ArchivoNovedadService } from '../../../services/archivo_novedad.services';
 import { NovedadElemento } from  '../../../models/novedad_elemento';
-import { NovedadElementoService } from  '../../../services/novedad_elemento.service';
+import { NovedadPersona } from '../../../models/novedad_persona';
+import { NovedadElementoService } from '../../../services/novedad_elemento.service';
 // Tipo para los códigos de novedad 
 type CodigoNovedad = 'R' | 'A' | 'V';
 type FontStyleType = 'normal' | 'bold' | 'italic' ;
@@ -90,9 +91,9 @@ personasParaActa: Persona[] = [];
   fechaFiltroOrigenFin = ''; 
 mostrarFiltroNIncidencia = false;
 nIncidenciaFiltro = '';
-
 idFiltro: string = '';
   unidadFiltro: string = '';
+  novedad_persona?: NovedadPersona[];
 
   constructor(
     private novedadesService: NovedadesService,
@@ -644,61 +645,50 @@ getAllNovedades(): void {
       this.actaForm.patchValue({ localidad: nombreLocalidad });
       console.log('Localidad seleccionada:', nombreLocalidad);
     }
-    cargarPersonas(novedad: Novedades): void {
-      // console.log(`Cargando personas para la novedad con ID: ${novedad.id}`);
-      // console.log(`Array de personas: ${JSON.stringify(novedad.personas)}`);
-      if (novedad.personas && novedad.personas.length > 0) {
-        novedad.personas.forEach((personaId: any) => {
-          const id = typeof personaId === 'object' ? personaId.id : personaId;
-          // console.log(`Cargando persona con ID: ${id}`);
-          this.personaService.getPersona(id).subscribe(
-            (persona: Persona) => {
-              // console.log(`Persona cargada: ${JSON.stringify(persona)}`);
-              // Obtener el estado de la persona para la novedad actual
-              this.estadoService.getEstadoByNovedadAndPersona(novedad.id, persona.id).subscribe(
-                (estado: Estado) => {
-                  persona.estado = estado.estado;
-                  // console.log(`Estado de la persona: ${persona.estado}`);
-                  if (!novedad.personasDetalles) {
-                    novedad.personasDetalles = [];
+
+                cargarPersonas(novedad: Novedades): void {
+          if (novedad.personas && novedad.personas.length > 0) {
+            novedad.personasDetalles = [];
+            novedad.personas.forEach((personaId: any) => {
+              const id = typeof personaId === 'object' ? personaId.id : personaId;
+              this.personaService.getPersona(id).subscribe(
+                (persona: Persona) => {
+                  // Buscar el estado en novedad.novedad_persona o similar
+                  const relacion = (novedad.novedad_persona || []).find((np: any) => np.persona_id === persona.id);
+                  if (relacion) {
+                    persona.estado = relacion.estado;
+                    persona.demorado = relacion.demorado !== undefined ? relacion.demorado : false;
                   }
                   novedad.personasDetalles.push(persona);
                 },
-                
+                (error: HttpErrorResponse) => {
+                  console.error('Error al obtener persona:', error.message);
+                }
               );
-            },
-            (error: HttpErrorResponse) => {
-              console.error('Error al obtener persona:', error.message);
-            }
-          );
-        });
-      } else {
-        // console.log('El array de personas está vacío o no está definido.');
-      }
-    }
-    
-cargarPersonasActa(novedad: Novedades): void {
-  this.personasParaActa = [];
-
-  if (novedad.personas && novedad.personas.length > 0) {
-    novedad.personas.forEach((personaId: any) => {
-      const id = typeof personaId === 'object' ? personaId.id : personaId;
-
-      this.personaService.getPersona(id).subscribe(
-        (persona: Persona) => {
-          this.estadoService.getEstadoByNovedadAndPersona(novedad.id, persona.id).subscribe(
-            (estado: Estado) => {
-              persona.estado = estado.estado;
-              this.personasParaActa.push(persona);
-            },
-            error => console.error('Error al obtener estado:', error)
-          );
-        },
-        error => console.error('Error al obtener persona:', error)
-      );
-    });
-  }
-}
+            });
+          }
+        }
+        
+        cargarPersonasActa(novedad: Novedades): void {
+          this.personasParaActa = [];
+          if (novedad.personas && novedad.personas.length > 0) {
+            novedad.personas.forEach((personaId: any) => {
+              const id = typeof personaId === 'object' ? personaId.id : personaId;
+              this.personaService.getPersona(id).subscribe(
+                (persona: Persona) => {
+                  // Buscar el estado en novedad.novedad_persona o similar
+                  const relacion = (novedad.novedad_persona || []).find((np: any) => np.persona_id === persona.id);
+                  if (relacion) {
+                    persona.estado = relacion.estado;
+                    persona.demorado = relacion.demorado !== undefined ? relacion.demorado : false;
+                  }
+                  this.personasParaActa.push(persona);
+                },
+                error => console.error('Error al obtener persona:', error)
+              );
+            });
+          }
+        }
 
 
    // Función para generar el PDF del acta
@@ -1435,60 +1425,60 @@ this.getNovedadesByLegajoByToday();
       }
     }
 
-    exportToExcel(): void {
-      console.log('exportToExcel');
-      const exportData: ExportRow[] = [];
-  
-      const processNovedad = (novedad: Novedades) => {
-        console.log('Processing novedad:', novedad.id);
-const elementoSecuestrado = (novedad.elemento_secuestrado ?? []).map((elem, index) => ({
-  [`elemento_secuestrado_${index + 1}_elemento`]: elem?.elemento ?? '',
-  [`elemento_secuestrado_${index + 1}_descripcion`]: elem?.descripcion ?? ''
-})).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+   exportToExcel(): void {
+  console.log('exportToExcel');
+  const exportData: ExportRow[] = [];
 
-const bienRecuperadoNo = (novedad.bien_recuperado_no ?? []).map((elem, index) => ({
-  [`bien_recuperado_no_${index + 1}_elemento`]: elem?.elemento ?? '',
-  [`bien_recuperado_no_${index + 1}_descripcion`]: elem?.descripcion ?? ''
-})).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+  const processNovedad = (novedad: Novedades) => {
+    return this.novedadElementoService.getElementosByNovedad(novedad.id).pipe(
+      map(elementos => {
+        // Separar por tipo
+            console.log('Elementos recibidos para novedad', novedad.id, elementos);
 
-const bienRecuperado = (novedad.bien_recuperado ?? []).map((elem, index) => ({
-  [`bien_recuperado_${index + 1}_elemento`]: elem?.elemento ?? '',
-  [`bien_recuperado_${index + 1}_descripcion`]: elem?.descripcion ?? ''
-})).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+        const secuestrados = elementos.filter(e => e.estado === 'secuestrado');
+        const recuperados = elementos.filter(e => e.estado === 'recuperado');
+        const noRecuperados = elementos.filter(e => e.estado === 'no recuperado');
 
-  
-        return this.novedadesPersonaService.getPersonasByNovedadId(novedad.id).pipe(
-          switchMap(personas => {
-            console.log('Personas:', personas);
-            if (personas.length === 0) {
-              return of([]);
-            }
-            const personasObservables = personas.map(persona => 
-              this.estadoService.getEstadoByNovedadAndPersona(novedad.id, persona.id).pipe(
-                map((estado: Estado) => {
-                  persona.estado = estado.estado;
-                  return persona;
-                })
-              )
-            );
-  
-            return forkJoin(personasObservables);
-          }),
-          map(personasConEstado => {
+        // Armar columnas dinámicas
+        const columnasSecuestrados = secuestrados.map((e, i) => ({
+          [`secuestrado_${i + 1}_elemento`]: e.elemento_nombre,
+          [`secuestrado_${i + 1}_descripcion`]: e.descripcion
+        })).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+
+        const columnasRecuperados = recuperados.map((e, i) => ({
+          [`recuperado_${i + 1}_elemento`]: e.elemento_nombre,
+          [`recuperado_${i + 1}_descripcion`]: e.descripcion
+        })).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+
+        const columnasNoRecuperados = noRecuperados.map((e, i) => ({
+          [`no_recuperado_${i + 1}_elemento`]: e.elemento_nombre,
+          [`no_recuperado_${i + 1}_descripcion`]: e.descripcion
+        })).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+
+        return { columnasSecuestrados, columnasRecuperados, columnasNoRecuperados, novedad };
+      }),
+      switchMap(({ columnasSecuestrados, columnasRecuperados, columnasNoRecuperados, novedad }) =>
+        this.novedadesPersonaService.getPersonasByNovedadId(novedad.id).pipe(
+         map(personas => {
             const victimas: string[] = [];
             const victimarios: string[] = [];
             const protagonistas: string[] = [];
-  
-            personasConEstado.forEach(persona => {
-              if (persona.estado === 'victima') {
-                victimas.push(`${persona.nombre} ${persona.apellido}`);
-              } else if (persona.estado === 'victimario') {
-                victimarios.push(`${persona.nombre} ${persona.apellido}`);
-              } else if (persona.estado === 'protagonista') {
-                protagonistas.push(`${persona.nombre} ${persona.apellido}`);
-              }
-            });
-  
+            const testigos: string[] = [];
+
+            personas
+              .filter(persona => persona.id !== undefined && persona.id !== null)
+              .forEach(persona => {
+                if (persona.estado === 'victima') {
+                  victimas.push(`${persona.nombre} ${persona.apellido} ${persona.dni}`);
+                } else if (persona.estado === 'victimario') {
+                  victimarios.push(`${persona.nombre} ${persona.apellido} ${persona.dni}`);
+                } else if (persona.estado === 'protagonista') {
+                  protagonistas.push(`${persona.nombre} ${persona.apellido} ${persona.dni}`);
+                } else if (persona.estado === 'testigo') {
+                  testigos.push(`${persona.nombre} ${persona.apellido} ${persona.dni}`);
+                }
+              });
+
             const exportRow: ExportRow = {
               id: novedad.id,
               fecha: novedad.fecha,
@@ -1515,27 +1505,27 @@ const bienRecuperado = (novedad.bien_recuperado ?? []).map((elem, index) => ({
               victimas: JSON.stringify(victimas),
               victimarios: JSON.stringify(victimarios),
               protagonistas: JSON.stringify(protagonistas),
-              ...elementoSecuestrado,
-              ...bienRecuperadoNo,
-              ...bienRecuperado
+              testigos: JSON.stringify(testigos),
+              ...columnasSecuestrados,
+              ...columnasRecuperados,
+              ...columnasNoRecuperados
             };
-  
+
             exportData.push(exportRow);
             return exportRow;
           })
-        );
-      };
-  
-      const observables = this.novedades.map(novedad => processNovedad(novedad));
-  
-      forkJoin(observables).subscribe(() => {
-        console.log('Exporting data:', exportData);
-        this.excelExportService.exportAsExcelFile(exportData, 'Novedades');
-      }, error => {
-        console.error('Error during export:', error);
-      });
-    }
+        )
+      )
+    );
+  };
 
-    
-  }
-  
+  const observables = this.novedades.map(novedad => processNovedad(novedad));
+
+  forkJoin(observables).subscribe(() => {
+    console.log('Exporting data:', exportData);
+    this.excelExportService.exportAsExcelFile(exportData, 'Novedades');
+  }, error => {
+    console.error('Error during export:', error);
+  });
+}
+}

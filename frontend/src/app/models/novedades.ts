@@ -1,5 +1,9 @@
 import { Persona } from "./persona";
 import { Personal } from "./personal";
+import { NovedadPersona } from "./novedad_persona";
+// import { NovedadPersona } from "../../../../backend";
+// Define NovedadPersona as a type or interface here, or import it from the correct frontend path
+
 export class Novedades {
   id!: number;
   operativo_id!: number | null;  
@@ -37,11 +41,12 @@ export class Novedades {
   elemento_secuestrado!: { elemento: string, descripcion: string, caracteristicas:string }[];
   bien_recuperado_no!: { elemento: string, descripcion: string ,caracteristicas:string}[];
   bien_recuperado!: { elemento: string, descripcion: string, caracteristicas:string }[];
+  novedad_persona?: NovedadPersona[]; // <-- ESTA ES LA CLAVE
 
   observaciones!: string;
   unidad_actuante!: string;
   oficial_cargo_id: number | null;  
-
+  // Remove duplicate or conflicting property
   estado!: boolean;
   personas!: number[]; // Array de números para la vinculación con la base de datos
   policias!: number[]; // Array de números para la vinculación con la base de datos

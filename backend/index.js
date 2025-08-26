@@ -297,8 +297,8 @@ sequelize.sync()
 // ========================
 // HTTPS Y SOCKET.IO
 // ========================
-const SSL_KEY_PATH = process.env.SSL_KEY || path.join(__dirname, 'ssl/10.0.10.203-key.pem');
-const SSL_CERT_PATH = process.env.SSL_CERT || path.join(__dirname, 'ssl/10.0.10.203.pem');
+const SSL_KEY_PATH = process.env.SSL_KEY || path.join(__dirname, 'ssl/10.0.10.106-key.pem');
+const SSL_CERT_PATH = process.env.SSL_CERT || path.join(__dirname, 'ssl/10.0.10.106.pem');
 
 let server;
 if (fs.existsSync(SSL_KEY_PATH) && fs.existsSync(SSL_CERT_PATH)) {

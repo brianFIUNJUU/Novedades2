@@ -63,7 +63,7 @@ exports.getPersonasByNovedadId = async (req, res) => {
         });
         // Devuelve la estructura que tu frontend espera
         res.status(200).json(relaciones.map(r => ({
-            persona: r.persona,
+            ...r.persona.dataValues,
             estado: r.estado,
             demorado: r.demorado
         })));

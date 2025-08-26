@@ -56,7 +56,7 @@ export class EstadoService {
     let body: any = JSON.stringify(estado);
     return this._http.post(this.hostBase, body, httpOptions); // Asegúrate de que la URL sea correcta
   }
-
+// 
   // Obtener un estado por ID
   getEstado(id: number): Observable<any> {
     const token = this.getAuthToken();
